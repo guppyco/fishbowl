@@ -19,7 +19,6 @@ from django.views.generic.edit import UpdateView
 from .forms import CustomAuthenticationForm, CustomUserCreationForm
 from .models import UserProfile
 
-
 LOGGER = logging.getLogger(__name__)
 
 
