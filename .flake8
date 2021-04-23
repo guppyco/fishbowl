@@ -1,0 +1,10 @@
+[flake8]
+exclude =
+    .git,
+    .github,
+    .tox,
+    requirements,
+    settings,
+    */migrations
+
+max-line-length = 80
