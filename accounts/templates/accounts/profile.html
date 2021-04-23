@@ -1,0 +1,20 @@
+{% extends "index.html" %}
+{% load crispy_forms_tags %}
+
+{% block noindex %}
+<meta name="robots" content="noindex">
+{% endblock %}
+{% block user_profile %}
+
+<div class="row">
+  <div class="col-12"><h3>Email: {{ user.email }}</h3></div>
+  <div class="col-12">
+  {% if user.is_authenticated %}
+    <a href="{% url 'logout' %}">Logout</a>
+  {% endif %}
+  </div>
+</div>
+
+<!-- Google analytics client-side tracking script for user signup. -->
+
+{% endblock user_profile %}

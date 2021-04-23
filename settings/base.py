@@ -40,9 +40,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     # Third party packages
+    'crispy_forms',
     'django_extensions',
 
     # Guppy apps
+    'accounts',
     'search',
 ]
 
@@ -106,6 +108,8 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTH_USER_MODEL = "accounts.UserProfile"
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
@@ -124,6 +128,19 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
-STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR + "/static/"
+
+STATIC_URL = "/static/"
+
+STATICFILES_FINDERS = (
+    "django.contrib.staticfiles.finders.FileSystemFinder",
+    "django.contrib.staticfiles.finders.AppDirectoriesFinder",
+)
+
+STATICFILES_DIRS = (
+    BASE_DIR + "/frontend/node_modules/",
+    BASE_DIR + "/frontend/css/",
+    BASE_DIR + "/frontend/js/",
+)
 
 BASE_URL = "localhost:8000"

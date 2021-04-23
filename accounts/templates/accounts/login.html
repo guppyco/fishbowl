@@ -1,0 +1,43 @@
+{% extends "index.html" %}
+{% load crispy_forms_tags %}
+
+{% block header_tags %}
+<title>Login to your Guppy account here.</title>
+<meta name="description" content="Login to your Guppy account here."/>
+{% endblock %}
+
+{% block login %}
+<div>
+  <h1 class="row">Login here.</h1>
+  {% if messages %}
+  <div class="messages row">
+    {% for message in messages %}
+    <div class="alert {{ message.tags }} alert-dismissible" role="alert">
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+      {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}Important: {% endif %}
+      {{ message }}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+  <div class="row">
+    <form class="signup-login-form col-12" action="" method="POST">{% csrf_token %}
+      <div id="login" class="input-group">
+        {% crispy login_form %}
+      </div>
+      <button class="btn btn-lg btn-primary" type="submit" name="login" value="{{ join_input|default:'Login' }}">{{ join_input|default:'Login'}}</button>
+    </form>
+  </div>
+  <div class="row row-spacer-2 clearfix"></div>
+  <div class="row row-spacer-2 clearfix"></div>
+  <div class="signup-link-box row">
+    <a id="signup-link" class="btn btn-lg btn-default" href="{% url 'signup' %}{{ next }}">Create a new account</a>
+  </div>
+  <div class="row row-spacer clearfix"></div>
+  <div class="signup-link-box row">
+    <a id="password-reset" class="btn btn-lg btn-default" href="{% url 'password_reset' %}">Reset your password</a>
+  </div>
+</div>
+{% endblock %}
