@@ -13,9 +13,7 @@ def home(request):
     if request.method == "POST":
         form = SearchForm(request.POST)
         if form.is_valid():
-            search_string = urllib.parse.quote_plus(
-                form.cleaned_data['search']
-            )
+            search_string = urllib.parse.quote_plus(form.cleaned_data["search"])
             search_path = f"/search?q={search_string}"
             if "search-guppy" in request.POST:
                 return redirect(f"{settings.BASE_URL}{search_path}")

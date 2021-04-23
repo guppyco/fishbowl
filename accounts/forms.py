@@ -29,7 +29,7 @@ class CustomUserCreationForm(UserCreationForm):
                 Field(
                     field_name,
                     placeholder=field.label,
-                    css_class="form-control mb-3"
+                    css_class="form-control mb-3",
                 )
             )
         self.helper.form_show_labels = False

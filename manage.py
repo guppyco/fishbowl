@@ -5,12 +5,13 @@ import sys
 
 
 def main():
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings.local')
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings.local")
     if not (
-            os.environ.get("DJANGO_SETTINGS_MODULE") == "settings.production"
-            or os.environ.get("DJANGO_SETTINGS_MODULE") == "settings.staging"
+        os.environ.get("DJANGO_SETTINGS_MODULE") == "settings.production"
+        or os.environ.get("DJANGO_SETTINGS_MODULE") == "settings.staging"
     ):
         import dotenv
+
         dotenv.read_dotenv(override=True)
 
     try:
@@ -24,5 +25,5 @@ def main():
     execute_from_command_line(sys.argv)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
