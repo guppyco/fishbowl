@@ -1,0 +1,43 @@
+[MASTER]
+ignore=migrations
+# List of plugins (as comma separated values of python modules names) to load,
+# usually to register additional checkers.
+load-plugins=pylint_django
+[FORMAT]
+
+# Maximum number of characters on a single line.
+max-line-length=80
+
+[SIMILARITIES]
+
+# Ignore docstrings when computing similarities.
+ignore-docstrings=yes
+ignore-comments=yes
+
+[MESSAGES CONTROL]
+
+# IGNORE
+disable=
+  attribute-defined-outside-init,
+  broad-except, # Ignore "Catching too general exception Exception"
+  fixme,
+  missing-docstring,
+  modelform-uses-exclude,
+  too-few-public-methods,
+  too-many-ancestors,
+  too-many-arguments,
+  too-many-branches,
+  too-many-locals,
+  too-many-instance-attributes,
+  too-many-public-methods,
+  too-many-return-statements,
+  too-many-lines,
+  unused-argument,
+  wrong-import-order,  # Covered by isort
+  wrong-import-position,  # Covered by isort
+  R0801  # Similar lines in 2 files
+
+[MISCELLANEOUS]
+
+# List of note tags to take in consideration, separated by a comma.
+notes=FIXME,XXX,TODO
