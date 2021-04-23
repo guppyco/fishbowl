@@ -9,4 +9,4 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Shellcheck
-        run: shellcheck bin/*.sh bin/*/*.sh
+        run: shellcheck bin/*.sh
