@@ -20,5 +20,5 @@ from . import views
 
 app_name = "search"  # pylint: disable=invalid-name
 urlpatterns = [  # pylint: disable=invalid-name
-    path('', views.home, name="home"),
+    path("", views.home, name="home"),
 ]
