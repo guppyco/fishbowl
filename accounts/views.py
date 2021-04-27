@@ -102,7 +102,6 @@ class UserProfileView(LoginRequiredMixin, DetailView):
         return self.request.user
 
     def get(self, request, *args, **kwargs):
-        # pylint: disable=attribute-defined-outside-init, line-too-long
         self.object = self.get_object()
         context = self.get_context_data(object=self.object)
 

@@ -142,3 +142,4 @@ STATICFILES_DIRS = (
 )
 
 BASE_URL = "localhost:8000"
+LOGIN_URL = "/login/"
