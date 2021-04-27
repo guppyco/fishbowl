@@ -62,10 +62,11 @@ class UserProfile(AbstractBaseUser, TimeStampedModel):
         full_name = self.email
         return full_name.strip()
 
-    def get_short_name(self):
+    def get_short_name(self) -> str:
         "Returns the short name for the user."
         short_name = self.email
         return short_name.strip()
 
+    @staticmethod
     def get_absolute_url() -> str:
         return reverse("user_profile")
