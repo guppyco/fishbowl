@@ -1,13 +1,7 @@
-import datetime
-
-from django.conf import settings
 from django.contrib.auth import authenticate
 from django.test import RequestFactory, TestCase
-from django.test.utils import override_settings
 from django.urls import reverse
-from django.utils import timezone
 
-from . import views as account_views
 from .factories import UserProfileFactory
 from .models import UserProfile
 from .utils import setup_tests

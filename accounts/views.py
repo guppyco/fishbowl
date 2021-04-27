@@ -1,7 +1,5 @@
 # accounts/views.py
 
-import datetime
-import json
 import logging
 import urllib
 
@@ -9,10 +7,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import redirect, render
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import UpdateView
 

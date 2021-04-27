@@ -1,5 +1,3 @@
-import uuid
-
 from django_extensions.db.models import TimeStampedModel
 
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
