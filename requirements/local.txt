@@ -6,3 +6,5 @@ django-stubs==1.8.0
 flake8==3.9.1
 isort==5.8.0
 mypy==0.812
+pylint-django==2.4.4
+pylint==2.8.2
