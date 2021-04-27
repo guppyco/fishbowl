@@ -8,9 +8,9 @@ jobs:
       postgres:
         image: postgres:10.8
         env:
-          POSTGRES_USER: fishbowl
-          POSTGRES_PASSWORD: fishbowl
-          POSTGRES_DB: fishbowl
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test
         ports:
           - 5432:5432
         # needed because the postgres container does not provide a healthcheck
@@ -44,9 +44,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements/local.txt
       - name: Setup environment variables
-        run: ansible-vault decrypt .env.encrypted --output=.env --vault-password-file .vault_pass.py
-        env:
-          ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
+        # run: ansible-vault decrypt .env.encrypted --output=.env --vault-password-file .vault_pass.py
+        # env:
+        #   ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
+        run: cp .env.example .env
       - name: Run migrations
         run: python manage.py migrate
       - name: Run tests
