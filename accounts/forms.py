@@ -1,7 +1,7 @@
 # accounts/forms.py
 
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Field, Layout
+from crispy_forms.layout import Div, Field, Layout
 
 from django.contrib.auth.forms import (
     AuthenticationForm,
@@ -21,19 +21,24 @@ class CustomUserCreationForm(UserCreationForm):
     def __init__(self, *args, **kargs):
         super().__init__(*args, **kargs)
         del self.fields["password2"]
+        self.fields["password1"].help_text = None
         # TODO: Update when django-crispy-forms gets updated.
         self.helper = FormHelper(self)
         self.helper.layout = Layout()
         for field_name, field in list(self.fields.items()):
             self.helper.layout.append(
-                Field(
-                    field_name,
-                    placeholder=field.label,
-                    css_class="form-control mb-3",
+                Div(
+                    Field(
+                        field_name,
+                        placeholder=field.label,
+                        css_class="form-control",
+                    ),
+                    css_class="form-group mb-3",
                 )
             )
         self.helper.form_show_labels = False
         self.helper.form_tag = False
+        self.helper.help_text = False
 
     class Meta:
         model = UserProfile
@@ -52,10 +57,13 @@ class CustomAuthenticationForm(AuthenticationForm):
         self.helper.layout = Layout()
         for field_name, field in list(self.fields.items()):
             self.helper.layout.append(
-                Field(
-                    field_name,
-                    placeholder=field.label,
-                    css_class="form-control mb-3",
+                Div(
+                    Field(
+                        field_name,
+                        placeholder=field.label,
+                        css_class="form-control",
+                    ),
+                    css_class="form-group mb-3",
                 )
             )
         self.helper.form_show_labels = False
