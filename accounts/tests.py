@@ -1,3 +1,5 @@
+from rest_framework.test import APITestCase
+
 from django.contrib.auth import authenticate
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
@@ -168,3 +170,50 @@ class UserProfileModelTests(TestCase):
     def test_full_name(self):
         full_name = self.user_profile.get_full_name()
         self.assertEqual(full_name, "annamford@gmail.com")
+
+
+class UserCreateToken(APITestCase):
+    def test_login_as_user(self):
+        user_data = {"email": "test@example.com", "password": "test"}
+        UserProfileFactory(**user_data)
+        url = reverse("token_obtain_pair")
+        response = self.client.post(url, user_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertIsNot(response.data["access"], "")
+
+    def test_refresh_token_unauthenticated(self):
+        user_data = {"email": "test@example.com", "password": "test"}
+        UserProfileFactory(**user_data)
+        url = reverse("token_refresh")
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, 400)
+
+    def test_refresh_token_authenticated(self):
+        user_data = {"email": "test@example.com", "password": "test"}
+        UserProfileFactory(**user_data)
+        login_url = reverse("token_obtain_pair")
+        response = self.client.post(login_url, user_data)
+        refresh = response.data["refresh"]
+
+        refresh_url = reverse("token_refresh")
+        response = self.client.post(refresh_url, {"refresh": refresh})
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_account_info_unauthenticated(self):
+        user_data = {"email": "test@example.com", "password": "test"}
+        UserProfileFactory(**user_data)
+        url = reverse("user_profile_api")
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 401)
+
+    def test_get_account_info_authenticated(self):
+        user_data = {"email": "test@example.com", "password": "test"}
+        UserProfileFactory(**user_data)
+        login_url = reverse("token_obtain_pair")
+        response = self.client.post(login_url, user_data)
+        token = response.data["access"]
+
+        refresh_url = reverse("user_profile_api")
+        headers = {"HTTP_AUTHORIZATION": "Bearer " + token}
+        response = self.client.get(refresh_url, **headers)
+        self.assertEqual(response.status_code, 200)

@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
+from datetime import timedelta
 
 from django.contrib.messages import constants as messages
 
@@ -43,6 +44,9 @@ INSTALLED_APPS = [
     # Third party packages
     "crispy_forms",
     "django_extensions",
+    "rest_framework",
+    "rest_framework.authtoken",
+    "rest_framework_simplejwt",
     # Guppy apps
     "accounts",
     "search",
@@ -79,6 +83,25 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "guppy.wsgi.application"
 
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework.authentication.TokenAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
+    "DEFAULT_PERMISSION_CLASSES": (
+        "rest_framework.permissions.IsAuthenticated",
+    ),
+}
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=3),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "ALGORITHM": "HS256",
+    "SIGNING_KEY": SECRET_KEY,
+    "AUTH_HEADER_TYPES": ("Bearer"),
+    "AUTH_HEADER_NAME": "HTTP_AUTHORIZATION",
+}
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
