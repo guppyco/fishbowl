@@ -46,7 +46,8 @@ INSTALLED_APPS = [
     "django_extensions",
     "rest_framework",
     "rest_framework.authtoken",
-    "rest_framework_simplejwt",
+    "rest_framework_jwt",
+    "rest_framework_jwt.blacklist",
     # Guppy apps
     "accounts",
     "search",
@@ -87,20 +88,19 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework.authentication.TokenAuthentication",
         "rest_framework.authentication.SessionAuthentication",
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "rest_framework_jwt.authentication.JSONWebTokenAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": (
         "rest_framework.permissions.IsAuthenticated",
     ),
 }
 
-SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(days=3),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
-    "ALGORITHM": "HS256",
-    "SIGNING_KEY": SECRET_KEY,
-    "AUTH_HEADER_TYPES": ("Bearer"),
-    "AUTH_HEADER_NAME": "HTTP_AUTHORIZATION",
+JWT_AUTH = {
+    "JWT_SECRET_KEY": SECRET_KEY,
+    "JWT_EXPIRATION_DELTA": timedelta(days=3),
+    "JWT_REFRESH_EXPIRATION_DELTA": timedelta(days=7),
+    "JWT_ALGORITHM": "HS256",
+    "JWT_AUTH_HEADER_PREFIX": "Bearer",
 }
 
 # Database

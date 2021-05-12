@@ -178,8 +178,8 @@ class UserCreateToken(APITestCase):
         UserProfileFactory(**user_data)
         url = reverse("token_obtain_pair")
         response = self.client.post(url, user_data)
-        self.assertEqual(response.status_code, 200)
-        self.assertIsNot(response.data["access"], "")
+        self.assertEqual(response.status_code, 201)
+        self.assertIsNot(response.data["token"], "")
 
     def test_refresh_token_unauthenticated(self):
         user_data = {"email": "test@example.com", "password": "test"}
@@ -193,11 +193,11 @@ class UserCreateToken(APITestCase):
         UserProfileFactory(**user_data)
         login_url = reverse("token_obtain_pair")
         response = self.client.post(login_url, user_data)
-        refresh = response.data["refresh"]
+        token = response.data["token"]
 
         refresh_url = reverse("token_refresh")
-        response = self.client.post(refresh_url, {"refresh": refresh})
-        self.assertEqual(response.status_code, 200)
+        response = self.client.post(refresh_url, {"token": token})
+        self.assertEqual(response.status_code, 201)
 
     def test_get_account_info_unauthenticated(self):
         user_data = {"email": "test@example.com", "password": "test"}
@@ -211,9 +211,25 @@ class UserCreateToken(APITestCase):
         UserProfileFactory(**user_data)
         login_url = reverse("token_obtain_pair")
         response = self.client.post(login_url, user_data)
-        token = response.data["access"]
+        token = response.data["token"]
 
         refresh_url = reverse("user_profile_api")
         headers = {"HTTP_AUTHORIZATION": "Bearer " + token}
         response = self.client.get(refresh_url, **headers)
         self.assertEqual(response.status_code, 200)
+
+    def test_destroy_token(self):
+        user_data = {"email": "test@example.com", "password": "test"}
+        UserProfileFactory(**user_data)
+        login_url = reverse("token_obtain_pair")
+        response = self.client.post(login_url, user_data)
+        token = response.data["token"]
+
+        logout_url = reverse("token_destroy")
+        headers = {"HTTP_AUTHORIZATION": "Bearer " + token}
+        self.client.post(logout_url, **headers)
+
+        refresh_url = reverse("user_profile_api")
+        headers = {"HTTP_AUTHORIZATION": "Bearer " + token}
+        response = self.client.get(refresh_url, **headers)
+        self.assertEqual(response.status_code, 403)
