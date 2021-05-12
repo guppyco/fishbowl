@@ -3,6 +3,10 @@
 import logging
 import urllib
 
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
@@ -126,3 +130,15 @@ class UserProfileUpdate(LoginRequiredMixin, UpdateView):
 
     def get_object(self, queryset=None):
         return self.request.user
+
+
+class UserProfileAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        content = {
+            "user": str(request.user),
+            "auth": str(request.auth),
+        }
+
+        return Response(content)
