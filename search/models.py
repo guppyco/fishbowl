@@ -5,6 +5,9 @@ class Result(models.Model):
     url = models.URLField()
     number_of_click = models.IntegerField(default=0)
 
+    def __str__(self) -> str:
+        return self.url
+
 
 class Search(models.Model):
     GOOGLE = 0
