@@ -1,6 +1,10 @@
 from django_extensions.db.models import TimeStampedModel
 
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.contrib.auth.models import (
+    AbstractBaseUser,
+    BaseUserManager,
+    PermissionsMixin,
+)
 from django.db import models
 from django.urls import reverse
 from django.utils.translation import gettext as _
@@ -28,7 +32,9 @@ class CustomUserManager(BaseUserManager):
     def create_user(self, email, password):
         return self._create_user(email, password)
 
-    def create_superuser(self, email, password, is_staff=True, is_superuser=True):
+    def create_superuser(
+        self, email, password, is_staff=True, is_superuser=True
+    ):
         return self._create_user(email, password, is_staff, is_superuser)
 
 
