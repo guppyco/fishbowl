@@ -98,6 +98,38 @@ class APISearchTests(APITestCase):
         self.assertEqual(search.search_results.count(), 4)
         self.assertEqual(Result.objects.count(), 4)
 
+        self.client.post(
+            url,
+            {
+                "search_type": 0,
+                "search_terms": "Test text 2",
+                "search_results": [
+                    "https://google.com/4",
+                    "https://google.com/5",
+                    "https://google.com/6",
+                    "https://google.com/7",
+                ],
+            },
+        )
+        count = Search.objects.count()
+        self.assertEqual(count, 2)
+        search = Search.objects.get(search_terms="Test text 2")
+        self.assertEqual(search.search_results.count(), 4)
+        self.assertEqual(Result.objects.count(), 7)
+
+        self.client.post(
+            url,
+            {
+                "search_type": 0,
+                "search_terms": "Test text 3",
+            },
+        )
+        count = Search.objects.count()
+        self.assertEqual(count, 3)
+        search = Search.objects.get(search_terms="Test text 3")
+        self.assertEqual(search.search_results.count(), 0)
+        self.assertEqual(Result.objects.count(), 7)
+
     def test_search_create_with_logged_in_user(self):
         url = reverse("search:api_search")
         response = self.client.post(
