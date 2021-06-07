@@ -188,7 +188,7 @@ class APIHistoriesTests(APITestCase):
             {
                 "url": "https://example.com",
                 "title": "Title",
-                "origin": "https://google.com",
+                "last_origin": "https://google.com",
             },
         )
         self.assertEqual(response.status_code, 201)
@@ -199,7 +199,7 @@ class APIHistoriesTests(APITestCase):
         data = {
             "url": "https://example.com",
             "title": "Title",
-            "origin": "https://google.com",
+            "last_origin": "https://google.com",
         }
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, 201)

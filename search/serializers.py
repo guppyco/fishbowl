@@ -22,7 +22,7 @@ class SimpleSearchSerializer(serializers.ModelSerializer):
 class HistorySerialzer(serializers.ModelSerializer):
     url = serializers.URLField(max_length=2048, required=True)
     title = serializers.CharField(max_length=500, required=False)
-    last_origin = serializers.URLField(max_length=2048)
+    last_origin = serializers.URLField(max_length=2048, required=False)
 
     class Meta:
         model = History
