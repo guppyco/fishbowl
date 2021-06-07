@@ -1,24 +1,22 @@
 # accounts/views.py
 
-import datetime
-import json
 import logging
 import urllib
+
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import redirect, render
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import UpdateView
 
 from .forms import CustomAuthenticationForm, CustomUserCreationForm
 from .models import UserProfile
-
 
 LOGGER = logging.getLogger(__name__)
 
@@ -108,7 +106,6 @@ class UserProfileView(LoginRequiredMixin, DetailView):
         return self.request.user
 
     def get(self, request, *args, **kwargs):
-        # pylint: disable=attribute-defined-outside-init, line-too-long
         self.object = self.get_object()
         context = self.get_context_data(object=self.object)
 
@@ -133,3 +130,15 @@ class UserProfileUpdate(LoginRequiredMixin, UpdateView):
 
     def get_object(self, queryset=None):
         return self.request.user
+
+
+class UserProfileAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        content = {
+            "user": str(request.user),
+            "auth": str(request.auth),
+        }
+
+        return Response(content)

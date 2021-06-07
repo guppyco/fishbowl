@@ -13,12 +13,17 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin
 from django.urls import path
 
 from . import views
 
 app_name = "search"  # pylint: disable=invalid-name
 urlpatterns = [  # pylint: disable=invalid-name
-    path('', views.home, name="home"),
+    path("", views.home, name="home"),
+    path("api/search/", views.SearchView.as_view(), name="api_search"),
+    path(
+        "api/search/click",
+        views.SearchView.click,
+        name="api_search_click",
+    ),
 ]

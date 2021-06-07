@@ -8,18 +8,24 @@
 
 {% block signup %}
 <div>
-  <h1 class="row">Sign up for Guppy</h1>
+  <h4 class="row">Sign up for Guppy</h4>
+  {% if messages %}
+    {% for message in messages %}
+    <div class="row alert {{ message.tags }} alert-dismissible fade show" role="alert">
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+      {{ message }}
+    </div>
+    {% endfor %}
+  {% endif %}
   <div class="row clearfix"></div>
   <div class="row">
-    <form class="signup-login-form col-12" action="" method="POST">{% csrf_token %}
-      <div class="input-group" id="signup-form">
-        {% crispy signup_form %}
-      </div>
-      <div class="row row-spacer-2 clearfix"></div>
-      <button class="btn btn-lg btn-primary" type="submit" name="signup" value="Get $$$$$">Sign up</button>
+    <form class="signup-login-form" action="" method="POST">{% csrf_token %}
+      {% crispy signup_form %}
+      <button type="submit" class="btn btn-primary" name="signup" value="Get $$$$$">Sign up</button>
     </form>
   </div>
-  <div class="row row-spacer-2 clearfix"></div>
   <div class="row">
     <p>Already a member? <a href="{% url 'login' %}{{ next }}">Click here to login</a></p>
   </div>

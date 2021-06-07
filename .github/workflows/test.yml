@@ -1,0 +1,54 @@
+# Via https://hacksoft.io/github-actions-in-action-setting-up-django-and-postgres/
+name: Python application
+on: [push]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:10.8
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test
+        ports:
+          - 5432:5432
+        # needed because the postgres container does not provide a healthcheck
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+    steps:
+      - name: apt update
+        run: sudo apt update
+      - uses: niden/actions-memcached@v7
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.8.5
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8.5
+      - name: psycopg2 prerequisites
+        run: sudo apt-get install python-dev libpq-dev
+      - name: memcached dependencies
+        run: sudo apt-get install libmemcached-dev
+      - name: Cache pip
+        uses: actions/cache@v2
+        with:
+          # This path is specific to Ubuntu
+          path: ~/.cache/pip
+          # Look to see if there is a cache hit
+          # for the corresponding requirements file
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+            ${{ runner.os }}-
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements/local.txt
+      - name: Setup environment variables
+        # run: ansible-vault decrypt .env.encrypted --output=.env --vault-password-file .vault_pass.py
+        # env:
+        #   ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
+        run: cp .env.example .env
+      - name: Run migrations
+        run: python manage.py migrate
+      - name: Run tests
+        run: python manage.py test --parallel

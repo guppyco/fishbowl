@@ -1,10 +1,9 @@
-import uuid
-
 from django_extensions.db.models import TimeStampedModel
 
 from django.contrib.auth.models import (
     AbstractBaseUser,
     BaseUserManager,
+    PermissionsMixin,
 )
 from django.db import models
 from django.urls import reverse
@@ -16,13 +15,14 @@ class CustomUserManager(BaseUserManager):
     Custom manager for creating a user with an email address for username.
     """
 
-    def _create_user(self, email, password, is_staff=False):
+    def _create_user(self, email, password, is_staff=False, is_superuser=False):
         if not email:
             raise ValueError("You must provide an email address.")
         email = self.normalize_email(email)
         user_profile = self.model(
             email=email,
             is_active=True,
+            is_superuser=is_superuser,
             is_staff=is_staff,
         )
         user_profile.set_password(password)
@@ -33,12 +33,12 @@ class CustomUserManager(BaseUserManager):
         return self._create_user(email, password)
 
     def create_superuser(
-        self, email, password, is_staff=True
+        self, email, password, is_staff=True, is_superuser=True
     ):
-        return self._create_user(email, password, is_staff)
+        return self._create_user(email, password, is_staff, is_superuser)
 
 
-class UserProfile(AbstractBaseUser, TimeStampedModel):
+class UserProfile(AbstractBaseUser, TimeStampedModel, PermissionsMixin):
     email = models.EmailField(unique=True)
     is_staff = models.BooleanField(
         _("staff status"),
@@ -67,10 +67,11 @@ class UserProfile(AbstractBaseUser, TimeStampedModel):
         full_name = self.email
         return full_name.strip()
 
-    def get_short_name(self):
+    def get_short_name(self) -> str:
         "Returns the short name for the user."
         short_name = self.email
         return short_name.strip()
 
+    @staticmethod
     def get_absolute_url() -> str:
         return reverse("user_profile")
