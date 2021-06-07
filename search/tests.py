@@ -8,7 +8,7 @@ from django.urls import reverse
 
 from accounts.factories import UserProfileFactory
 
-from .models import Result, Search
+from .models import History, Result, Search
 
 
 class SearchTests(TestCase):
@@ -172,3 +172,58 @@ class APISearchTests(APITestCase):
         self.assertEqual(search.user_id, user.id)
         self.assertEqual(search.search_results.count(), 3)
         self.assertEqual(Result.objects.count(), 4)
+
+
+class APIHistoriesTests(APITestCase):
+    def test_history_create_invalid(self):
+        url = reverse("search:api_histories")
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.data["url"][0], "This field is required.")
+
+    def test_history_create_valid(self):
+        url = reverse("search:api_histories")
+        response = self.client.post(
+            url,
+            {
+                "url": "https://example.com",
+                "title": "Title",
+                "origin": "https://google.com",
+            },
+        )
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.data["title"], "Title")
+
+    def test_history_create_with_logged_in_user(self):
+        url = reverse("search:api_histories")
+        data = {
+            "url": "https://example.com",
+            "title": "Title",
+            "origin": "https://google.com",
+        }
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 201)
+        count = History.objects.count()
+        self.assertEqual(count, 1)
+        history = History.objects.last()
+        self.assertEqual(history.user_id, 0)
+
+        # Login
+        user_data = {"email": "test@example.com", "password": "test"}
+        user = UserProfileFactory(**user_data)
+        resp = self.client.post(reverse("token_obtain_pair"), user_data)
+        token = resp.data["token"]
+        # pylint: disable=no-member
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token)
+        response = self.client.post(url, data)
+        count = History.objects.count()
+        self.assertEqual(count, 2)
+        history = History.objects.last()
+        self.assertEqual(history.user_id, user.id)
+        self.assertEqual(history.count, 1)
+
+        response = self.client.post(url, data)
+        history.refresh_from_db()
+        self.assertEqual(history.count, 2)
+        count = History.objects.count()
+        self.assertEqual(count, 2)
