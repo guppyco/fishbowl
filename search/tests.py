@@ -54,7 +54,7 @@ class APISearchTests(APITestCase):
         response = self.client.post(
             url, {"search_type": 0, "search_terms": "Test text"}
         )
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 201)
         self.assertEqual(response.data["search_terms"], "Test text")
 
     def test_search_create_valid_with_results(self):
@@ -70,7 +70,7 @@ class APISearchTests(APITestCase):
                 ],
             },
         )
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 201)
         count = Search.objects.count()
         self.assertEqual(count, 1)
         search = Search.objects.first()
@@ -143,7 +143,7 @@ class APISearchTests(APITestCase):
                 ],
             },
         )
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 201)
         count = Search.objects.count()
         self.assertEqual(count, 1)
 
