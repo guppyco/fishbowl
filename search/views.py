@@ -1,6 +1,6 @@
 import urllib
 
-from rest_framework import generics, mixins
+from rest_framework import generics, mixins, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -78,7 +78,7 @@ class SearchView(mixins.CreateModelMixin, generics.GenericAPIView):
                 result_ids.append(model.pk)
             search_model = Search.objects.get(pk=serializer.data["id"])
             search_model.search_results.add(*result_ids)
-            return Response(serializer.data)
+            return Response(serializer.data, status.HTTP_201_CREATED)
 
         raise ValidationError(serializer.errors)
 
