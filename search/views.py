@@ -91,12 +91,12 @@ class SearchView(mixins.CreateModelMixin, generics.GenericAPIView):
 class HistoryCreateView(CreateAPIView):
     serializer_class = HistorySerialzer
     permission_classes = [AllowAny]
-    # queryset = Book.objects.all()
 
     def create(self, request, *args, **kwargs):
         data = {}
         for key, item in request.data.items():
-            data[key] = item
+            if item.strip():
+                data[key] = item
         user_id = request.user.pk
         if user_id is None:
             user_id = 0

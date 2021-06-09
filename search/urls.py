@@ -27,6 +27,8 @@ urlpatterns = [  # pylint: disable=invalid-name
         name="api_search_click",
     ),
     path(
-        "api/histories", views.HistoryCreateView.as_view(), name="api_histories"
+        "api/histories/",
+        views.HistoryCreateView.as_view(),
+        name="api_histories",
     ),
 ]

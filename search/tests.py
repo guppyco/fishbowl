@@ -192,6 +192,17 @@ class APIHistoriesTests(APITestCase):
             },
         )
         self.assertEqual(response.status_code, 201)
+
+        self.assertEqual(response.data["title"], "Title")
+        response = self.client.post(
+            url,
+            {
+                "url": "https://example.com",
+                "title": "Title",
+                "last_origin": ""
+            },
+        )
+        self.assertEqual(response.status_code, 201)
         self.assertEqual(response.data["title"], "Title")
 
     def test_history_create_with_logged_in_user(self):
