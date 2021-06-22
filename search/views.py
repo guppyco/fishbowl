@@ -12,6 +12,7 @@ from django.shortcuts import redirect, render
 from .forms import SearchForm
 from .models import History, Result, Search
 from .serializers import HistorySerialzer, SimpleSearchSerializer
+from .utils import click_url
 
 
 def home(request):
@@ -50,7 +51,7 @@ class SearchView(mixins.CreateModelMixin, generics.GenericAPIView):
             user_id = 0
         data = {
             "user_id": user_id,
-            "search_results": results,
+            "results": results,
         }
         if "search_terms" in request.data:
             data["search_terms"] = request.data["search_terms"]
@@ -78,14 +79,10 @@ class SearchView(mixins.CreateModelMixin, generics.GenericAPIView):
                 model, _ = Result.objects.get_or_create(url=result)
                 result_ids.append(model.pk)
             search_model = Search.objects.get(pk=serializer.data["id"])
-            search_model.search_results.add(*result_ids)
+            search_model.results.add(*result_ids)
             return Response(serializer.data, status.HTTP_201_CREATED)
 
         raise ValidationError(serializer.errors)
-
-    def click(self, request):
-        # TODO: add code for click tracking
-        return self, request
 
 
 class HistoryCreateView(CreateAPIView):
@@ -119,6 +116,8 @@ class HistoryCreateView(CreateAPIView):
                 )
                 serializer.is_valid(raise_exception=True)
             serializer.save()
+            # Track clicked URL
+            click_url(data)
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 

@@ -1,14 +1,14 @@
 from django.contrib import admin
 from django.utils.html import format_html
 
-from .models import History, Search
+from .models import History, Search, SearchResult
 
 
 @admin.register(Search)
 class SearchAdmin(admin.ModelAdmin):
     list_display = ("_search_terms", "search_type", "view_user")
-
     search_fields = ("search_terms",)
+    readonly_fields = ["results_content"]
 
     def _search_terms(self, obj) -> str:  # pylint: disable=no-self-use
         if len(obj.search_terms) > 100:
@@ -24,14 +24,32 @@ class SearchAdmin(admin.ModelAdmin):
 
     view_user.short_description = "User"  # type: ignore
 
+    def results_content(self, instance):  # pylint: disable=no-self-use
+        string = ""
+        results = instance.results.all()
+        for result in results:
+            search_result = SearchResult.objects.get(
+                search=instance, result=result
+            )
+            string += f"({search_result}) {result.url} \n\n"
+
+        return string
+
+    results_content.short_description = "Search results"  # type: ignore
+
 
 @admin.register(History)
 class HistoryAdmin(admin.ModelAdmin):
-    list_display = ("title", "_url", "view_user", "count")
+    list_display = ("_title", "_url", "view_user", "count")
+
+    def _title(self, obj) -> str:  # pylint: disable=no-self-use
+        if len(obj.title) > 60:
+            return obj.title[:60] + "..."
+        return obj.title
 
     def _url(self, obj) -> str:  # pylint: disable=no-self-use
-        if len(obj.url) > 100:
-            return obj.url[:100] + "..."
+        if len(obj.url) > 60:
+            return obj.url[:60] + "..."
         return obj.url
 
     def view_user(self, obj) -> str:  # pylint: disable=no-self-use
