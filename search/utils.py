@@ -4,9 +4,13 @@ from .models import Result, SearchResult
 
 
 def click_url(data) -> None:
-    if "last_origin" in data and data["last_origin"] and (
-        "://www.google." in data["last_origin"]
-        or "://google." in data["last_origin"]
+    if (
+        "last_origin" in data
+        and data["last_origin"]
+        and (
+            "://www.google." in data["last_origin"]
+            or "://google." in data["last_origin"]
+        )
     ):
         results = Result.objects.filter(url=data["url"])
 
