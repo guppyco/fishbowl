@@ -4,7 +4,7 @@ from .models import Result, SearchResult
 
 
 def click_url(data) -> None:
-    if data["last_origin"] and (
+    if "last_origin" in data and data["last_origin"] and (
         "://www.google." in data["last_origin"]
         or "://google." in data["last_origin"]
     ):
