@@ -8,7 +8,7 @@ from django.urls import reverse
 
 from accounts.factories import UserProfileFactory
 
-from .models import History, Result, Search
+from .models import History, Result, Search, SearchResult
 
 
 class SearchTests(TestCase):
@@ -75,10 +75,10 @@ class APISearchTests(APITestCase):
         self.assertEqual(count, 1)
         search = Search.objects.first()
         self.assertEqual(search.user_id, 0)
-        self.assertEqual(search.search_results.count(), 2)
-        search_results = search.search_results.all()
-        self.assertEqual(search_results[0].url, "https://google.com/1")
-        self.assertEqual(search_results[1].url, "https://google.com/2")
+        self.assertEqual(search.results.count(), 2)
+        results = search.results.all()
+        self.assertEqual(results[0].url, "https://google.com/1")
+        self.assertEqual(results[1].url, "https://google.com/2")
 
         self.client.post(
             url,
@@ -95,7 +95,7 @@ class APISearchTests(APITestCase):
         count = Search.objects.count()
         self.assertEqual(count, 1)
         search = Search.objects.first()
-        self.assertEqual(search.search_results.count(), 4)
+        self.assertEqual(search.results.count(), 4)
         self.assertEqual(Result.objects.count(), 4)
 
         self.client.post(
@@ -114,7 +114,7 @@ class APISearchTests(APITestCase):
         count = Search.objects.count()
         self.assertEqual(count, 2)
         search = Search.objects.get(search_terms="Test text 2")
-        self.assertEqual(search.search_results.count(), 4)
+        self.assertEqual(search.results.count(), 4)
         self.assertEqual(Result.objects.count(), 7)
 
         self.client.post(
@@ -127,7 +127,7 @@ class APISearchTests(APITestCase):
         count = Search.objects.count()
         self.assertEqual(count, 3)
         search = Search.objects.get(search_terms="Test text 3")
-        self.assertEqual(search.search_results.count(), 0)
+        self.assertEqual(search.results.count(), 0)
         self.assertEqual(Result.objects.count(), 7)
 
     def test_search_create_with_logged_in_user(self):
@@ -170,7 +170,7 @@ class APISearchTests(APITestCase):
         self.assertEqual(count, 2)
         search = Search.objects.last()
         self.assertEqual(search.user_id, user.id)
-        self.assertEqual(search.search_results.count(), 3)
+        self.assertEqual(search.results.count(), 3)
         self.assertEqual(Result.objects.count(), 4)
 
 
@@ -234,3 +234,63 @@ class APIHistoriesTests(APITestCase):
         self.assertEqual(history.count, 2)
         count = History.objects.count()
         self.assertEqual(count, 2)
+
+    def test_click_url_on_google_search_results(self):
+        url = reverse("search:api_search")
+        response = self.client.post(
+            url,
+            {
+                "search_type": 0,
+                "search_terms": "Test text",
+                "search_results": [
+                    "https://example.com/1",
+                    "https://example.com/2",
+                ],
+            },
+        )
+
+        url = reverse("search:api_histories")
+        data = {
+            "url": "https://example.com/1",
+            "title": "Title",
+            "last_origin": "https://google.com",
+        }
+        response = self.client.post(url, data)
+
+        self.assertEqual(response.status_code, 201)
+        result = Result.objects.get(url="https://example.com/1")
+        search_result = SearchResult.objects.get(result=result)
+        self.assertEqual(search_result.count, 1)
+
+        self.client.post(url, data)
+        search_result.refresh_from_db()
+        self.assertEqual(search_result.count, 2)
+
+        # Login
+        user_data = {"email": "test@example.com", "password": "test"}
+        user = UserProfileFactory(**user_data)
+        resp = self.client.post(reverse("token_obtain_pair"), user_data)
+        token = resp.data["token"]
+        # pylint: disable=no-member
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token)
+        self.client.post(
+            reverse("search:api_search"),
+            {
+                "search_type": 0,
+                "search_terms": "Test text",
+                "search_results": [
+                    "https://example.com/1",
+                    "https://example.com/2",
+                ],
+            },
+        )
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 201)
+        search_result = SearchResult.objects.get(
+            result=result, search__user_id=user.pk
+        )
+        self.assertEqual(search_result.count, 1)
+
+        self.client.post(url, data)
+        search_result.refresh_from_db()
+        self.assertEqual(search_result.count, 2)
