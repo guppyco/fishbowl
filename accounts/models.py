@@ -55,20 +55,15 @@ class UserProfile(AbstractBaseUser, TimeStampedModel, PermissionsMixin):
             "Unselect this instead of deleting accounts."
         ),
     )
-    first_name = models.CharField(max_length=50, blank=False)
+    first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50, blank=True)
     # Address
-    address1 = models.CharField(max_length=200, blank=False, null=False)
+    address1 = models.CharField(max_length=200)
     address2 = models.CharField(max_length=200, blank=True)
-    city = models.CharField(max_length=50, blank=False, null=False)
-    state = models.CharField(max_length=50, blank=False, null=False)
-    country = models.CharField(
-        max_length=50,
-        blank=False,
-        default="US",
-        null=False,
-    )
-    zip = models.CharField(max_length=50, blank=False, null=False)
+    city = models.CharField(max_length=50)
+    state = models.CharField(max_length=50)
+    country = models.CharField(max_length=50, default="US")
+    zip = models.CharField(max_length=50)
 
     USERNAME_FIELD = "email"
 
