@@ -17,6 +17,11 @@ def create_signup_post_data(input_updates=None):
     data = {
         "signup-email": "test@guppy.co",
         "signup-password1": "test",
+        "signup-first_name": "Name",
+        "signup-address1": "31 TP",
+        "signup-city": "Arcata",
+        "signup-state": "California",
+        "signup-zip": "91201",
     }
     if input_updates:
         for key in input_updates:
@@ -55,7 +60,7 @@ class SignupPageTests(TestCase):
         self.assertIn("/account/", redirect[0])
         self.assertEqual(redirect[1], 302)
         member = UserProfile.objects.latest("created")
-        self.assertEqual(member.get_short_name(), "test@guppy.co")
+        self.assertEqual(member.get_short_name(), "Name")
         self.assertContains(
             response, "Google analytics client-side tracking script"
         )
@@ -161,15 +166,17 @@ class ProfileViewTests(TestCase):
 
 class UserProfileModelTests(TestCase):
     def setUp(self):
-        self.user_profile = UserProfileFactory(email="annamford@gmail.com")
+        self.user_profile = UserProfileFactory(
+            email="annamford@gmail.com", first_name="Anna", last_name="Ford"
+        )
 
     def test_short_name(self):
         short_name = self.user_profile.get_short_name()
-        self.assertEqual(short_name, "annamford@gmail.com")
+        self.assertEqual(short_name, "Anna")
 
     def test_full_name(self):
         full_name = self.user_profile.get_full_name()
-        self.assertEqual(full_name, "annamford@gmail.com")
+        self.assertEqual(full_name, "Anna Ford")
 
 
 class UserCreateToken(APITestCase):

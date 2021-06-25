@@ -55,6 +55,20 @@ class UserProfile(AbstractBaseUser, TimeStampedModel, PermissionsMixin):
             "Unselect this instead of deleting accounts."
         ),
     )
+    first_name = models.CharField(max_length=50, blank=False)
+    last_name = models.CharField(max_length=50, blank=True)
+    # Address
+    address1 = models.CharField(max_length=200, blank=False, null=False)
+    address2 = models.CharField(max_length=200, blank=True)
+    city = models.CharField(max_length=50, blank=False, null=False)
+    state = models.CharField(max_length=50, blank=False, null=False)
+    country = models.CharField(
+        max_length=50,
+        blank=False,
+        default="US",
+        null=False,
+    )
+    zip = models.CharField(max_length=50, blank=False, null=False)
 
     USERNAME_FIELD = "email"
 
@@ -64,13 +78,33 @@ class UserProfile(AbstractBaseUser, TimeStampedModel, PermissionsMixin):
         """
         Returns the first_name plus the last_name, with a space in between.
         """
-        full_name = self.email
+        full_name = self.first_name
+        if self.last_name:
+            full_name += f" {self.last_name}"
+
         return full_name.strip()
 
     def get_short_name(self) -> str:
         "Returns the short name for the user."
-        short_name = self.email
+        if self.first_name == "":
+            short_name = self.email
+        else:
+            try:
+                short_name = self.first_name.split(" ", 1)[0]
+            except AttributeError:
+                short_name = self.email
+
         return short_name.strip()
+
+    def get_address(self) -> str:
+        "Returns address as string"
+        address = ""
+        fields = ["address1", "address2", "city", "state", "country"]
+        for field in fields:
+            if getattr(self, field):
+                address += f"{getattr(self, field)}, "
+
+        return address[:-2]
 
     @staticmethod
     def get_absolute_url() -> str:
