@@ -125,7 +125,16 @@ class UserProfileView(LoginRequiredMixin, DetailView):
 
 class UserProfileUpdate(LoginRequiredMixin, UpdateView):
     model = UserProfile
-    fields = ["name", "email", "password"]
+    fields = [
+        "email",
+        "first_name",
+        "last_name",
+        "address1",
+        "address2",
+        "city",
+        "state",
+        "zip",
+    ]
     success_url = ""
 
     def get_object(self, queryset=None):
