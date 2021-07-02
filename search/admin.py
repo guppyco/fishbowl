@@ -6,8 +6,9 @@ from .models import History, Search, SearchResult
 
 @admin.register(Search)
 class SearchAdmin(admin.ModelAdmin):
-    list_display = ("_search_terms", "search_type", "view_user")
+    list_display = ("_search_terms", "search_type", "view_user", "created")
     search_fields = ("search_terms",)
+    list_filter = ("user_id",)
     readonly_fields = ["results_content"]
 
     def _search_terms(self, obj) -> str:  # pylint: disable=no-self-use
@@ -40,7 +41,8 @@ class SearchAdmin(admin.ModelAdmin):
 
 @admin.register(History)
 class HistoryAdmin(admin.ModelAdmin):
-    list_display = ("_title", "_url", "view_user", "count")
+    list_display = ("_title", "_url", "view_user", "count", "created")
+    list_filter = ("user_id",)
 
     def _title(self, obj) -> str:  # pylint: disable=no-self-use
         if len(obj.title) > 60:
