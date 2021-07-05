@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from django_extensions.db.models import TimeStampedModel
 
 from django.contrib.auth.models import (
@@ -7,7 +9,10 @@ from django.contrib.auth.models import (
 )
 from django.db import models
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.translation import gettext as _
+
+from search.models import History, Search
 
 
 class CustomUserManager(BaseUserManager):
@@ -104,3 +109,32 @@ class UserProfile(AbstractBaseUser, TimeStampedModel, PermissionsMixin):
     @staticmethod
     def get_absolute_url() -> str:
         return reverse("user_profile")
+
+    def get_status(self):
+        activities_in_past_seven_days = False
+        past_seven_date = timezone.now() - timedelta(days=7)
+
+        is_history = History.objects.filter(
+            user_id=self.pk, created__gte=past_seven_date
+        )
+        is_search = Search.objects.filter(
+            user_id=self.pk, created__gte=past_seven_date
+        )
+
+        if is_history.exists() or is_search.exists():
+            activities_in_past_seven_days = True
+
+        return activities_in_past_seven_days
+
+    def get_last_posting_time(self):
+        time = "no data"
+
+        last_history = History.objects.filter(user_id=self.pk).last()
+        if last_history:
+            time = last_history.created
+
+        last_search = Search.objects.filter(user_id=self.pk).last()
+        if last_search and (time == "no data" or time < last_search.created):
+            time = last_search.created
+
+        return time
