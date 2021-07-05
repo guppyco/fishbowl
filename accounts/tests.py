@@ -1,8 +1,13 @@
+from datetime import timedelta
+
 from rest_framework.test import APITestCase
 
 from django.contrib.auth import authenticate
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
+from django.utils import timezone
+
+from search.factories import HistoryFactory, SearchFactory
 
 from .factories import UserProfileFactory
 from .models import UserProfile
@@ -220,9 +225,9 @@ class UserCreateToken(APITestCase):
         response = self.client.post(login_url, user_data)
         token = response.data["token"]
 
-        refresh_url = reverse("user_profile_api")
+        profile_url = reverse("user_profile_api")
         headers = {"HTTP_AUTHORIZATION": "Bearer " + token}
-        response = self.client.get(refresh_url, **headers)
+        response = self.client.get(profile_url, **headers)
         self.assertEqual(response.status_code, 200)
 
     def test_destroy_token(self):
@@ -236,7 +241,88 @@ class UserCreateToken(APITestCase):
         headers = {"HTTP_AUTHORIZATION": "Bearer " + token}
         self.client.post(logout_url, **headers)
 
-        refresh_url = reverse("user_profile_api")
+        profile_url = reverse("user_profile_api")
         headers = {"HTTP_AUTHORIZATION": "Bearer " + token}
-        response = self.client.get(refresh_url, **headers)
+        response = self.client.get(profile_url, **headers)
         self.assertEqual(response.status_code, 403)
+
+
+class UserProfileTest(APITestCase):
+    def setUp(self):
+        user_data = {
+            "email": "test@example.com",
+            "password": "test",
+            "first_name": "Aaron",
+            "last_name": "Ramsey",
+            "address1": "31 TP",
+            "city": "Arcata",
+            "state": "California",
+            "zip": "91201",
+        }
+        self.user = UserProfileFactory(**user_data)
+        login_url = reverse("token_obtain_pair")
+        response = self.client.post(login_url, user_data)
+        self.token = response.data["token"]
+
+    def test_get_profile_info(self):
+        profile_url = reverse("user_profile_api")
+        headers = {"HTTP_AUTHORIZATION": "Bearer " + self.token}
+        response = self.client.get(profile_url, **headers)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["user"], "test@example.com")
+        profile = response.data["profile"]
+        self.assertEqual(profile["full_name"], "Aaron Ramsey")
+        self.assertEqual(profile["address"], "31 TP, Arcata, California, US")
+        self.assertEqual(profile["status"], False)
+        self.assertEqual(profile["last_time"], "no data")
+
+        search = SearchFactory(user_id=self.user.pk)
+        response = self.client.get(profile_url, **headers)
+        self.assertEqual(response.status_code, 200)
+        profile = response.data["profile"]
+        self.assertEqual(profile["status"], True)
+        self.assertEqual(profile["last_time"], search.created)
+
+        history = HistoryFactory(user_id=self.user.pk)
+        response = self.client.get(profile_url, **headers)
+        self.assertEqual(response.status_code, 200)
+        profile = response.data["profile"]
+        self.assertEqual(profile["status"], True)
+        self.assertEqual(profile["last_time"], history.created)
+
+        search_2 = SearchFactory(user_id=self.user.pk)
+        response = self.client.get(profile_url, **headers)
+        self.assertEqual(response.status_code, 200)
+        profile = response.data["profile"]
+        self.assertEqual(profile["status"], True)
+        self.assertEqual(profile["last_time"], search_2.created)
+
+    def test_get_profile_info_with_posted_data(self):
+        profile_url = reverse("user_profile_api")
+        headers = {"HTTP_AUTHORIZATION": "Bearer " + self.token}
+
+        search = SearchFactory(user_id=self.user.pk)
+        date = timezone.now() - timedelta(days=8)
+        search.created = date
+        search.save()
+        response = self.client.get(profile_url, **headers)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["profile"]["status"], False)
+
+        history = HistoryFactory(user_id=self.user.pk)
+        history.created = date
+        history.save()
+        response = self.client.get(profile_url, **headers)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["profile"]["status"], False)
+
+        search_2 = SearchFactory(user_id=self.user.pk)
+        date = timezone.now() - timedelta(days=6)
+        search_2.created = date
+        search_2.save()
+        response = self.client.get(profile_url, **headers)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.data["profile"]["status"], True)
+        self.assertEqual(
+            response.data["profile"]["last_time"], search_2.created
+        )
