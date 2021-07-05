@@ -10,7 +10,7 @@ class Result(models.Model):
         return self.url
 
 
-class Search(models.Model):
+class Search(TimeStampedModel):
     GOOGLE = 0
     GUPPY = 1
     SEARCH_TYPES = ((GOOGLE, "Google"), (GUPPY, "Guppy"))
