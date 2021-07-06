@@ -35,6 +35,12 @@ def home(request):
     return render(request, template, context)
 
 
+def search(request):
+    template = "search/search.html"
+    context = {"q": request.GET["q"]}
+    return render(request, template, context)
+
+
 class SearchView(mixins.CreateModelMixin, generics.GenericAPIView):
     serializer_class = SimpleSearchSerializer
     permission_classes = [AllowAny]
