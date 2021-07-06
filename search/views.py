@@ -35,7 +35,7 @@ def home(request):
     return render(request, template, context)
 
 
-def search(request):
+def guppy_search(request):
     template = "search/search.html"
     context = {"q": request.GET["q"]}
     return render(request, template, context)
