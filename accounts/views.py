@@ -3,6 +3,7 @@
 import logging
 import urllib
 
+from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -145,9 +146,21 @@ class UserProfileAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        content = {
-            "user": str(request.user),
-            "auth": str(request.auth),
-        }
+        try:
+            user = request.user
+            profile = UserProfile.objects.get(email=user)
+            content = {
+                "user": str(request.user),
+                "auth": str(request.auth),
+                "profile": {
+                    "full_name": profile.get_full_name(),
+                    "address": profile.get_address(),
+                    "status": profile.get_status(),
+                    "last_time": profile.get_last_posting_time(),
+                },
+            }
 
-        return Response(content)
+            return Response(content)
+        except Exception as exc:
+            LOGGER.exception(exc)
+            return Response(status=status.HTTP_404_NOT_FOUND)
