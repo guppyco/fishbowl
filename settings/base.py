@@ -169,9 +169,7 @@ STATICFILES_FINDERS = (
     "django.contrib.staticfiles.finders.AppDirectoriesFinder",
 )
 
-STATICFILES_DIRS = (
-    BASE_DIR + "/frontend/node_modules/",
-)
+STATICFILES_DIRS = (BASE_DIR + "/frontend/node_modules/",)
 
 MESSAGE_TAGS = {
     messages.DEBUG: "alert-secondary",
