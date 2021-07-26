@@ -171,8 +171,6 @@ STATICFILES_FINDERS = (
 
 STATICFILES_DIRS = (
     BASE_DIR + "/frontend/node_modules/",
-    BASE_DIR + "/frontend/css/",
-    BASE_DIR + "/frontend/js/",
 )
 
 MESSAGE_TAGS = {
