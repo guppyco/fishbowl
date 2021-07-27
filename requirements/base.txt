@@ -1,8 +1,11 @@
+celery==5.1.2
 django==3.1.9
+django-celery-results==2.2.0
 django-cors-headers==3.7.0
 django-crispy-forms==1.11.2
 django-extensions==3.0.3
 djangorestframework==3.12.4
 drf-jwt==1.19.0
 factory_boy==3.2.0
+flower==1.0.0
 psycopg2==2.8.6

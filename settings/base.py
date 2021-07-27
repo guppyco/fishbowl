@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     # Third party packages
     "corsheaders",
     "crispy_forms",
+    "django_celery_results",
     "django_extensions",
     "rest_framework",
     "rest_framework.authtoken",
@@ -142,6 +143,12 @@ AUTH_PASSWORD_VALIDATORS = [
 
 AUTH_USER_MODEL = "accounts.UserProfile"
 
+# Celery settings.
+CELERY_BROKER_URL = os.environ.get(
+    "BROKER_URL", "amqp://guest:guest@127.0.0.1//"
+)
+CELERY_TASK_SOFT_TIME_LIMIT = 60
+CELERY_RESULT_BACKEND = "django-db"
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
