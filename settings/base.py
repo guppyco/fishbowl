@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     # Third party packages
+    "anymail",
     "corsheaders",
     "crispy_forms",
     "django_celery_results",
@@ -52,6 +53,7 @@ INSTALLED_APPS = [
     "rest_framework_jwt.blacklist",
     # Guppy apps
     "accounts",
+    "emails",
     "search",
 ]
 
