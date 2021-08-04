@@ -221,30 +221,38 @@ class UserCreateToken(APITestCase):
     def test_get_account_info_authenticated(self):
         user_data = {"email": "test@example.com", "password": "test"}
         UserProfileFactory(**user_data)
-        login_url = reverse("token_obtain_pair")
-        response = self.client.post(login_url, user_data)
-        token = response.data["token"]
+        self.client.post(
+            reverse("api_login"),
+            {
+                "username": "test@example.com",
+                "password": "test",
+            },
+        )
 
         profile_url = reverse("user_profile_api")
-        headers = {"HTTP_AUTHORIZATION": "Bearer " + token}
-        response = self.client.get(profile_url, **headers)
+        response = self.client.get(profile_url)
         self.assertEqual(response.status_code, 200)
 
-    def test_destroy_token(self):
+    def test_api_logout(self):
         user_data = {"email": "test@example.com", "password": "test"}
         UserProfileFactory(**user_data)
-        login_url = reverse("token_obtain_pair")
-        response = self.client.post(login_url, user_data)
-        token = response.data["token"]
-
-        logout_url = reverse("token_destroy")
-        headers = {"HTTP_AUTHORIZATION": "Bearer " + token}
-        self.client.post(logout_url, **headers)
+        self.client.post(
+            reverse("api_login"),
+            {
+                "username": "test@example.com",
+                "password": "test",
+            },
+        )
 
         profile_url = reverse("user_profile_api")
-        headers = {"HTTP_AUTHORIZATION": "Bearer " + token}
-        response = self.client.get(profile_url, **headers)
-        self.assertEqual(response.status_code, 403)
+        response = self.client.get(profile_url)
+        self.assertEqual(response.status_code, 200)
+
+        logout_url = reverse("logout")
+        self.client.post(logout_url)
+
+        response = self.client.get(profile_url)
+        self.assertEqual(response.status_code, 401)
 
 
 class UserProfileTest(APITestCase):
@@ -260,14 +268,17 @@ class UserProfileTest(APITestCase):
             "zip": "91201",
         }
         self.user = UserProfileFactory(**user_data)
-        login_url = reverse("token_obtain_pair")
-        response = self.client.post(login_url, user_data)
-        self.token = response.data["token"]
+        self.client.post(
+            reverse("api_login"),
+            {
+                "username": "test@example.com",
+                "password": "test",
+            },
+        )
 
     def test_get_profile_info(self):
         profile_url = reverse("user_profile_api")
-        headers = {"HTTP_AUTHORIZATION": "Bearer " + self.token}
-        response = self.client.get(profile_url, **headers)
+        response = self.client.get(profile_url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["user"], "test@example.com")
         profile = response.data["profile"]
@@ -277,21 +288,21 @@ class UserProfileTest(APITestCase):
         self.assertEqual(profile["last_time"], "no data")
 
         search = SearchFactory(user_id=self.user.pk)
-        response = self.client.get(profile_url, **headers)
+        response = self.client.get(profile_url)
         self.assertEqual(response.status_code, 200)
         profile = response.data["profile"]
         self.assertEqual(profile["status"], True)
         self.assertEqual(profile["last_time"], search.created)
 
         history = HistoryFactory(user_id=self.user.pk)
-        response = self.client.get(profile_url, **headers)
+        response = self.client.get(profile_url)
         self.assertEqual(response.status_code, 200)
         profile = response.data["profile"]
         self.assertEqual(profile["status"], True)
         self.assertEqual(profile["last_time"], history.created)
 
         search_2 = SearchFactory(user_id=self.user.pk)
-        response = self.client.get(profile_url, **headers)
+        response = self.client.get(profile_url)
         self.assertEqual(response.status_code, 200)
         profile = response.data["profile"]
         self.assertEqual(profile["status"], True)
@@ -299,20 +310,18 @@ class UserProfileTest(APITestCase):
 
     def test_get_profile_info_with_posted_data(self):
         profile_url = reverse("user_profile_api")
-        headers = {"HTTP_AUTHORIZATION": "Bearer " + self.token}
-
         search = SearchFactory(user_id=self.user.pk)
         date = timezone.now() - timedelta(days=8)
         search.created = date
         search.save()
-        response = self.client.get(profile_url, **headers)
+        response = self.client.get(profile_url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["profile"]["status"], False)
 
         history = HistoryFactory(user_id=self.user.pk)
         history.created = date
         history.save()
-        response = self.client.get(profile_url, **headers)
+        response = self.client.get(profile_url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["profile"]["status"], False)
 
@@ -320,7 +329,7 @@ class UserProfileTest(APITestCase):
         date = timezone.now() - timedelta(days=6)
         search_2.created = date
         search_2.save()
-        response = self.client.get(profile_url, **headers)
+        response = self.client.get(profile_url)
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.data["profile"]["status"], True)
         self.assertEqual(

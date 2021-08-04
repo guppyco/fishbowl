@@ -150,10 +150,13 @@ class APISearchTests(APITestCase):
         # Login
         user_data = {"email": "test@example.com", "password": "test"}
         user = UserProfileFactory(**user_data)
-        resp = self.client.post(reverse("token_obtain_pair"), user_data)
-        token = resp.data["token"]
-        # pylint: disable=no-member
-        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token)
+        self.client.post(
+            reverse("api_login"),
+            {
+                "username": "test@example.com",
+                "password": "test",
+            },
+        )
         self.client.post(
             url,
             {
@@ -218,10 +221,13 @@ class APIHistoriesTests(APITestCase):
         # Login
         user_data = {"email": "test@example.com", "password": "test"}
         user = UserProfileFactory(**user_data)
-        resp = self.client.post(reverse("token_obtain_pair"), user_data)
-        token = resp.data["token"]
-        # pylint: disable=no-member
-        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token)
+        self.client.post(
+            reverse("api_login"),
+            {
+                "username": "test@example.com",
+                "password": "test",
+            },
+        )
         response = self.client.post(url, data)
         count = History.objects.count()
         self.assertEqual(count, 2)
@@ -269,10 +275,13 @@ class APIHistoriesTests(APITestCase):
         # Login
         user_data = {"email": "test@example.com", "password": "test"}
         user = UserProfileFactory(**user_data)
-        resp = self.client.post(reverse("token_obtain_pair"), user_data)
-        token = resp.data["token"]
-        # pylint: disable=no-member
-        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token)
+        self.client.post(
+            reverse("api_login"),
+            {
+                "username": "test@example.com",
+                "password": "test",
+            },
+        )
         self.client.post(
             reverse("search:api_search"),
             {

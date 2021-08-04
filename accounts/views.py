@@ -4,7 +4,13 @@ import logging
 import urllib
 
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import BasicAuthentication
+from rest_framework.decorators import (
+    api_view,
+    authentication_classes,
+    permission_classes,
+)
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -12,7 +18,9 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.middleware.csrf import get_token
 from django.shortcuts import redirect, render
+from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import UpdateView
 
@@ -80,6 +88,34 @@ def login_user(request):
     template = "accounts/login.html"
 
     return render(request, template, context)
+
+
+@api_view(("POST",))
+@csrf_exempt
+@permission_classes([AllowAny])
+@authentication_classes([BasicAuthentication])
+def api_login_user(request):
+    login_form = CustomAuthenticationForm(data=request.POST)
+    if login_form.is_valid():
+        username = request.POST["username"]
+        password = request.POST["password"]
+        member = authenticate(username=username, password=password)
+        if member is not None and member.is_active:
+            login(request, member)
+            csrf_token = get_token(request)
+            return Response(
+                {
+                    "error": False,
+                    "csrf_token": csrf_token,
+                }
+            )
+
+    return Response(
+        {
+            "error": True,
+            "message": "This account is not valid",
+        }
+    )
 
 
 def logout_user(request):
