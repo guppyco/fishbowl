@@ -216,7 +216,7 @@ class UserCreateToken(APITestCase):
         UserProfileFactory(**user_data)
         url = reverse("user_profile_api")
         response = self.client.get(url)
-        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.status_code, 403)
 
     def test_get_account_info_authenticated(self):
         user_data = {"email": "test@example.com", "password": "test"}
@@ -252,7 +252,7 @@ class UserCreateToken(APITestCase):
         self.client.post(logout_url)
 
         response = self.client.get(profile_url)
-        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.status_code, 403)
 
 
 class UserProfileTest(APITestCase):
