@@ -11,12 +11,7 @@ class SimpleSearchSerializer(serializers.ModelSerializer):
     class Meta:
         model = Search
         depth = 1
-        fields = [
-            "id",
-            "search_type",
-            "search_terms",
-            "user_id",
-        ]
+        fields = "__all__"
 
 
 class HistorySerialzer(serializers.ModelSerializer):

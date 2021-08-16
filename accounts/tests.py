@@ -1,5 +1,6 @@
-from datetime import timedelta
+from datetime import datetime, timedelta
 
+from freezegun import freeze_time
 from rest_framework.test import APITestCase
 
 from django.contrib.auth import authenticate
@@ -7,10 +8,11 @@ from django.test import RequestFactory, TestCase
 from django.urls import reverse
 from django.utils import timezone
 
+from accounts.jobs.daily.collect_payouts import Job
 from search.factories import HistoryFactory, SearchFactory
 
 from .factories import UserProfileFactory
-from .models import UserProfile
+from .models import Payout, UserProfile
 from .utils import setup_tests
 
 
@@ -317,6 +319,7 @@ class UserProfileTest(APITestCase):
         response = self.client.get(profile_url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["profile"]["status"], False)
+        self.assertEqual(response.data["profile"]["last_time"], date)
 
         history = HistoryFactory(user_id=self.user.pk)
         history.created = date
@@ -324,6 +327,7 @@ class UserProfileTest(APITestCase):
         response = self.client.get(profile_url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["profile"]["status"], False)
+        self.assertEqual(response.data["profile"]["last_time"], date)
 
         search_2 = SearchFactory(user_id=self.user.pk)
         date = timezone.now() - timedelta(days=6)
@@ -335,3 +339,124 @@ class UserProfileTest(APITestCase):
         self.assertEqual(
             response.data["profile"]["last_time"], search_2.created
         )
+
+
+class PayoutTest(TestCase):
+    def setUp(self):
+        users = UserProfileFactory.create_batch(10, is_waitlisted=False)
+        self.users = users
+        self.user = users[0]
+        self.daily_job = Job()
+
+    def create_search(self, user_id):
+        url = reverse("search:api_search")
+        # Login
+        user = UserProfile.objects.get(pk=user_id)
+        self.client.post(
+            reverse("api_login"),
+            {
+                "username": user.email,
+                "password": "test",
+            },
+        )
+        self.client.post(
+            url,
+            {
+                "search_type": 0,
+                "search_terms": "Test text",
+                "search_results": [
+                    "https://google.com/2",
+                    "https://google.com/3",
+                ],
+            },
+        )
+
+    def create_history(self, user_id):
+        url = reverse("search:api_histories")
+        # Login
+        user = UserProfile.objects.get(pk=user_id)
+        self.client.post(
+            reverse("api_login"),
+            {
+                "username": user.email,
+                "password": "test",
+            },
+        )
+        self.client.post(
+            url,
+            {
+                "url": "https://example.com",
+                "title": "Title",
+                "last_origin": "https://google.com",
+            },
+        )
+
+    def test_no_payout(self):
+        self.daily_job.execute()
+        count = Payout.objects.count()
+        self.assertEqual(count, 0)
+
+    def test_payout_activities_today(self):
+        self.create_history(user_id=self.user.pk)
+        self.daily_job.execute()
+        payouts = Payout.objects.all()
+        self.assertEqual(payouts.count(), 1)
+        payout = payouts[0]
+        self.assertEqual(payout.user_profile.pk, self.user.pk)
+
+    def test_payout_amount(self):
+        with freeze_time(datetime(2021, 2, 1)):
+            self.create_search(user_id=self.user.pk)
+            self.daily_job.execute()
+            payouts = Payout.objects.all()
+            self.assertEqual(payouts.count(), 1)
+            payout = payouts[0]
+            self.assertEqual(payout.user_profile.pk, self.user.pk)
+            self.assertEqual(payout.amount, int(1000 / 28 / 1))
+            self.assertEqual(payout.date, datetime(2021, 2, 1).date())
+
+        with freeze_time(datetime(2022, 3, 1)):
+            self.create_history(user_id=self.user.pk)
+            self.daily_job.execute()
+            payouts = Payout.objects.all()
+            self.assertEqual(payouts.count(), 2)
+            payout = payouts[1]
+            self.assertEqual(payout.user_profile.pk, self.user.pk)
+            self.assertEqual(payout.amount, int(1000 / 31 / 1))
+            self.assertEqual(payout.date, datetime(2022, 3, 1).date())
+
+    def test_payout_activities_past_seven_days(self):
+        seven_days_before = timezone.now() - timedelta(days=6)
+        with freeze_time(seven_days_before):
+            self.create_history(user_id=self.user.pk)
+
+        self.daily_job.execute()
+        payouts = Payout.objects.all()
+        self.assertEqual(payouts.count(), 1)
+        payout = payouts[0]
+        self.assertEqual(payout.user_profile.pk, self.user.pk)
+        self.assertEqual(payout.date, datetime.now().date())
+
+    def test_payout_activities_greater_than_seven_days(self):
+        eight_days_before = timezone.now() - timedelta(days=7)
+        with freeze_time(eight_days_before):
+            self.create_history(user_id=self.user.pk)
+
+        self.daily_job.execute()
+        payouts = Payout.objects.all()
+        self.assertEqual(payouts.count(), 0)
+
+    def test_payout_activities_multiple_criterias(self):
+        UserProfileFactory(is_waitlisted=True)
+        eight_days_before = timezone.now() - timedelta(days=8)
+        with freeze_time(eight_days_before):
+            user = UserProfileFactory(is_waitlisted=False)
+            self.create_history(user_id=user.pk)
+        for user in self.users:
+            self.create_history(user_id=user.pk)
+
+        self.daily_job.execute()
+        payouts = Payout.objects.all()
+        self.assertEqual(payouts.count(), 10)
+        for payout in payouts:
+            self.assertEqual(payout.amount, int(1000 / 31 / 10))

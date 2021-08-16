@@ -9,6 +9,8 @@ from rest_framework.response import Response
 from django.conf import settings
 from django.shortcuts import redirect, render
 
+from accounts.models import UserProfile
+
 from .forms import SearchForm
 from .models import History, Result, Search
 from .serializers import HistorySerialzer, SimpleSearchSerializer
@@ -86,6 +88,12 @@ class SearchView(mixins.CreateModelMixin, generics.GenericAPIView):
                 result_ids.append(model.pk)
             search_model = Search.objects.get(pk=serializer.data["id"])
             search_model.results.add(*result_ids)
+
+            # Update `last_posting_time` of user profile
+            UserProfile.objects.filter(pk=data["user_id"]).update(
+                last_posting_time=serializer.data["modified"]
+            )
+
             return Response(serializer.data, status.HTTP_201_CREATED)
 
         raise ValidationError(serializer.errors)
@@ -122,8 +130,14 @@ class HistoryCreateView(CreateAPIView):
                 )
                 serializer.is_valid(raise_exception=True)
             serializer.save()
+
             # Track clicked URL
             click_url(data)
+
+            # Update `last_posting_time` of user profile
+            UserProfile.objects.filter(pk=data["user_id"]).update(
+                last_posting_time=serializer.data["modified"]
+            )
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
