@@ -69,6 +69,12 @@ class UserProfile(AbstractBaseUser, TimeStampedModel, PermissionsMixin):
     state = models.CharField(max_length=50)
     country = models.CharField(max_length=50, default="US")
     zip = models.CharField(max_length=50)
+    last_posting_time = models.DateTimeField(null=True, blank=True)
+    is_waitlisted = models.BooleanField(
+        _("Waitlist"),
+        default=True,
+        help_text=_("Designates whether this user is in waitlist"),
+    )
 
     USERNAME_FIELD = "email"
 
@@ -112,29 +118,67 @@ class UserProfile(AbstractBaseUser, TimeStampedModel, PermissionsMixin):
 
     def get_status(self):
         activities_in_past_seven_days = False
-        past_seven_date = timezone.now() - timedelta(days=7)
-
-        is_history = History.objects.filter(
-            user_id=self.pk, created__gte=past_seven_date
-        )
-        is_search = Search.objects.filter(
-            user_id=self.pk, created__gte=past_seven_date
+        past_seven_date = timezone.now() - timedelta(days=6)
+        # Reset to begin of the day
+        past_seven_date = past_seven_date.replace(
+            hour=0, minute=0, second=0, microsecond=0
         )
 
-        if is_history.exists() or is_search.exists():
+        if self.last_posting_time and self.last_posting_time >= past_seven_date:
             activities_in_past_seven_days = True
+        else:
+            is_history = History.objects.filter(
+                user_id=self.pk, created__gte=past_seven_date
+            )
+            is_search = Search.objects.filter(
+                user_id=self.pk, created__gte=past_seven_date
+            )
+
+            if is_history.exists() or is_search.exists():
+                activities_in_past_seven_days = True
 
         return activities_in_past_seven_days
 
     def get_last_posting_time(self):
         time = "no data"
 
-        last_history = History.objects.filter(user_id=self.pk).last()
-        if last_history:
-            time = last_history.created
+        if self.last_posting_time:
+            time = self.last_posting_time
 
-        last_search = Search.objects.filter(user_id=self.pk).last()
-        if last_search and (time == "no data" or time < last_search.created):
-            time = last_search.created
+        else:
+            last_history = History.objects.filter(user_id=self.pk).last()
+            if last_history:
+                time = last_history.created
+
+            last_search = Search.objects.filter(user_id=self.pk).last()
+            if last_search and (
+                time == "no data" or time < last_search.created
+            ):
+                time = last_search.created
 
         return time
+
+
+class Payout(TimeStampedModel):
+    user_profile = models.ForeignKey(
+        UserProfile,
+        on_delete=models.CASCADE,
+        related_name="payouts",
+        blank=True,
+        null=True,
+    )
+    amount = models.IntegerField(blank=True, null=True)
+    # payment status
+    UNPAID = 0
+    REQUESTING = 1
+    PAID = 2
+    PAYMENT_STATUSES = (
+        (UNPAID, "unpaid"),
+        (REQUESTING, "requesting"),
+        (PAID, "paid"),
+    )
+    payment_status = models.IntegerField(
+        choices=PAYMENT_STATUSES, blank=False, default=UNPAID
+    )
+    note = models.CharField(max_length=500, blank=True)
+    date = models.DateField(default=timezone.now)

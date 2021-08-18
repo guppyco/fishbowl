@@ -173,6 +173,8 @@ class APISearchTests(APITestCase):
         self.assertEqual(count, 2)
         search = Search.objects.last()
         self.assertEqual(search.user_id, user.id)
+        user.refresh_from_db()
+        self.assertEqual(user.last_posting_time, search.modified)
         self.assertEqual(search.results.count(), 3)
         self.assertEqual(Result.objects.count(), 4)
 
@@ -234,10 +236,15 @@ class APIHistoriesTests(APITestCase):
         history = History.objects.last()
         self.assertEqual(history.user_id, user.id)
         self.assertEqual(history.count, 1)
+        user.refresh_from_db()
+        self.assertEqual(user.last_posting_time, history.modified)
 
         response = self.client.post(url, data)
         history.refresh_from_db()
         self.assertEqual(history.count, 2)
+        self.assertNotEqual(user.last_posting_time, history.modified)
+        user.refresh_from_db()
+        self.assertEqual(user.last_posting_time, history.modified)
         count = History.objects.count()
         self.assertEqual(count, 2)
 
@@ -303,3 +310,7 @@ class APIHistoriesTests(APITestCase):
         self.client.post(url, data)
         search_result.refresh_from_db()
         self.assertEqual(search_result.count, 2)
+
+        history = History.objects.last()
+        user.refresh_from_db()
+        self.assertEqual(user.last_posting_time, history.modified)
