@@ -2,7 +2,6 @@ from datetime import timedelta
 
 from django_extensions.db.models import TimeStampedModel
 
-import django
 from django.contrib.auth.models import (
     AbstractBaseUser,
     BaseUserManager,
@@ -164,7 +163,7 @@ class Payout(TimeStampedModel):
     user_profile = models.ForeignKey(
         UserProfile,
         on_delete=models.CASCADE,
-        related_name="payout",
+        related_name="payouts",
         blank=True,
         null=True,
     )
@@ -182,4 +181,4 @@ class Payout(TimeStampedModel):
         choices=PAYMENT_STATUSES, blank=False, default=UNPAID
     )
     note = models.CharField(max_length=500, blank=True)
-    date = models.DateField(default=django.utils.timezone.now)
+    date = models.DateField(default=timezone.now)

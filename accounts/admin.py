@@ -62,4 +62,4 @@ class UserProfileAdmin(admin.ModelAdmin):
 
 @admin.register(Payout)
 class PayoutAdmin(admin.ModelAdmin):
-    list_display = ("user_profile", "date", "payment_status", "note")
+    list_display = ("user_profile", "date", "amount", "payment_status", "note")
