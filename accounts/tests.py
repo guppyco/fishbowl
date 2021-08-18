@@ -341,17 +341,14 @@ class UserProfileTest(APITestCase):
         )
 
 
-class PayoutTest(TestCase):
-    def setUp(self):
-        users = UserProfileFactory.create_batch(10, is_waitlisted=False)
-        self.users = users
-        self.user = users[0]
-        self.daily_job = Job()
+class PostData(TestCase):
+    """
+    The helper used to login, create search and history data
+    """
 
-    def create_search(self, user_id):
-        url = reverse("search:api_search")
-        # Login
-        user = UserProfile.objects.get(pk=user_id)
+    def login(self, user=None):
+        if user is None:
+            user = self.user  # pylint: disable=no-member
         self.client.post(
             reverse("api_login"),
             {
@@ -359,6 +356,14 @@ class PayoutTest(TestCase):
                 "password": "test",
             },
         )
+
+    def create_search(self, user=None):
+        # Login
+        if user is None:
+            user = self.user  # pylint: disable=no-member
+        PostData.login(self, user)
+
+        url = reverse("search:api_search")
         self.client.post(
             url,
             {
@@ -371,17 +376,13 @@ class PayoutTest(TestCase):
             },
         )
 
-    def create_history(self, user_id):
-        url = reverse("search:api_histories")
+    def create_history(self, user=None):
         # Login
-        user = UserProfile.objects.get(pk=user_id)
-        self.client.post(
-            reverse("api_login"),
-            {
-                "username": user.email,
-                "password": "test",
-            },
-        )
+        if user is None:
+            user = self.user  # pylint: disable=no-member
+        PostData.login(self, user)
+
+        url = reverse("search:api_histories")
         self.client.post(
             url,
             {
@@ -391,13 +392,21 @@ class PayoutTest(TestCase):
             },
         )
 
+
+class PayoutTest(TestCase):
+    def setUp(self):
+        users = UserProfileFactory.create_batch(10, is_waitlisted=False)
+        self.users = users
+        self.user = users[0]
+        self.daily_job = Job()
+
     def test_no_payout(self):
         self.daily_job.execute()
         count = Payout.objects.count()
         self.assertEqual(count, 0)
 
     def test_payout_activities_today(self):
-        self.create_history(user_id=self.user.pk)
+        PostData.create_history(self)
         self.daily_job.execute()
         payouts = Payout.objects.all()
         self.assertEqual(payouts.count(), 1)
@@ -406,7 +415,7 @@ class PayoutTest(TestCase):
 
     def test_payout_amount(self):
         with freeze_time(datetime(2021, 2, 1)):
-            self.create_search(user_id=self.user.pk)
+            PostData.create_search(self)
             self.daily_job.execute()
             payouts = Payout.objects.all()
             self.assertEqual(payouts.count(), 1)
@@ -416,7 +425,7 @@ class PayoutTest(TestCase):
             self.assertEqual(payout.date, datetime(2021, 2, 1).date())
 
         with freeze_time(datetime(2022, 3, 1)):
-            self.create_history(user_id=self.user.pk)
+            PostData.create_history(self)
             self.daily_job.execute()
             payouts = Payout.objects.all()
             self.assertEqual(payouts.count(), 2)
@@ -428,7 +437,7 @@ class PayoutTest(TestCase):
     def test_payout_activities_past_seven_days(self):
         seven_days_before = timezone.now() - timedelta(days=6)
         with freeze_time(seven_days_before):
-            self.create_history(user_id=self.user.pk)
+            PostData.create_history(self)
 
         self.daily_job.execute()
         payouts = Payout.objects.all()
@@ -440,7 +449,7 @@ class PayoutTest(TestCase):
     def test_payout_activities_greater_than_seven_days(self):
         eight_days_before = timezone.now() - timedelta(days=7)
         with freeze_time(eight_days_before):
-            self.create_history(user_id=self.user.pk)
+            PostData.create_history(self)
 
         self.daily_job.execute()
         payouts = Payout.objects.all()
@@ -451,12 +460,106 @@ class PayoutTest(TestCase):
         eight_days_before = timezone.now() - timedelta(days=8)
         with freeze_time(eight_days_before):
             user = UserProfileFactory(is_waitlisted=False)
-            self.create_history(user_id=user.pk)
+            PostData.create_history(self, user)
         for user in self.users:
-            self.create_history(user_id=user.pk)
+            PostData.create_history(self, user)
 
         self.daily_job.execute()
         payouts = Payout.objects.all()
         self.assertEqual(payouts.count(), 10)
         for payout in payouts:
             self.assertEqual(payout.amount, int(1000 / 31 / 10))
+
+
+class PayoutAmountTest(TestCase):
+    def setUp(self):
+        users = UserProfileFactory.create_batch(10, is_waitlisted=False)
+        self.users = users
+        self.user = users[0]
+        self.daily_job = Job()
+
+    def test_no_amount(self):
+        self.daily_job.execute()
+
+        PostData.login(self)
+        profile_url = reverse("user_profile_api")
+        response = self.client.get(profile_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["profile"]["paid_amount"], 0)
+        self.assertEqual(response.data["profile"]["requesting_amount"], 0)
+        self.assertEqual(response.data["profile"]["unpaid_amount"], 0)
+
+    def test_amount_today(self):
+        PostData.create_history(self)
+        self.daily_job.execute()
+
+        profile_url = reverse("user_profile_api")
+        response = self.client.get(profile_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["profile"]["paid_amount"], 0)
+        self.assertEqual(response.data["profile"]["requesting_amount"], 0)
+        self.assertTrue(response.data["profile"]["unpaid_amount"] > 0)
+
+    def test_amount_on_specific_date(self):
+        with freeze_time(datetime(2021, 2, 1)):
+            PostData.create_history(self)
+            self.daily_job.execute()
+
+        PostData.login(self)
+        profile_url = reverse("user_profile_api")
+        response = self.client.get(profile_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["profile"]["paid_amount"], 0)
+        self.assertEqual(response.data["profile"]["requesting_amount"], 0)
+        self.assertEqual(
+            response.data["profile"]["unpaid_amount"], int(1000 / 28 / 1)
+        )
+
+        # TODO: request payout
+        # need return 401
+
+    def test_requesting_amount(self):
+        with freeze_time(datetime(2021, 4, 1)):
+            for user in self.users:
+                # 10 users post data in 2021/04/01
+                PostData.create_search(self, user)
+        for i in range(1, 31):  # loop i from 1 to 30
+            with freeze_time(datetime(2021, 4, i)):
+                # Only user[0] posts data from 2021/04/01 10 2021/04/30
+                PostData.create_search(self)
+                # Execute daily job
+                self.daily_job.execute()
+
+        PostData.login(self)
+        profile_url = reverse("user_profile_api")
+        response = self.client.get(profile_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["profile"]["paid_amount"], 0)
+        self.assertEqual(response.data["profile"]["requesting_amount"], 0)
+        self.assertEqual(
+            response.data["profile"]["unpaid_amount"],
+            int(1000 / 30 / 10) * 7  # share amount to 10 users fist 7 days
+            + int(1000 / 30 / 1) * 23,  # share amount to 1 user whole
+        )
+
+        # Execute daily job in 2021 May
+        for i in range(1, 32):  # loop i from 1 to 31
+            with freeze_time(datetime(2021, 5, i)):
+                self.daily_job.execute()
+
+        profile_url = reverse("user_profile_api")
+        response = self.client.get(profile_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["profile"]["paid_amount"], 0)
+        self.assertEqual(response.data["profile"]["requesting_amount"], 0)
+        self.assertEqual(
+            response.data["profile"]["unpaid_amount"],
+            int(1000 / 30 / 10) * 7  # share amount to 10 users fist 7 days
+            + int(1000 / 30 / 1) * 23  # share amount to 1 user whole
+            + int(1000 / 31 / 1) * 6,  # amount of next 6 days in 2021 May
+        )
+
+        # TODO: request payout
+        # need return 201
+        # then get profile
+        # assert amounts

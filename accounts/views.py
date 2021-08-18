@@ -25,7 +25,7 @@ from django.views.generic.detail import DetailView
 from django.views.generic.edit import UpdateView
 
 from .forms import CustomAuthenticationForm, CustomUserCreationForm
-from .models import UserProfile
+from .models import Payout, UserProfile
 
 LOGGER = logging.getLogger(__name__)
 
@@ -193,6 +193,11 @@ class UserProfileAPIView(APIView):
                     "address": profile.get_address(),
                     "status": profile.get_status(),
                     "last_time": profile.get_last_posting_time(),
+                    "paid_amount": profile.get_earned_amount(Payout.PAID),
+                    "requesting_amount": profile.get_earned_amount(
+                        Payout.REQUESTING
+                    ),
+                    "unpaid_amount": profile.get_earned_amount(Payout.UNPAID),
                 },
             }
 

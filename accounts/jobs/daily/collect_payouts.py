@@ -27,7 +27,7 @@ class Job(DailyJob):
         for user in users:
             Payout.objects.get_or_create(
                 user_profile=user,
-                date__gt=today,
+                date=today,
                 amount=amount,
             )
 
