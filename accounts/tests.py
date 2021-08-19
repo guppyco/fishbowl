@@ -514,6 +514,9 @@ class PayoutAmountTest(TestCase):
         self.assertEqual(
             response.data["profile"]["unpaid_amount"], int(1000 / 28 / 1)
         )
+        self.assertEqual(
+            response.data["profile"]["unpaid_amount_text"], "$0.35"
+        )
 
         # TODO: request payout
         # need return 401
@@ -541,6 +544,7 @@ class PayoutAmountTest(TestCase):
             int(1000 / 30 / 10) * 7  # share amount to 10 users fist 7 days
             + int(1000 / 30 / 1) * 23,  # share amount to 1 user whole
         )
+        self.assertEqual(response.data["profile"]["unpaid_amount_text"], "$7.8")
 
         # Execute daily job in 2021 May
         for i in range(1, 32):  # loop i from 1 to 31

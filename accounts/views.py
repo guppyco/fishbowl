@@ -26,6 +26,7 @@ from django.views.generic.edit import UpdateView
 
 from .forms import CustomAuthenticationForm, CustomUserCreationForm
 from .models import Payout, UserProfile
+from .utils import cent2dollar
 
 LOGGER = logging.getLogger(__name__)
 
@@ -153,6 +154,18 @@ class UserProfileView(LoginRequiredMixin, DetailView):
             if first_signup:
                 context["first_signup"] = True
 
+        paid_amount = self.object.get_earned_amount(Payout.PAID)
+        requesting_amount = self.object.get_earned_amount(Payout.REQUESTING)
+        unpaid_amount = self.object.get_earned_amount(Payout.UNPAID)
+        context["profile"] = {
+            "paid_amount": paid_amount,
+            "paid_amount_text": cent2dollar(paid_amount),
+            "requesting_amount": requesting_amount,
+            "requesting_amount_text": cent2dollar(requesting_amount),
+            "unpaid_amount": unpaid_amount,
+            "unpaid_amount_text": cent2dollar(unpaid_amount),
+        }
+
         return self.render_to_response(context)
 
     def get_context_data(self, **kwargs):
@@ -185,6 +198,9 @@ class UserProfileAPIView(APIView):
         try:
             user = request.user
             profile = UserProfile.objects.get(email=user)
+            paid_amount = profile.get_earned_amount(Payout.PAID)
+            requesting_amount = profile.get_earned_amount(Payout.REQUESTING)
+            unpaid_amount = profile.get_earned_amount(Payout.UNPAID)
             content = {
                 "user": str(request.user),
                 "auth": str(request.auth),
@@ -192,12 +208,14 @@ class UserProfileAPIView(APIView):
                     "full_name": profile.get_full_name(),
                     "address": profile.get_address(),
                     "status": profile.get_status(),
+                    "is_waitlisted": profile.is_waitlisted,
                     "last_time": profile.get_last_posting_time(),
-                    "paid_amount": profile.get_earned_amount(Payout.PAID),
-                    "requesting_amount": profile.get_earned_amount(
-                        Payout.REQUESTING
-                    ),
-                    "unpaid_amount": profile.get_earned_amount(Payout.UNPAID),
+                    "paid_amount": paid_amount,
+                    "paid_amount_text": cent2dollar(paid_amount),
+                    "requesting_amount": requesting_amount,
+                    "requesting_amount_text": cent2dollar(requesting_amount),
+                    "unpaid_amount": unpaid_amount,
+                    "unpaid_amount_text": cent2dollar(unpaid_amount),
                 },
             }
 
