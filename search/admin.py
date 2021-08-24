@@ -6,10 +6,11 @@ from .models import History, Search, SearchResult
 
 @admin.register(Search)
 class SearchAdmin(admin.ModelAdmin):
-    list_display = ("_search_terms", "search_type", "view_user", "created")
+    list_display = ("_search_terms", "search_type", "view_user", "modified")
     search_fields = ("search_terms",)
     list_filter = ("user_id",)
     readonly_fields = ["results_content"]
+    ordering = ("-modified",)
 
     def _search_terms(self, obj) -> str:  # pylint: disable=no-self-use
         if len(obj.search_terms) > 100:
@@ -36,7 +37,7 @@ class SearchAdmin(admin.ModelAdmin):
 
         return string
 
-    results_content.short_description = "Search results"  # type: ignore
+    results_content.short_description = "Clicked URLs"  # type: ignore
 
 
 @admin.register(History)

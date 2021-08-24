@@ -75,10 +75,9 @@ class APISearchTests(APITestCase):
         self.assertEqual(count, 1)
         search = Search.objects.first()
         self.assertEqual(search.user_id, 0)
-        self.assertEqual(search.results.count(), 2)
+        self.assertEqual(search.results.count(), 0)
         results = search.results.all()
-        self.assertEqual(results[0].url, "https://google.com/1")
-        self.assertEqual(results[1].url, "https://google.com/2")
+        self.assertEqual(results.count(), 0)
 
         self.client.post(
             url,
@@ -95,8 +94,8 @@ class APISearchTests(APITestCase):
         count = Search.objects.count()
         self.assertEqual(count, 1)
         search = Search.objects.first()
-        self.assertEqual(search.results.count(), 4)
-        self.assertEqual(Result.objects.count(), 4)
+        self.assertEqual(search.results.count(), 0)
+        self.assertEqual(Result.objects.count(), 0)
 
         self.client.post(
             url,
@@ -114,8 +113,8 @@ class APISearchTests(APITestCase):
         count = Search.objects.count()
         self.assertEqual(count, 2)
         search = Search.objects.get(search_terms="Test text 2")
-        self.assertEqual(search.results.count(), 4)
-        self.assertEqual(Result.objects.count(), 7)
+        self.assertEqual(search.results.count(), 0)
+        self.assertEqual(Result.objects.count(), 0)
 
         self.client.post(
             url,
@@ -128,7 +127,7 @@ class APISearchTests(APITestCase):
         self.assertEqual(count, 3)
         search = Search.objects.get(search_terms="Test text 3")
         self.assertEqual(search.results.count(), 0)
-        self.assertEqual(Result.objects.count(), 7)
+        self.assertEqual(Result.objects.count(), 0)
 
     def test_search_create_with_logged_in_user(self):
         url = reverse("search:api_search")
@@ -175,8 +174,8 @@ class APISearchTests(APITestCase):
         self.assertEqual(search.user_id, user.id)
         user.refresh_from_db()
         self.assertEqual(user.last_posting_time, search.modified)
-        self.assertEqual(search.results.count(), 3)
-        self.assertEqual(Result.objects.count(), 4)
+        self.assertEqual(search.results.count(), 0)
+        self.assertEqual(Result.objects.count(), 0)
 
 
 class APIHistoriesTests(APITestCase):
@@ -267,6 +266,7 @@ class APIHistoriesTests(APITestCase):
             "url": "https://example.com/1",
             "title": "Title",
             "last_origin": "https://google.com",
+            "search_term": "Test text",
         }
         response = self.client.post(url, data)
 

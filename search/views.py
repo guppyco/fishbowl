@@ -12,7 +12,7 @@ from django.shortcuts import redirect, render
 from accounts.models import UserProfile
 
 from .forms import SearchForm
-from .models import History, Result, Search
+from .models import History, Search
 from .serializers import HistorySerialzer, SimpleSearchSerializer
 from .utils import click_url
 
@@ -82,12 +82,6 @@ class SearchView(mixins.CreateModelMixin, generics.GenericAPIView):
                 )
                 serializer.is_valid(raise_exception=True)
             serializer.save()
-            result_ids = []
-            for result in results:
-                model, _ = Result.objects.get_or_create(url=result)
-                result_ids.append(model.pk)
-            search_model = Search.objects.get(pk=serializer.data["id"])
-            search_model.results.add(*result_ids)
 
             # Update `last_posting_time` of user profile
             UserProfile.objects.filter(pk=data["user_id"]).update(
