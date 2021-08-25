@@ -311,6 +311,8 @@ class APIHistoriesTests(APITestCase):
         search_result.refresh_from_db()
         self.assertEqual(search_result.count, 2)
 
+        data["search_term"] = ""
+        self.client.post(url, data)
         history = History.objects.last()
         user.refresh_from_db()
         self.assertEqual(user.last_posting_time, history.modified)
