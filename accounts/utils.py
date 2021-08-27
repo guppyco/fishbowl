@@ -54,7 +54,7 @@ def calculate_amount(number_of_users) -> int:
     return int(amount)
 
 
-def cent2dollar(cents: int, show_init: bool = True) -> str:
+def cents_to_dollars(cents: int, show_init: bool = True) -> str:
     """Convert currency from cents to dollars"""
     dollars = str(cents / 100)
 

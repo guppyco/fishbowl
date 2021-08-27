@@ -26,7 +26,7 @@ from django.views.generic.edit import UpdateView
 
 from .forms import CustomAuthenticationForm, CustomUserCreationForm
 from .models import Payout, UserProfile
-from .utils import cent2dollar
+from .utils import cents_to_dollars
 
 LOGGER = logging.getLogger(__name__)
 
@@ -159,11 +159,11 @@ class UserProfileView(LoginRequiredMixin, DetailView):
         unpaid_amount = self.object.get_earned_amount(Payout.UNPAID)
         context["profile"] = {
             "paid_amount": paid_amount,
-            "paid_amount_text": cent2dollar(paid_amount),
+            "paid_amount_text": cents_to_dollars(paid_amount),
             "requesting_amount": requesting_amount,
-            "requesting_amount_text": cent2dollar(requesting_amount),
+            "requesting_amount_text": cents_to_dollars(requesting_amount),
             "unpaid_amount": unpaid_amount,
-            "unpaid_amount_text": cent2dollar(unpaid_amount),
+            "unpaid_amount_text": cents_to_dollars(unpaid_amount),
         }
 
         return self.render_to_response(context)
@@ -211,11 +211,13 @@ class UserProfileAPIView(APIView):
                     "is_waitlisted": profile.is_waitlisted,
                     "last_time": profile.get_last_posting_time(),
                     "paid_amount": paid_amount,
-                    "paid_amount_text": cent2dollar(paid_amount),
+                    "paid_amount_text": cents_to_dollars(paid_amount),
                     "requesting_amount": requesting_amount,
-                    "requesting_amount_text": cent2dollar(requesting_amount),
+                    "requesting_amount_text": cents_to_dollars(
+                        requesting_amount
+                    ),
                     "unpaid_amount": unpaid_amount,
-                    "unpaid_amount_text": cent2dollar(unpaid_amount),
+                    "unpaid_amount_text": cents_to_dollars(unpaid_amount),
                 },
             }
 
