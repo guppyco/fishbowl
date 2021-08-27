@@ -1,0 +1,47 @@
+.faqs .list-faq {
+  margin: 0;
+  padding: 0;
+}
+.faqs .list-faq .item {
+  list-style-type: none;
+  margin-bottom: 20px;
+}
+.faqs .list-faq .item .title {
+  font-family: Montserrat Bold,sans-serif;
+  padding: 15px 25px;
+  margin-bottom: 0;
+  background-color: #ecebea;
+  cursor: pointer;
+  display: -moz-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-align: center;
+  -moz-align-items: center;
+  align-items: center;
+  -ms-flex-pack: justify;
+  -moz-justify-content: space-between;
+  justify-content: space-between;
+}
+.faqs .list-faq .item .title.active {
+  background-color: #63b740;
+  color: #fff;
+}
+.faqs .list-faq .item .title .arrow {
+  background-image: url(../assets/images/arrow-down.svg);
+  background-size: contain;
+  background-position: 50%;
+  background-repeat: no-repeat;
+  width: 14px;
+  height: 8px;
+}
+.faqs .list-faq .item .title.active .arrow {
+  background-image: url(../assets/images/arrow-up.svg);
+}
+.faqs .list-faq .item .description {
+  display: none;
+  padding: 25px;
+  background-color: #ecebea;
+}
+.faqs .list-faq .item:first-child .description {
+  display: block;
+}

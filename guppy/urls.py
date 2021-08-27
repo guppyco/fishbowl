@@ -20,4 +20,5 @@ urlpatterns = [  # pylint: disable=invalid-name
     path("admin/", admin.site.urls),
     path("", include("search.urls", namespace="search")),
     path("", include("accounts.urls")),
+    path("faqs/", include("faqs.urls", namespace="faqs")),
 ]
