@@ -12,7 +12,7 @@ from django.shortcuts import redirect, render
 from accounts.models import UserProfile
 
 from .forms import SearchForm
-from .models import History, Result, Search
+from .models import History, Search
 from .serializers import HistorySerialzer, SimpleSearchSerializer
 from .utils import click_url
 
@@ -82,12 +82,6 @@ class SearchView(mixins.CreateModelMixin, generics.GenericAPIView):
                 )
                 serializer.is_valid(raise_exception=True)
             serializer.save()
-            result_ids = []
-            for result in results:
-                model, _ = Result.objects.get_or_create(url=result)
-                result_ids.append(model.pk)
-            search_model = Search.objects.get(pk=serializer.data["id"])
-            search_model.results.add(*result_ids)
 
             # Update `last_posting_time` of user profile
             UserProfile.objects.filter(pk=data["user_id"]).update(
@@ -117,27 +111,28 @@ class HistoryCreateView(CreateAPIView):
         )
 
         if serializer.is_valid(raise_exception=True):
-            histories = History.objects.filter(
-                url=data["url"],
-                user_id=user_id,
-            )
-            if histories.count():
-                history = histories.first()
-                data["count"] = history.count + 1
-                serializer = self.serializer_class(
-                    history,
-                    data=data,
+            if "search_term" not in data or not data["search_term"]:
+                histories = History.objects.filter(
+                    url=data["url"],
+                    user_id=user_id,
                 )
-                serializer.is_valid(raise_exception=True)
-            serializer.save()
+                if histories.count():
+                    history = histories.first()
+                    data["count"] = history.count + 1
+                    serializer = self.serializer_class(
+                        history,
+                        data=data,
+                    )
+                    serializer.is_valid(raise_exception=True)
+                serializer.save()
 
-            # Track clicked URL
-            click_url(data)
-
-            # Update `last_posting_time` of user profile
-            UserProfile.objects.filter(pk=data["user_id"]).update(
-                last_posting_time=serializer.data["modified"]
-            )
+                # Update `last_posting_time` of user profile
+                UserProfile.objects.filter(pk=data["user_id"]).update(
+                    last_posting_time=serializer.data["modified"]
+                )
+            else:
+                # Track clicked URL
+                click_url(data)
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
