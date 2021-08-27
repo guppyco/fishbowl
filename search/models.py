@@ -6,6 +6,9 @@ from django.db import models
 class Result(models.Model):
     url = models.URLField(max_length=2048)
 
+    class Meta:
+        ordering = ["pk"]
+
     def __str__(self) -> str:
         return self.url
 

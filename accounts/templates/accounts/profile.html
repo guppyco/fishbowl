@@ -21,6 +21,40 @@
     <div class="col-12">Zipcode: {{ user.zip }}</div>
   </div>
   <div class="row">
+    <div class="col-12">Status: {% if user.get_status %}Active{% else %}Inactive{% endif %}</div>
+  </div>
+  <div class="row">
+    <div class="col-12">Last time posting data: {{ user.get_last_posting_time }}</div>
+  </div>
+  <div class="row">
+    <div class="col-12">Account type: {% if user.is_waitlisted %}Waitlist{% else %}Approved{% endif %}</div>
+  </div>
+  {% if not user.is_waitlisted %}
+    <div class="row">
+      <div class="col-12">Paid amount: {{ profile.paid_amount_text }}</div>
+    </div>
+    <div class="row">
+      <div class="col-12">Requesting amount: {{ profile.requesting_amount_text }}</div>
+    </div>
+    <div class="row">
+      <div class="col-12">Unpaid amount: {{ profile.unpaid_amount_text }}</div>
+    </div>
+    {% if profile.unpaid_amount >= 1000 %}
+      <div class="row">
+        <div class="col-12">
+          <button>Request a payout</button>
+        </div>
+      </div>
+    {% else %}
+      <div class="row">
+        <div class="col-12">
+          <button disabled>Request a payout</button>
+          <span> (Minimum Guppy payout is $10.)</span>
+        </div>
+      </div>
+    {% endif %}
+  {% endif %}
+  <div class="row">
     <div class="col-12">
       <a href="{% url 'logout' %}">Logout</a>
     </div>

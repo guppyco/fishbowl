@@ -158,6 +158,30 @@ class UserProfile(AbstractBaseUser, TimeStampedModel, PermissionsMixin):
 
         return time
 
+    def get_earned_amount(self, status: int = None) -> int:
+        """
+        Get earned amount by status
+        If status is not set, return total created amounts
+        """
+        if status == Payout.UNPAID:
+            query = self.payouts.filter(payment_status=Payout.UNPAID)
+        elif status == Payout.REQUESTING:
+            query = self.payout_requests.filter(
+                payment_status=PayoutRequest.REQUESTING
+            )
+        elif status == Payout.PAID:
+            query = self.payout_requests.filter(
+                payment_status=PayoutRequest.PAID
+            )
+        else:
+            query = self.payouts.all()
+
+        amount = query.aggregate(models.Sum("amount"))
+        if not amount["amount__sum"]:
+            return 0
+
+        return amount["amount__sum"]
+
 
 class Payout(TimeStampedModel):
     user_profile = models.ForeignKey(
@@ -182,3 +206,22 @@ class Payout(TimeStampedModel):
     )
     note = models.CharField(max_length=500, blank=True)
     date = models.DateField(default=timezone.now)
+
+
+class PayoutRequest(TimeStampedModel):
+    user_profile = models.ForeignKey(
+        UserProfile,
+        on_delete=models.CASCADE,
+        related_name="payout_requests",
+        blank=True,
+        null=True,
+    )
+    amount = models.IntegerField(blank=True, null=True)
+    # payment status
+    REQUESTING = 0
+    PAID = 1
+    PAYMENT_STATUSES = ((REQUESTING, "requesting"), (PAID, "paid"))
+    payment_status = models.IntegerField(
+        choices=PAYMENT_STATUSES, blank=False, default=REQUESTING
+    )
+    note = models.CharField(max_length=500, blank=True)

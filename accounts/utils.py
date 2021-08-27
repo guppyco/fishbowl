@@ -52,3 +52,13 @@ def calculate_amount(number_of_users) -> int:
     amount = fixed_amount / num_days / number_of_users
 
     return int(amount)
+
+
+def cents_to_dollars(cents: int, show_init: bool = True) -> str:
+    """Convert currency from cents to dollars"""
+    dollars = str(cents / 100)
+
+    if show_init:
+        dollars = "$" + dollars
+
+    return dollars
