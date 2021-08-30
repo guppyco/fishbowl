@@ -51,9 +51,13 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",
     "rest_framework_jwt",
     "rest_framework_jwt.blacklist",
+    "ckeditor",
+    "ckeditor_uploader",
+    "adminsortable2",
     # Guppy apps
     "accounts",
     "emails",
+    "faqs",
     "search",
 ]
 
@@ -150,6 +154,19 @@ CELERY_BROKER_URL = os.environ.get(
 CELERY_TASK_SOFT_TIME_LIMIT = 60
 CELERY_RESULT_BACKEND = "django-db"
 
+# CKEditor
+CKEDITOR_JQUERY_URL = (
+    "https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"
+)
+
+CKEDITOR_UPLOAD_PATH = "uploads/"
+
+CKEDITOR_CONFIGS = {
+    "default": {
+        "toolbar": None,
+    },
+}
+
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
 
@@ -176,7 +193,18 @@ STATICFILES_FINDERS = (
     "django.contrib.staticfiles.finders.AppDirectoriesFinder",
 )
 
-STATICFILES_DIRS = (BASE_DIR + "/frontend/node_modules/",)
+STATICFILES_DIRS = [
+    (
+        "node_modules/jquery",
+        os.path.join(BASE_DIR, "frontend", "node_modules", "jquery"),
+    ),
+    (
+        "node_modules/bootstrap",
+        os.path.join(BASE_DIR, "frontend", "node_modules", "bootstrap"),
+    ),
+    ("css", BASE_DIR + "/frontend/css/"),
+    ("assets/images", BASE_DIR + "/frontend/assets/images/"),
+]
 
 MESSAGE_TAGS = {
     messages.DEBUG: "alert-secondary",

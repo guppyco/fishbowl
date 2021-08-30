@@ -29,4 +29,4 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements/local.txt
       - name: Pylint
-        run: pylint accounts guppy search
+        run: pylint accounts emails faqs guppy search
