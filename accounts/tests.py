@@ -12,7 +12,7 @@ from accounts.jobs.daily.collect_payouts import Job
 from search.factories import HistoryFactory, SearchFactory
 
 from .factories import UserProfileFactory
-from .models import Payout, UserProfile
+from .models import Payout, PayoutRequest, UserProfile
 from .utils import setup_tests
 
 
@@ -518,17 +518,21 @@ class PayoutAmountTest(TestCase):
             response.data["profile"]["unpaid_amount_text"], "$0.35"
         )
 
-        # TODO: request payout
-        # need return 401
+        # Request payout
+        response = self.client.get(reverse("payouts_request_api"))
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(
+            response.data["message"], "Minimum Guppy payout is $10"
+        )
 
-    def test_requesting_amount(self):
+    def test_requesting_amount(self):  # pylint: disable=too-many-statements
         with freeze_time(datetime(2021, 4, 1)):
             for user in self.users:
                 # 10 users post data in 2021/04/01
                 PostData.create_search(self, user)
         for i in range(1, 31):  # loop i from 1 to 30
             with freeze_time(datetime(2021, 4, i)):
-                # Only user[0] posts data from 2021/04/01 10 2021/04/30
+                # Only users[0] posts data from 2021/04/01 10 2021/04/30
                 PostData.create_search(self)
                 # Execute daily job
                 self.daily_job.execute()
@@ -563,7 +567,52 @@ class PayoutAmountTest(TestCase):
             + int(1000 / 31 / 1) * 6,  # amount of next 6 days in 2021 May
         )
 
-        # TODO: request payout
-        # need return 201
-        # then get profile
-        # assert amounts
+        # Request payout
+        response = self.client.get(reverse("payouts_request_api"))
+        self.assertEqual(response.status_code, 401)
+
+        # Post more data from users[0]
+        with freeze_time(datetime(2021, 6, 1)):
+            PostData.create_search(self)
+            # Execute daily job
+            # self.daily_job.execute()
+        for i in range(1, 3):  # loop i from 1 to 2
+            with freeze_time(datetime(2021, 6, i)):
+                self.daily_job.execute()
+
+        PostData.login(self)
+        response = self.client.get(reverse("payouts_request_api"))
+        self.assertEqual(response.status_code, 201)
+        payout_request = PayoutRequest.objects.get(user_profile=self.user)
+        self.assertEqual(payout_request.amount, 1038)
+        requesting_payouts = self.user.payouts.filter(
+            payment_status=Payout.REQUESTING
+        )
+        self.assertEqual(requesting_payouts.count(), 38)
+
+        response = self.client.get(reverse("payouts_request_api"))
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(
+            response.data["message"], "You cannot request more than one payout"
+        )
+
+        # Check profile info
+        response = self.client.get(profile_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["profile"]["paid_amount"], 0)
+        self.assertEqual(response.data["profile"]["requesting_amount"], 1038)
+        self.assertEqual(response.data["profile"]["unpaid_amount"], 0)
+
+        payout_request.payment_status = PayoutRequest.PAID
+        payout_request.save()
+        response = self.client.get(profile_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["profile"]["paid_amount"], 1038)
+        self.assertEqual(response.data["profile"]["requesting_amount"], 0)
+        self.assertEqual(response.data["profile"]["unpaid_amount"], 0)
+        requesting_payouts = self.user.payouts.filter(
+            payment_status=Payout.REQUESTING
+        )
+        self.assertEqual(requesting_payouts.count(), 0)
+        paid_payouts = self.user.payouts.filter(payment_status=Payout.PAID)
+        self.assertEqual(paid_payouts.count(), 38)

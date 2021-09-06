@@ -1,4 +1,5 @@
 from datetime import timedelta
+from typing import Any, Dict, Union
 
 from django_extensions.db.models import TimeStampedModel
 
@@ -8,6 +9,7 @@ from django.contrib.auth.models import (
     PermissionsMixin,
 )
 from django.db import models
+from django.db.models.query import QuerySet  # pylint: disable=unused-import
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext as _
@@ -158,10 +160,35 @@ class UserProfile(AbstractBaseUser, TimeStampedModel, PermissionsMixin):
 
         return time
 
-    def get_earned_amount(self, status: int = None) -> int:
+    def get_earned_amount(
+        self,
+        status: int = None,
+        return_objects: bool = False,
+    ) -> Union[int, Dict[str, Any]]:
         """
         Get earned amount by status
         If status is not set, return total created amounts
+        """
+        query = self.get_earned_payouts(status)
+
+        amount_query = query.aggregate(models.Sum("amount"))
+        if not amount_query["amount__sum"]:
+            amount = 0
+        else:
+            amount = amount_query["amount__sum"]
+
+        if return_objects:
+            return {
+                "objects": query,
+                "amount": amount,
+            }
+
+        return amount
+
+    def get_earned_payouts(self, status: int = None) -> "QuerySet[Payout]":
+        """
+        Get earned payouts by status
+        If status is not set, return total created payouts
         """
         if status == Payout.UNPAID:
             query = self.payouts.filter(payment_status=Payout.UNPAID)
@@ -176,11 +203,7 @@ class UserProfile(AbstractBaseUser, TimeStampedModel, PermissionsMixin):
         else:
             query = self.payouts.all()
 
-        amount = query.aggregate(models.Sum("amount"))
-        if not amount["amount__sum"]:
-            return 0
-
-        return amount["amount__sum"]
+        return query
 
 
 class Payout(TimeStampedModel):
@@ -225,3 +248,15 @@ class PayoutRequest(TimeStampedModel):
         choices=PAYMENT_STATUSES, blank=False, default=REQUESTING
     )
     note = models.CharField(max_length=500, blank=True)
+
+    def save(self, *args, **kwargs):
+        # Change requesting payouts to paid when updating PayoutRequest
+        if self.payment_status == self.PAID:
+            Payout.objects.filter(
+                user_profile=self.user_profile,
+                payment_status=Payout.REQUESTING,
+            ).update(
+                payment_status=Payout.PAID,
+            )
+        # TODO: revert payouts when PayoutRequest status is requesting
+        super().save(*args, **kwargs)

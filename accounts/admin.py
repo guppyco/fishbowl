@@ -7,7 +7,7 @@ from django.utils.html import format_html
 
 from search.models import History, Search
 
-from .models import Payout, UserProfile
+from .models import Payout, PayoutRequest, UserProfile
 
 
 @admin.register(UserProfile)
@@ -63,3 +63,14 @@ class UserProfileAdmin(admin.ModelAdmin):
 @admin.register(Payout)
 class PayoutAdmin(admin.ModelAdmin):
     list_display = ("user_profile", "date", "amount", "payment_status", "note")
+
+
+@admin.register(PayoutRequest)
+class PayoutRequestAdmin(admin.ModelAdmin):
+    list_display = (
+        "user_profile",
+        "amount",
+        "payment_status",
+        "created",
+        "note",
+    )

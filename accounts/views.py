@@ -13,6 +13,7 @@ from rest_framework.decorators import (
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.viewsets import ViewSet
 
 from django.conf import settings
 from django.contrib import messages
@@ -225,3 +226,36 @@ class UserProfileAPIView(APIView):
         except Exception as exc:
             LOGGER.exception(exc)
             return Response(status=status.HTTP_404_NOT_FOUND)
+
+
+class PayoutAPIView(ViewSet):
+    permission_classes = [IsAuthenticated]
+
+    def request_payout(self, request):  # pylint: disable=no-self-use
+        user = request.user
+        profile = UserProfile.objects.get(email=user)
+
+        requesting_amount = profile.get_earned_amount(Payout.REQUESTING)
+        if requesting_amount:
+            return Response(
+                {"message": "You cannot request more than one payout"},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
+        unpaid_payouts = profile.get_earned_amount(
+            status=Payout.UNPAID,
+            return_objects=True,
+        )
+
+        if unpaid_payouts["amount"] < 1000:
+            return Response(
+                {"message": "Minimum Guppy payout is $10"},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
+        # Create payout request
+        user.payout_requests.create(amount=unpaid_payouts["amount"])
+        # Update requesting payouts
+        unpaid_payouts["objects"].update(payment_status=Payout.REQUESTING)
+
+        return Response({}, status=status.HTTP_201_CREATED)
