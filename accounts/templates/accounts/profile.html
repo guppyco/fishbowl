@@ -71,8 +71,8 @@
 
 {% block extra_js %}
 <script type="text/javascript">
-  $(document).ready(function() {
-    $('.request-payout').click(function() {
+  $(document).ready(() => {
+    $('.request-payout').click(() => {
       $.ajax({
         url: '{% url "payouts_request_api" %}',
         type: 'GET',
@@ -81,7 +81,6 @@
         $('.payout-message').text('Your request is sent')
         $('.payout-message').addClass('alert-info')
       }).fail(res => {
-        console.log(res, 'ppp')
         $('.payout-message').text(res.responseJSON.message)
         $('.payout-message').addClass('alert-danger')
       })
