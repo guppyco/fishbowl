@@ -575,7 +575,6 @@ class PayoutAmountTest(TestCase):
         with freeze_time(datetime(2021, 6, 1)):
             PostData.create_search(self)
             # Execute daily job
-            # self.daily_job.execute()
         for i in range(1, 3):  # loop i from 1 to 2
             with freeze_time(datetime(2021, 6, i)):
                 self.daily_job.execute()
@@ -588,6 +587,7 @@ class PayoutAmountTest(TestCase):
         requesting_payouts = self.user.payouts.filter(
             payment_status=Payout.REQUESTING
         )
+        self.assertTrue(payout_request.note)
         self.assertEqual(requesting_payouts.count(), 38)
 
         response = self.client.get(reverse("payouts_request_api"))
@@ -616,3 +616,17 @@ class PayoutAmountTest(TestCase):
         self.assertEqual(requesting_payouts.count(), 0)
         paid_payouts = self.user.payouts.filter(payment_status=Payout.PAID)
         self.assertEqual(paid_payouts.count(), 38)
+
+        payout_request.payment_status = PayoutRequest.REQUESTING
+        payout_request.save()
+        response = self.client.get(profile_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["profile"]["paid_amount"], 0)
+        self.assertEqual(response.data["profile"]["requesting_amount"], 1038)
+        self.assertEqual(response.data["profile"]["unpaid_amount"], 0)
+        paid_payouts = self.user.payouts.filter(payment_status=Payout.PAID)
+        self.assertEqual(paid_payouts.count(), 0)
+        requesting_payouts = self.user.payouts.filter(
+            payment_status=Payout.REQUESTING
+        )
+        self.assertEqual(requesting_payouts.count(), 38)

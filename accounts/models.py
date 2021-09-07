@@ -1,3 +1,4 @@
+import json
 from datetime import timedelta
 from typing import Any, Dict, Union
 
@@ -252,11 +253,16 @@ class PayoutRequest(TimeStampedModel):
     def save(self, *args, **kwargs):
         # Change requesting payouts to paid when updating PayoutRequest
         if self.payment_status == self.PAID:
-            Payout.objects.filter(
-                user_profile=self.user_profile,
-                payment_status=Payout.REQUESTING,
-            ).update(
-                payment_status=Payout.PAID,
-            )
-        # TODO: revert payouts when PayoutRequest status is requesting
+            payment_status = Payout.PAID
+        else:
+            payment_status = Payout.REQUESTING
+
+        payout_ids = json.loads(self.note)
+        Payout.objects.filter(
+            user_profile=self.user_profile,
+            pk__in=payout_ids,
+        ).update(
+            payment_status=payment_status,
+        )
+
         super().save(*args, **kwargs)
