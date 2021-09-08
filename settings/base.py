@@ -155,10 +155,6 @@ CELERY_TASK_SOFT_TIME_LIMIT = 60
 CELERY_RESULT_BACKEND = "django-db"
 
 # CKEditor
-CKEDITOR_JQUERY_URL = (
-    "https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"
-)
-
 CKEDITOR_UPLOAD_PATH = "uploads/"
 
 CKEDITOR_CONFIGS = {

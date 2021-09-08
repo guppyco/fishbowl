@@ -40,7 +40,7 @@
   // TODO: try to apply this solution: https://docs.djangoproject.com/en/2.1/ref/templates/builtins/#for
   $(document).ready(function() {
     $('.list-faq .item:first .title').addClass('active')
-    $( '.list-faq .item .title' ).click(function() {
+    $('.list-faq .item .title').click(function() {
       $(this).siblings('.description').stop().slideToggle()
       $(this).toggleClass('active')
     });
