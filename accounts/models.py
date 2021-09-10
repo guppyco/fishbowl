@@ -1,3 +1,7 @@
+import json
+from datetime import timedelta
+from typing import Any, Dict, Union
+
 from django_extensions.db.models import TimeStampedModel
 
 from django.contrib.auth.models import (
@@ -6,8 +10,12 @@ from django.contrib.auth.models import (
     PermissionsMixin,
 )
 from django.db import models
+from django.db.models.query import QuerySet  # pylint: disable=unused-import
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.translation import gettext as _
+
+from search.models import History, Search
 
 
 class CustomUserManager(BaseUserManager):
@@ -55,6 +63,21 @@ class UserProfile(AbstractBaseUser, TimeStampedModel, PermissionsMixin):
             "Unselect this instead of deleting accounts."
         ),
     )
+    first_name = models.CharField(max_length=50)
+    last_name = models.CharField(max_length=50, blank=True)
+    # Address
+    address1 = models.CharField(max_length=200)
+    address2 = models.CharField(max_length=200, blank=True)
+    city = models.CharField(max_length=50)
+    state = models.CharField(max_length=50)
+    country = models.CharField(max_length=50, default="US")
+    zip = models.CharField(max_length=50)
+    last_posting_time = models.DateTimeField(null=True, blank=True)
+    is_waitlisted = models.BooleanField(
+        _("Waitlist"),
+        default=True,
+        help_text=_("Designates whether this user is in waitlist"),
+    )
 
     USERNAME_FIELD = "email"
 
@@ -64,14 +87,182 @@ class UserProfile(AbstractBaseUser, TimeStampedModel, PermissionsMixin):
         """
         Returns the first_name plus the last_name, with a space in between.
         """
-        full_name = self.email
+        full_name = self.first_name
+        if self.last_name:
+            full_name += f" {self.last_name}"
+
         return full_name.strip()
 
     def get_short_name(self) -> str:
         "Returns the short name for the user."
-        short_name = self.email
+        if self.first_name == "":
+            short_name = self.email
+        else:
+            try:
+                short_name = self.first_name.split(" ", 1)[0]
+            except AttributeError:
+                short_name = self.email
+
         return short_name.strip()
+
+    def get_address(self) -> str:
+        "Returns address as string"
+        address = ""
+        fields = ["address1", "address2", "city", "state", "country"]
+        for field in fields:
+            if getattr(self, field):
+                address += f"{getattr(self, field)}, "
+
+        return address[:-2]
 
     @staticmethod
     def get_absolute_url() -> str:
         return reverse("user_profile")
+
+    def get_status(self):
+        activities_in_past_seven_days = False
+        past_seven_date = timezone.now() - timedelta(days=6)
+        # Reset to begin of the day
+        past_seven_date = past_seven_date.replace(
+            hour=0, minute=0, second=0, microsecond=0
+        )
+
+        if self.last_posting_time and self.last_posting_time >= past_seven_date:
+            activities_in_past_seven_days = True
+        else:
+            is_history = History.objects.filter(
+                user_id=self.pk, created__gte=past_seven_date
+            )
+            is_search = Search.objects.filter(
+                user_id=self.pk, created__gte=past_seven_date
+            )
+
+            if is_history.exists() or is_search.exists():
+                activities_in_past_seven_days = True
+
+        return activities_in_past_seven_days
+
+    def get_last_posting_time(self):
+        time = "no data"
+
+        if self.last_posting_time:
+            time = self.last_posting_time
+
+        else:
+            last_history = History.objects.filter(user_id=self.pk).last()
+            if last_history:
+                time = last_history.created
+
+            last_search = Search.objects.filter(user_id=self.pk).last()
+            if last_search and (
+                time == "no data" or time < last_search.created
+            ):
+                time = last_search.created
+
+        return time
+
+    def get_earned_amount(
+        self,
+        status: int = None,
+        return_objects: bool = False,
+    ) -> Union[int, Dict[str, Any]]:
+        """
+        Get earned amount by status
+        If status is not set, return total created amounts
+        """
+        query = self.get_earned_payouts(status)
+
+        amount_query = query.aggregate(models.Sum("amount"))
+        if not amount_query["amount__sum"]:
+            amount = 0
+        else:
+            amount = amount_query["amount__sum"]
+
+        if return_objects:
+            return {
+                "objects": query,
+                "amount": amount,
+            }
+
+        return amount
+
+    def get_earned_payouts(self, status: int = None) -> "QuerySet[Payout]":
+        """
+        Get earned payouts by status
+        If status is not set, return total created payouts
+        """
+        if status == Payout.UNPAID:
+            query = self.payouts.filter(payment_status=Payout.UNPAID)
+        elif status == Payout.REQUESTING:
+            query = self.payout_requests.filter(
+                payment_status=PayoutRequest.REQUESTING
+            )
+        elif status == Payout.PAID:
+            query = self.payout_requests.filter(
+                payment_status=PayoutRequest.PAID
+            )
+        else:
+            query = self.payouts.all()
+
+        return query
+
+
+class Payout(TimeStampedModel):
+    user_profile = models.ForeignKey(
+        UserProfile,
+        on_delete=models.CASCADE,
+        related_name="payouts",
+        blank=True,
+        null=True,
+    )
+    amount = models.IntegerField(blank=True, null=True)
+    # payment status
+    UNPAID = 0
+    REQUESTING = 1
+    PAID = 2
+    PAYMENT_STATUSES = (
+        (UNPAID, "unpaid"),
+        (REQUESTING, "requesting"),
+        (PAID, "paid"),
+    )
+    payment_status = models.IntegerField(
+        choices=PAYMENT_STATUSES, blank=False, default=UNPAID
+    )
+    note = models.CharField(max_length=500, blank=True)
+    date = models.DateField(default=timezone.now)
+
+
+class PayoutRequest(TimeStampedModel):
+    user_profile = models.ForeignKey(
+        UserProfile,
+        on_delete=models.CASCADE,
+        related_name="payout_requests",
+        blank=True,
+        null=True,
+    )
+    amount = models.IntegerField(blank=True, null=True)
+    # payment status
+    REQUESTING = 0
+    PAID = 1
+    PAYMENT_STATUSES = ((REQUESTING, "requesting"), (PAID, "paid"))
+    payment_status = models.IntegerField(
+        choices=PAYMENT_STATUSES, blank=False, default=REQUESTING
+    )
+    note = models.CharField(max_length=500, blank=True)
+
+    def save(self, *args, **kwargs):
+        # Change requesting payouts to paid when updating PayoutRequest
+        if self.payment_status == self.PAID:
+            payment_status = Payout.PAID
+        else:
+            payment_status = Payout.REQUESTING
+
+        payout_ids = json.loads(self.note)
+        Payout.objects.filter(
+            user_profile=self.user_profile,
+            pk__in=payout_ids,
+        ).update(
+            payment_status=payment_status,
+        )
+
+        super().save(*args, **kwargs)

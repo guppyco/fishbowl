@@ -42,7 +42,16 @@ class CustomUserCreationForm(UserCreationForm):
 
     class Meta:
         model = UserProfile
-        fields = ["email"]
+        fields = [
+            "email",
+            "password1",
+            "first_name",
+            "last_name",
+            "address1",
+            "address2",
+            "city",
+            "state",
+        ]
 
     def clean_email(self):
         email = self.cleaned_data["email"].lower()

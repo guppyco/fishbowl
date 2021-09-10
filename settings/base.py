@@ -42,15 +42,22 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     # Third party packages
+    "anymail",
     "corsheaders",
     "crispy_forms",
+    "django_celery_results",
     "django_extensions",
     "rest_framework",
     "rest_framework.authtoken",
     "rest_framework_jwt",
     "rest_framework_jwt.blacklist",
+    "ckeditor",
+    "ckeditor_uploader",
+    "adminsortable2",
     # Guppy apps
     "accounts",
+    "emails",
+    "faqs",
     "search",
 ]
 
@@ -88,9 +95,7 @@ WSGI_APPLICATION = "guppy.wsgi.application"
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework.authentication.TokenAuthentication",
-        "rest_framework.authentication.SessionAuthentication",
-        "rest_framework_jwt.authentication.JSONWebTokenAuthentication",
+        "accounts.authentications.CsrfExemptSessionAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": (
         "rest_framework.permissions.IsAuthenticated",
@@ -142,6 +147,21 @@ AUTH_PASSWORD_VALIDATORS = [
 
 AUTH_USER_MODEL = "accounts.UserProfile"
 
+# Celery settings.
+CELERY_BROKER_URL = os.environ.get(
+    "BROKER_URL", "amqp://guest:guest@127.0.0.1//"
+)
+CELERY_TASK_SOFT_TIME_LIMIT = 60
+CELERY_RESULT_BACKEND = "django-db"
+
+# CKEditor
+CKEDITOR_UPLOAD_PATH = "uploads/"
+
+CKEDITOR_CONFIGS = {
+    "default": {
+        "toolbar": None,
+    },
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
@@ -169,11 +189,22 @@ STATICFILES_FINDERS = (
     "django.contrib.staticfiles.finders.AppDirectoriesFinder",
 )
 
-STATICFILES_DIRS = (
-    BASE_DIR + "/frontend/node_modules/",
-    BASE_DIR + "/frontend/css/",
-    BASE_DIR + "/frontend/js/",
-)
+STATICFILES_DIRS = [
+    (
+        "node_modules/jquery",
+        os.path.join(BASE_DIR, "frontend", "node_modules", "jquery"),
+    ),
+    (
+        "node_modules/bootstrap",
+        os.path.join(BASE_DIR, "frontend", "node_modules", "bootstrap"),
+    ),
+    (
+        "node_modules/sentry",
+        os.path.join(BASE_DIR, "frontend", "node_modules", "@sentry"),
+    ),
+    ("css", BASE_DIR + "/frontend/css/"),
+    ("assets/images", BASE_DIR + "/frontend/assets/images/"),
+]
 
 MESSAGE_TAGS = {
     messages.DEBUG: "alert-secondary",

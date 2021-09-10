@@ -1,22 +1,34 @@
 # accounts/views.py
 
+import json
 import logging
 import urllib
 
-from rest_framework.permissions import IsAuthenticated
+from rest_framework import status
+from rest_framework.authentication import BasicAuthentication
+from rest_framework.decorators import (
+    api_view,
+    authentication_classes,
+    permission_classes,
+)
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.viewsets import ViewSet
 
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.middleware.csrf import get_token
 from django.shortcuts import redirect, render
+from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import UpdateView
 
 from .forms import CustomAuthenticationForm, CustomUserCreationForm
-from .models import UserProfile
+from .models import Payout, UserProfile
+from .utils import cents_to_dollars
 
 LOGGER = logging.getLogger(__name__)
 
@@ -81,6 +93,34 @@ def login_user(request):
     return render(request, template, context)
 
 
+@api_view(("POST",))
+@csrf_exempt
+@permission_classes([AllowAny])
+@authentication_classes([BasicAuthentication])
+def api_login_user(request):
+    login_form = CustomAuthenticationForm(data=request.POST)
+    if login_form.is_valid():
+        username = request.POST["username"]
+        password = request.POST["password"]
+        member = authenticate(username=username, password=password)
+        if member is not None and member.is_active:
+            login(request, member)
+            csrf_token = get_token(request)
+            return Response(
+                {
+                    "error": False,
+                    "csrf_token": csrf_token,
+                }
+            )
+
+    return Response(
+        {
+            "error": True,
+            "message": "This account is not valid",
+        }
+    )
+
+
 def logout_user(request):
     logout(request)
     return redirect("login")
@@ -116,6 +156,18 @@ class UserProfileView(LoginRequiredMixin, DetailView):
             if first_signup:
                 context["first_signup"] = True
 
+        paid_amount = self.object.get_earned_amount(Payout.PAID)
+        requesting_amount = self.object.get_earned_amount(Payout.REQUESTING)
+        unpaid_amount = self.object.get_earned_amount(Payout.UNPAID)
+        context["profile"] = {
+            "paid_amount": paid_amount,
+            "paid_amount_text": cents_to_dollars(paid_amount),
+            "requesting_amount": requesting_amount,
+            "requesting_amount_text": cents_to_dollars(requesting_amount),
+            "unpaid_amount": unpaid_amount,
+            "unpaid_amount_text": cents_to_dollars(unpaid_amount),
+        }
+
         return self.render_to_response(context)
 
     def get_context_data(self, **kwargs):
@@ -125,7 +177,16 @@ class UserProfileView(LoginRequiredMixin, DetailView):
 
 class UserProfileUpdate(LoginRequiredMixin, UpdateView):
     model = UserProfile
-    fields = ["name", "email", "password"]
+    fields = [
+        "email",
+        "first_name",
+        "last_name",
+        "address1",
+        "address2",
+        "city",
+        "state",
+        "zip",
+    ]
     success_url = ""
 
     def get_object(self, queryset=None):
@@ -136,9 +197,70 @@ class UserProfileAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        content = {
-            "user": str(request.user),
-            "auth": str(request.auth),
-        }
+        try:
+            user = request.user
+            profile = UserProfile.objects.get(email=user)
+            paid_amount = profile.get_earned_amount(Payout.PAID)
+            requesting_amount = profile.get_earned_amount(Payout.REQUESTING)
+            unpaid_amount = profile.get_earned_amount(Payout.UNPAID)
+            content = {
+                "user": str(request.user),
+                "auth": str(request.auth),
+                "profile": {
+                    "full_name": profile.get_full_name(),
+                    "address": profile.get_address(),
+                    "status": profile.get_status(),
+                    "is_waitlisted": profile.is_waitlisted,
+                    "last_time": profile.get_last_posting_time(),
+                    "paid_amount": paid_amount,
+                    "paid_amount_text": cents_to_dollars(paid_amount),
+                    "requesting_amount": requesting_amount,
+                    "requesting_amount_text": cents_to_dollars(
+                        requesting_amount
+                    ),
+                    "unpaid_amount": unpaid_amount,
+                    "unpaid_amount_text": cents_to_dollars(unpaid_amount),
+                },
+            }
 
-        return Response(content)
+            return Response(content)
+        except Exception as exc:
+            LOGGER.exception(exc)
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+
+class PayoutAPIView(ViewSet):
+    permission_classes = [IsAuthenticated]
+
+    def request_payout(self, request):  # pylint: disable=no-self-use
+        user = request.user
+        profile = UserProfile.objects.get(email=user)
+
+        requesting_amount = profile.get_earned_amount(Payout.REQUESTING)
+        if requesting_amount:
+            return Response(
+                {"message": "You cannot request more than one payout"},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
+        unpaid_payouts = profile.get_earned_amount(
+            status=Payout.UNPAID,
+            return_objects=True,
+        )
+
+        if unpaid_payouts["amount"] < 1000:
+            return Response(
+                {"message": "Minimum Guppy payout is $10"},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
+        # Create payout request
+        payout_ids = unpaid_payouts["objects"].values_list("pk", flat=True)
+        user.payout_requests.create(
+            amount=unpaid_payouts["amount"],
+            note=json.dumps(list(payout_ids)),
+        )
+        # Update requesting payouts
+        unpaid_payouts["objects"].update(payment_status=Payout.REQUESTING)
+
+        return Response({}, status=status.HTTP_201_CREATED)
