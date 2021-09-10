@@ -22,3 +22,12 @@ TK
 
 ## Data sources
 We pulled [Alexa's top million websites](http://s3.amazonaws.com/alexa-static/top-1m.csv.zip), found via [Quora](https://www.quora.com/What-are-the-top-100-000-most-visited-websites) to determine the top sites on the internet to start searching first.
+
+## Deployments:
+
+1. Install Ansible
+2. Pull `ian` branch from https://github.com/YPCrumble/deployments
+3. For new server only (first deployment):
+- Run secure scripts: `. bin/guppy_<environment>/secure-guppy-<environment>.sh`
+- Run setup scripts: `. bin/guppy_<environment>/setup-guppy-<environment>.sh`
+4. Run deployment scripts: `. bin/guppy_<environment>/deploy-guppy-<environment>.sh`
