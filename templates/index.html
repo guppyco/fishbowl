@@ -7,6 +7,19 @@
     <script type="text/javascript" src="{% static 'node_modules/bootstrap/dist/js/bootstrap.js' %}"></script>
     <link rel="stylesheet" type="text/css" href="{% static 'node_modules/bootstrap/dist/css/bootstrap.css' %}" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}" crossorigin="anonymous" />
+    <script type="text/javascript" src="{% static 'node_modules/sentry/browser/build/bundle.js' %}"></script>
+    {% if sentry_dsn %}
+    <script type="text/javascript">
+      Sentry.init({ dsn: '{{sentry_dsn}}' });
+      {% if user.is_authenticated %}
+        var member_email = '{{user.email}}';
+        var member_name = '{{user.first_name}} {{user.last_name}}';
+        Sentry.configureScope((scope) => {
+          scope.setUser({'email': member_email, 'name': member_name});
+        })
+      {% endif %}
+    </script>
+    {% endif %}
   </head>
   <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">

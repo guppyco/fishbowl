@@ -198,6 +198,10 @@ STATICFILES_DIRS = [
         "node_modules/bootstrap",
         os.path.join(BASE_DIR, "frontend", "node_modules", "bootstrap"),
     ),
+    (
+        "node_modules/sentry",
+        os.path.join(BASE_DIR, "frontend", "node_modules", "@sentry"),
+    ),
     ("css", BASE_DIR + "/frontend/css/"),
     ("assets/images", BASE_DIR + "/frontend/assets/images/"),
 ]
