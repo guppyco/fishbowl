@@ -42,17 +42,20 @@
     {% if profile.unpaid_amount >= 1000 %}
       <div class="row">
         <div class="col-12">
-          <button>Request a payout</button>
+          <button class="request-payout">Request a payout</button>
         </div>
       </div>
     {% else %}
       <div class="row">
         <div class="col-12">
           <button disabled>Request a payout</button>
-          <span> (Minimum Guppy payout is $10.)</span>
+          <span> (Minimum Guppy payout is $10)</span>
         </div>
       </div>
     {% endif %}
+    <div class="row">
+      <div class="col-12"><span class="payout-message"></span></div>
+    </div>
   {% endif %}
   <div class="row">
     <div class="col-12">
@@ -65,3 +68,24 @@
 <!-- Google analytics client-side tracking script for user signup. -->
 
 {% endblock user_profile %}
+
+{% block extra_js %}
+<script type="text/javascript">
+  $(document).ready(() => {
+    $('.request-payout').click(() => {
+      $.ajax({
+        url: '{% url "payouts_request_api" %}',
+        type: 'GET',
+        dataType: 'json',
+      }).done(() => {
+        $('.payout-message').text('Your request is sent')
+        $('.payout-message').addClass('alert-info')
+      }).fail(res => {
+        $('.payout-message').text(res.responseJSON.message)
+        $('.payout-message').addClass('alert-danger')
+      })
+      $('.request-payout').prop('disabled', true)
+    })
+  })
+</script>
+{% endblock %}

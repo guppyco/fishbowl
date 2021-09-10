@@ -23,5 +23,10 @@ urlpatterns = [
         views.UserProfileAPIView.as_view(),
         name="user_profile_api",
     ),
+    path(
+        "api/payouts/request/",
+        views.PayoutAPIView.as_view({"get": "request_payout"}),
+        name="payouts_request_api",
+    ),
     path("", include("django.contrib.auth.urls")),
 ]
