@@ -16,9 +16,21 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 
+from guppy import views
+
 urlpatterns = [  # pylint: disable=invalid-name
     path("admin/", admin.site.urls),
     path("", include("search.urls", namespace="search")),
     path("", include("accounts.urls")),
     path("faqs/", include("faqs.urls", namespace="faqs")),
+    path(
+        "terms-of-service/",
+        views.TermsOfServiceView.as_view(),
+        name="terms-of-service",
+    ),
+    path(
+        "privacy-policy/",
+        views.PrivacyPolicyView.as_view(),
+        name="privacy-policy",
+    ),
 ]

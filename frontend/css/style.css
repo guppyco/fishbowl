@@ -45,3 +45,10 @@
 .faqs .list-faq .item:first-child .description {
   display: block;
 }
+
+footer {
+  background-color: #efefef;
+}
+footer hr.clearfix {
+  margin: 5px 10px;
+}
