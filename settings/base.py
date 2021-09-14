@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     "accounts",
     "emails",
     "faqs",
+    "guppy",
     "search",
 ]
 
