@@ -7,30 +7,38 @@
 {% endblock %}
 
 {% block login %}
-<div>
-  <h4 class="row">Login here.</h4>
-  {% if messages %}
-    {% for message in messages %}
-    <div class="row alert {{ message.tags }} alert-dismissible fade show" role="alert">
-      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-        <span aria-hidden="true">&times;</span>
-      </button>
-      {{ message }}
+<div class="row row-spacer">
+  <div class="col-md-8 offset-md-2">
+    <h4>Login here.</h4>
+    {% if messages %}
+      {% for message in messages %}
+      <div class="row alert {{ message.tags }} alert-dismissible fade show" role="alert">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        {{ message }}
+      </div>
+      {% endfor %}
+    {% endif %}
+    <div class="row">
+      <div class="col-md-6">
+        <form action="" method="POST">{% csrf_token %}
+          {% crispy login_form %}
+          <button type="submit" class="btn btn-primary" value="{{ join_input|default:'Login' }}">{{ join_input|default:'Login'}}</button>
+        </form>
+      </div>
     </div>
-    {% endfor %}
-  {% endif %}
-  <div class="row">
-    <form action="" method="POST">{% csrf_token %}
-      {% crispy login_form %}
-      <button type="submit" class="btn btn-primary" value="{{ join_input|default:'Login' }}">{{ join_input|default:'Login'}}</button>
-    </form>
-  </div>
-  <div class="signup-link-box row">
-    <a id="signup-link" href="{% url 'signup' %}{{ next }}">Create a new account</a>
-  </div>
-  <div class="row row-spacer clearfix"></div>
-  <div class="signup-link-box row">
-    <a id="password-reset" href="{% url 'password_reset' %}">Reset your password</a>
+    <div class="signup-link-box row">
+      <div class="col">
+        <a id="signup-link" href="{% url 'signup' %}{{ next }}">Create a new account</a>
+      </div>
+    </div>
+    <div class="row row-spacer clearfix"></div>
+    <div class="signup-link-box row">
+      <div class="col">
+        <a id="password-reset" href="{% url 'password_reset' %}">Reset your password</a>
+      </div>
+    </div>
   </div>
 </div>
 {% endblock %}

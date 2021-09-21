@@ -1,16 +1,18 @@
 {% extends "index.html" %}
 
 {% block content %}
-<div class="col-md-8 offset-md-2 text-center">
-  {% if not user.is_authenticated %}
-  <a href="{% url 'signup' %}"><h1>Get paid to surf the web!</h1></a>
-  {% endif %}
-  <h4>Earn cash for searching the web.</h4>
-  <form method="POST">
-    {% csrf_token %}
-    {{ form }}
-    <input type="submit" name="search-guppy" value="Search Guppy" />
-    <input type="submit" name="search-google" value="Search Google" />
-  </form>
+<div class="row row-spacer">
+  <div class="col-md-8 offset-md-2 text-center">
+    {% if not user.is_authenticated %}
+    <a href="{% url 'signup' %}"><h1>Get paid to surf the web!</h1></a>
+    {% endif %}
+    <h4>Earn cash for searching the web.</h4>
+    <form method="POST">
+      {% csrf_token %}
+      {{ form }}
+      <input type="submit" name="search-guppy" value="Search Guppy" />
+      <input type="submit" name="search-google" value="Search Google" />
+    </form>
+  </div>
 </div>
 {% endblock %}
