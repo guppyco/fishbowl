@@ -31,3 +31,17 @@ We pulled [Alexa's top million websites](http://s3.amazonaws.com/alexa-static/to
 - Run secure scripts: `. bin/guppy_<environment>/secure-guppy-<environment>.sh`
 - Run setup scripts: `. bin/guppy_<environment>/setup-guppy-<environment>.sh`
 4. Run deployment scripts: `. bin/guppy_<environment>/deploy-guppy-<environment>.sh`
+
+## Setting up the Python development server
+
+1. Create your virtualenvironment
+1. Setup PostgreSQL, create user, database
+1. Create `.env` in the root of the project directory base on `.env.example` and provide the configs (DATABASE_NAME, DATABASE_USER, DATABASE_PASSWORD, ...)
+1. Install wheel with `pip install wheel`
+1. Install dependencies into your virtualenvironment with `pip install -r requirements/local.txt`
+1. Install frontend dependences via yarn (or npm): `cd ./frontend && yarn` or `cd ./frontend && npm install`
+1. Run migrations with `python manage.py migrate`
+1. Create super user with `python manage.py createsuperuser`
+1. Start the server with `python manage.py runserver`
+
+*Tip:* If you get the error when installing dependencies, try to install the pakages: libssl-dev, libffi-dev, libpq-dev, gcc, libmemcached-dev
