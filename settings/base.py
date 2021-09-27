@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "crispy_forms",
     "django_celery_results",
     "django_extensions",
+    "honeypot",
     "rest_framework",
     "rest_framework.authtoken",
     "rest_framework_jwt",
@@ -58,6 +59,7 @@ INSTALLED_APPS = [
     "accounts",
     "emails",
     "faqs",
+    "guppy",
     "search",
 ]
 
@@ -205,6 +207,8 @@ STATICFILES_DIRS = [
     ("css", BASE_DIR + "/frontend/css/"),
     ("assets/images", BASE_DIR + "/frontend/assets/images/"),
 ]
+
+HONEYPOT_FIELD_NAME = "telephone"
 
 MESSAGE_TAGS = {
     messages.DEBUG: "alert-secondary",

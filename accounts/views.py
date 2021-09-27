@@ -4,6 +4,7 @@ import json
 import logging
 import urllib
 
+from honeypot.decorators import check_honeypot
 from rest_framework import status
 from rest_framework.authentication import BasicAuthentication
 from rest_framework.decorators import (
@@ -33,6 +34,7 @@ from .utils import cents_to_dollars
 LOGGER = logging.getLogger(__name__)
 
 
+@check_honeypot
 def signup_user(request):
     if request.user.is_authenticated:
         return redirect_user(request)

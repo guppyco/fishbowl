@@ -29,6 +29,7 @@ def create_signup_post_data(input_updates=None):
         "signup-city": "Arcata",
         "signup-state": "California",
         "signup-zip": "91201",
+        "telephone": "",  # honeypot
     }
     if input_updates:
         for key in input_updates:

@@ -1,5 +1,6 @@
 {% extends "index.html" %}
 {% load crispy_forms_tags %}
+{% load honeypot %}
 
 {% block header_tags %}
 <title>Sign up for Guppy, the site for getting notifications.</title>
@@ -23,6 +24,7 @@
   <div class="row">
     <form class="signup-login-form" action="" method="POST">{% csrf_token %}
       {% crispy signup_form %}
+      {% render_honeypot_field %}
       <button type="submit" class="btn btn-primary" name="signup" value="Get $$$$$">Sign up</button>
     </form>
   </div>
