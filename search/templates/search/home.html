@@ -1,7 +1,7 @@
 {% extends "index.html" %}
 
 {% block content %}
-<div class="row row-spacer">
+<div class="row">
   <div class="col-md-8 offset-md-2 text-center">
     {% if not user.is_authenticated %}
     <a href="{% url 'signup' %}"><h1>Get paid to surf the web!</h1></a>
