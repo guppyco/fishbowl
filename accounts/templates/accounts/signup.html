@@ -8,11 +8,11 @@
 {% endblock %}
 
 {% block signup %}
-<div>
-  <h4 class="row">Sign up for Guppy</h4>
+<div class="row">
+  <h4 class="col-md-8 offset-md-2">Sign up for Guppy</h4>
   {% if messages %}
     {% for message in messages %}
-    <div class="row alert {{ message.tags }} alert-dismissible fade show" role="alert">
+    <div class="col-md-8 offset-md-2 alert {{ message.tags }} alert-dismissible fade show" role="alert">
       <button type="button" class="close" data-dismiss="alert" aria-label="Close">
         <span aria-hidden="true">&times;</span>
       </button>
@@ -20,15 +20,15 @@
     </div>
     {% endfor %}
   {% endif %}
-  <div class="row clearfix"></div>
-  <div class="row">
+  <div class="col-md-8 offset-md-2 clearfix"></div>
+  <div class="col-md-8 offset-md-2">
     <form class="signup-login-form" action="" method="POST">{% csrf_token %}
       {% crispy signup_form %}
       {% render_honeypot_field %}
       <button type="submit" class="btn btn-primary" name="signup" value="Get $$$$$">Sign up</button>
     </form>
   </div>
-  <div class="row">
+  <div class="col-md-8 offset-md-2">
     <p>Already a member? <a href="{% url 'login' %}{{ next }}">Click here to login</a></p>
   </div>
 </div>

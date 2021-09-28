@@ -9,56 +9,56 @@
 <div class="user-profile">
   {% if user.is_authenticated %}
   <div class="row">
-    <div class="col-12"><h4>Email: {{ user.email }}</h4></div>
+    <div class="col-md-8 offset-md-2"><h4>Email: {{ user.email }}</h4></div>
   </div>
   <div class="row">
-    <div class="col-12">Name: {{ user.get_full_name }}</div>
+    <div class="col-md-8 offset-md-2">Name: {{ user.get_full_name }}</div>
   </div>
   <div class="row">
-    <div class="col-12">Address: {{ user.get_address }}</div>
+    <div class="col-md-8 offset-md-2">Address: {{ user.get_address }}</div>
   </div>
   <div class="row">
-    <div class="col-12">Zipcode: {{ user.zip }}</div>
+    <div class="col-md-8 offset-md-2">Zipcode: {{ user.zip }}</div>
   </div>
   <div class="row">
-    <div class="col-12">Status: {% if user.get_status %}Active{% else %}Inactive{% endif %}</div>
+    <div class="col-md-8 offset-md-2">Status: {% if user.get_status %}Active{% else %}Inactive{% endif %}</div>
   </div>
   <div class="row">
-    <div class="col-12">Last time posting data: {{ user.get_last_posting_time }}</div>
+    <div class="col-md-8 offset-md-2">Last time posting data: {{ user.get_last_posting_time }}</div>
   </div>
   <div class="row">
-    <div class="col-12">Account type: {% if user.is_waitlisted %}Waitlist{% else %}Approved{% endif %}</div>
+    <div class="col-md-8 offset-md-2">Account type: {% if user.is_waitlisted %}Waitlist{% else %}Approved{% endif %}</div>
   </div>
   {% if not user.is_waitlisted %}
     <div class="row">
-      <div class="col-12">Paid amount: {{ profile.paid_amount_text }}</div>
+      <div class="col-md-8 offset-md-2">Paid amount: {{ profile.paid_amount_text }}</div>
     </div>
     <div class="row">
-      <div class="col-12">Requesting amount: {{ profile.requesting_amount_text }}</div>
+      <div class="col-md-8 offset-md-2">Requesting amount: {{ profile.requesting_amount_text }}</div>
     </div>
     <div class="row">
-      <div class="col-12">Unpaid amount: {{ profile.unpaid_amount_text }}</div>
+      <div class="col-md-8 offset-md-2">Unpaid amount: {{ profile.unpaid_amount_text }}</div>
     </div>
     {% if profile.unpaid_amount >= 1000 %}
       <div class="row">
-        <div class="col-12">
+        <div class="col-md-8 offset-md-2">
           <button class="request-payout">Request a payout</button>
         </div>
       </div>
     {% else %}
       <div class="row">
-        <div class="col-12">
+        <div class="col-md-8 offset-md-2">
           <button disabled>Request a payout</button>
           <span> (Minimum Guppy payout is $10)</span>
         </div>
       </div>
     {% endif %}
     <div class="row">
-      <div class="col-12"><span class="payout-message"></span></div>
+      <div class="col-md-8 offset-md-2"><span class="payout-message"></span></div>
     </div>
   {% endif %}
   <div class="row">
-    <div class="col-12">
+    <div class="col-md-8 offset-md-2">
       <a href="{% url 'logout' %}">Logout</a>
     </div>
   </div>
