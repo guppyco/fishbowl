@@ -7,6 +7,19 @@
 {% block user_profile %}
 
 <div class="user-profile">
+  <div class="row">
+  {% if messages %}
+    {% for message in messages %}
+    <div class="col-md-8 offset-md-2 alert {{ message.tags }} alert-dismissible fade show" role="alert">
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+      {{ message }}
+    </div>
+    {% endfor %}
+  {% endif %}
+  </div>
+  <div class="col-md-8 offset-md-2 clearfix"></div>
   {% if user.is_authenticated %}
   <div class="row">
     <div class="col-md-8 offset-md-2"><h4>Email: {{ user.email }}</h4></div>
@@ -57,8 +70,11 @@
       <div class="col-md-8 offset-md-2"><span class="payout-message"></span></div>
     </div>
   {% endif %}
-  <div class="row">
+  <div class="row mt-3">
     <div class="col-md-8 offset-md-2">
+      <a class="btn btn-primary" href="{% url 'user_profile_edit' %}">Update</a>
+    </div>
+    <div class="col-md-8 offset-md-2 mt-3">
       <a href="{% url 'logout' %}">Logout</a>
     </div>
   </div>

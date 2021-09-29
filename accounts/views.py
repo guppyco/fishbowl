@@ -20,14 +20,18 @@ from rest_framework.viewsets import ViewSet
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.middleware.csrf import get_token
 from django.shortcuts import redirect, render
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.detail import DetailView
-from django.views.generic.edit import UpdateView
 
-from .forms import CustomAuthenticationForm, CustomUserCreationForm
+from .forms import (
+    CustomAuthenticationForm,
+    CustomUserChangeForm,
+    CustomUserCreationForm,
+)
 from .models import Payout, UserProfile
 from .utils import cents_to_dollars
 
@@ -123,6 +127,27 @@ def api_login_user(request):
     )
 
 
+@login_required
+def profile_edit(request):
+    if request.method == "POST":
+        profile_form = CustomUserChangeForm(
+            request.POST, request.FILES, instance=request.user
+        )
+
+        if profile_form.is_valid():
+            profile_form.save()
+            messages.success(request, "Your profile is updated successfully")
+            return redirect("user_profile")
+    else:
+        profile_form = CustomUserChangeForm(instance=request.user)
+
+    return render(
+        request,
+        "accounts/userprofile_form.html",
+        {"profile_form": profile_form},
+    )
+
+
 def logout_user(request):
     logout(request)
     return redirect("login")
@@ -175,24 +200,6 @@ class UserProfileView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         return context
-
-
-class UserProfileUpdate(LoginRequiredMixin, UpdateView):
-    model = UserProfile
-    fields = [
-        "email",
-        "first_name",
-        "last_name",
-        "address1",
-        "address2",
-        "city",
-        "state",
-        "zip",
-    ]
-    success_url = ""
-
-    def get_object(self, queryset=None):
-        return self.request.user
 
 
 class UserProfileAPIView(APIView):

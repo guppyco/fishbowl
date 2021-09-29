@@ -172,6 +172,18 @@ class ProfileViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
 
 
+class ProfileUpdateTests(TestCase):
+    def setUp(self):
+        self.member = setup_tests(self.client)
+        self.factory = RequestFactory()
+
+    def test_profile_page(self):
+        url = reverse("user_profile_edit")
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "accounts/userprofile_form.html")
+
+
 class UserProfileModelTests(TestCase):
     def setUp(self):
         self.user_profile = UserProfileFactory(
