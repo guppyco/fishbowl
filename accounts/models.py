@@ -80,6 +80,7 @@ class UserProfile(AbstractBaseUser, TimeStampedModel, PermissionsMixin):
     )
 
     USERNAME_FIELD = "email"
+    NUMBER_OF_ALLOWED_USERS = 20
 
     objects = CustomUserManager()
 
