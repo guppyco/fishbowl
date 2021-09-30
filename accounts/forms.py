@@ -51,6 +51,7 @@ class CustomUserCreationForm(UserCreationForm):
             "address2",
             "city",
             "state",
+            "zip",
         ]
 
     def clean_email(self):
@@ -88,8 +89,32 @@ class CustomUserChangeForm(UserChangeForm):
 
     def __init__(self, *args, **kargs):
         super().__init__(*args, **kargs)
-        del self.fields["username"]
+        del self.fields["password"]
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout()
+        for field_name, field in list(self.fields.items()):
+            self.helper.layout.append(
+                Div(
+                    Field(
+                        field_name,
+                        placeholder=field.label,
+                        css_class="form-control",
+                    ),
+                    css_class="form-group mb-3",
+                )
+            )
+        self.helper.form_tag = False
+        self.helper.help_text = False
 
     class Meta:
         model = UserProfile
-        fields = ["email", "password"]
+        fields = [
+            "email",
+            "first_name",
+            "last_name",
+            "address1",
+            "address2",
+            "city",
+            "state",
+            "zip",
+        ]
