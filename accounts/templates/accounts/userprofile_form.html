@@ -7,9 +7,9 @@
 <meta name="description" content="Sign up to for Guppy"/>
 {% endblock %}
 
-{% block signup %}
+{% block content %}
 <div class="row">
-  <h4 class="col-md-8 offset-md-2">Sign up for Guppy</h4>
+  <h4 class="col-md-8 offset-md-2">Update your profile</h4>
   {% if messages %}
     {% for message in messages %}
     <div class="col-md-8 offset-md-2 alert {{ message.tags }} alert-dismissible fade show" role="alert">
@@ -23,14 +23,12 @@
   <div class="col-md-8 offset-md-2 clearfix"></div>
   <div class="col-md-8 offset-md-2">
     <form class="signup-login-form" action="" method="POST">{% csrf_token %}
-      {% crispy signup_form %}
+      {% crispy profile_form %}
       {% render_honeypot_field %}
-      <button type="submit" class="btn btn-primary" name="signup" value="Get $$$$$">Sign up</button>
+      <button type="submit" class="btn btn-primary" name="signup">Update</button>
+      <a  href="{% url 'user_profile' %}" class="btn btn-secondary">Cancel</a>
     </form>
-  </div>
-  <div class="col-md-8 offset-md-2">
-    <p>Already a member? <a href="{% url 'login' %}{{ next }}">Click here to login</a></p>
   </div>
 </div>
 
-{% endblock signup %}
+{% endblock content %}

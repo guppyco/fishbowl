@@ -7,28 +7,26 @@
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid partners-container">
-  <div class="row faq-header">
-    <h1 class="d-flex align-items-center">FAQS</h1>
-  </div>
-  <div class="row faq-description text-center navbar-change">
-    <p class="col-md-8 offset-md-2">Got questions? We've got answers.</p>
-    <p class="col-md-8 offset-md-2">If you have some other questions, feel free to send us an email to <a href="mailto:ian@guppy.co" target="_top"><strong>ian@guppy.co</strong></a></p>
-  </div>
-  <div class="row faqs">
-    <div class="col-md-8 offset-md-2">
-      <div class="content-faq">
-          <ul class="list-faq">
-          {% for faq in object_list %}
-            <li class="item">
-              <div class="content">
-                <h5 class="title">{{ faq.question }} <span class="arrow"></span></h5>
-                <div class="description">{{ faq.answer | safe }}</div>
-              </div>
-            </li>
-          {% endfor %}
-          </ul>
-      </div>
+<div class="row faq-header">
+  <h1 class="col-md-8 offset-md-2">FAQS</h1>
+</div>
+<div class="row faq-description text-center navbar-change">
+  <p class="col-md-8 offset-md-2">Got questions? We've got answers.</p>
+  <p class="col-md-8 offset-md-2">If you have some other questions, feel free to send us an email to <a href="mailto:ian@guppy.co" target="_top"><strong>ian@guppy.co</strong></a></p>
+</div>
+<div class="row faqs">
+  <div class="col-md-8 offset-md-2">
+    <div class="content-faq">
+        <ul class="list-faq">
+        {% for faq in object_list %}
+          <li class="item">
+            <div class="content">
+              <h5 class="title">{{ faq.question }} <span class="arrow"></span></h5>
+              <div class="description">{{ faq.answer | safe }}</div>
+            </div>
+          </li>
+        {% endfor %}
+        </ul>
     </div>
   </div>
 </div>
