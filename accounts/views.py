@@ -48,6 +48,14 @@ def signup_user(request):
         signup_form = CustomUserCreationForm(data=request.POST, prefix="signup")
         if signup_form.is_valid():
             account = signup_form.save()
+
+            number_of_allowed_users = UserProfile.objects.filter(
+                is_waitlisted=False
+            ).count()
+            if number_of_allowed_users < UserProfile.NUMBER_OF_ALLOWED_USERS:
+                account.is_waitlisted = False
+                account.save()
+
             email = account.email
             password = signup_form.cleaned_data["password1"]
             user = authenticate(username=email, password=password)
