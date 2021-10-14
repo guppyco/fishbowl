@@ -88,6 +88,22 @@ class SignupPageTests(TestCase):
         self.assertTemplateUsed(response, "accounts/signup.html")
         self.assertTemplateNotUsed(response, "club.html")
 
+    def test_signup_page_waitlisted(self):
+        UserProfileFactory.create_batch(2, is_waitlisted=True)
+        UserProfileFactory.create_batch(19, is_waitlisted=False)
+        # 22nd user is 20th active user
+        data = create_signup_post_data({"signup-email": "email_1@example.com"})
+        url = reverse("signup")
+        self.client.post(url, data)
+        profile = UserProfile.objects.get(email="email_1@example.com")
+        self.assertFalse(profile.is_waitlisted)
+        # 23rd user is not an active user
+        self.client.get(reverse("logout"))
+        data = create_signup_post_data({"signup-email": "email_2@example.com"})
+        self.client.post(url, data)
+        profile_2 = UserProfile.objects.get(email="email_2@example.com")
+        self.assertTrue(profile_2.is_waitlisted)
+
     def test_logout_redirect(self):
         """
         Make sure the logged out user redirects to the home page.
