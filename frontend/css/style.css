@@ -1,3 +1,27 @@
+a {
+  color: #0084FF;
+}
+.btn-primary,
+.btn-primary:not(:disabled):not(.disabled):active,
+.btn-primary:not(:disabled):not(.disabled).active,
+.show > .btn-primary.dropdown-toggle  {
+  background-color: #0084FF;
+  color: #fff;
+}
+.btn.btn-outline-secondary:hover {
+  color: #fff;
+  background-color: #FF5E00;
+  border-color: #FF5E00;
+}
+.navbar .navbar-brand img {
+  height: 40px;
+}
+.navbar-light .navbar-text a.btn-primary {
+  color: #fff;
+}
+.navbar-light .navbar-text a.btn-outline-secondary:hover {
+  color: #fff;
+}
 .faqs .list-faq {
   margin: 0;
   padding: 0;
@@ -23,7 +47,7 @@
   justify-content: space-between;
 }
 .faqs .list-faq .item .title.active {
-  background-color: #63b740;
+  background-color: #FF5E00;
   color: #fff;
 }
 .faqs .list-faq .item .title .arrow {
