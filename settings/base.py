@@ -240,7 +240,7 @@ STATICFILES_DIRS = [
     ("assets/images", BASE_DIR + "/frontend/assets/images/"),
 ]
 
-HONEYPOT_FIELD_NAME = "telephone"
+HONEYPOT_FIELD_NAME = "guppy_honeypot"
 
 MESSAGE_TAGS = {
     messages.DEBUG: "alert-secondary",
