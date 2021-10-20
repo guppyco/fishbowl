@@ -52,3 +52,15 @@ footer {
 footer hr.clearfix {
   margin: 5px 10px;
 }
+
+/* Home page */
+.home-page section {
+  margin-bottom: 35px;
+}
+.home-page .instructions ul li {
+  border: none;
+  padding: 0.25rem 1.25rem;
+}
+.home-page .large-font {
+  font-size: 23px;
+}
