@@ -154,9 +154,16 @@ LOGGING = {
             "class": "logging.StreamHandler",
             "formatter": "simple",
         },
+        "file": {
+            "filters": ["require_debug_false"],
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": "bookclubz.log",
+            "formatter": "simple",
+            "maxBytes": 1024 * 1024 * 50,
+        },
     },
     "root": {
-        "handlers": ["console"],
+        "handlers": ["file"],
         "level": "INFO",
     },
 }
