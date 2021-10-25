@@ -154,9 +154,16 @@ LOGGING = {
             "class": "logging.StreamHandler",
             "formatter": "simple",
         },
+        "file": {
+            "filters": ["require_debug_false"],
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": "bookclubz.log",
+            "formatter": "simple",
+            "maxBytes": 1024 * 1024 * 50,
+        },
     },
     "root": {
-        "handlers": ["console"],
+        "handlers": ["file"],
         "level": "INFO",
     },
 }
@@ -241,7 +248,7 @@ STATICFILES_DIRS = [
     ("assets/images", BASE_DIR + "/frontend/assets/images/"),
 ]
 
-HONEYPOT_FIELD_NAME = "telephone"
+HONEYPOT_FIELD_NAME = "guppy"
 
 MESSAGE_TAGS = {
     messages.DEBUG: "alert-secondary",
@@ -253,3 +260,4 @@ MESSAGE_TAGS = {
 
 BASE_URL = "http://localhost:8000"
 LOGIN_URL = "/login/"
+INTERNAL_IPS = ("127.0.0.1", "localhost", "162.243.168.41")

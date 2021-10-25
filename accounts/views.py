@@ -202,6 +202,12 @@ class UserProfileView(LoginRequiredMixin, DetailView):
             "unpaid_amount": unpaid_amount,
             "unpaid_amount_text": cents_to_dollars(unpaid_amount),
         }
+        # Pass first_signup variable to tell Google Analytics
+        # if this signup should be counted as a conversion.
+        if hasattr(self.request, "session"):
+            first_signup = self.request.session.pop("first_signup", False)
+            if first_signup:
+                context["first_signup"] = True
 
         return self.render_to_response(context)
 
