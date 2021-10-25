@@ -1,4 +1,9 @@
 {% extends "index.html" %}
+{% load static %}
+
+{% block header_tags %}
+<link rel="stylesheet" href="{% static 'css/swimming-fish.css' %}">
+{% endblock %}
 
 {% block content %}
 <div class="row home-page">
@@ -50,4 +55,28 @@
     -->
   </div>
 </div>
+{% endblock %}
+
+{% block swimming_fish %}
+<div class="fish-block">
+  <div id="fish-tank">
+    <div id="bubble-field"></div>
+    <div class="plant">
+      <div class="leaf-1"></div>
+    </div>
+    <div class="fish">
+      <div class="top-fin"></div>
+      <div class="fish-body"></div>
+      <div class="tail-fin"></div>
+      <div class="side-fin"></div>
+      <div class="scale scale-1"></div>
+      <div class="scale scale-2"></div>
+      <div class="scale scale-3"></div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script type="text/javascript" src="{% static 'js/swimming-fish.js' %}"></script>
 {% endblock %}
