@@ -244,6 +244,7 @@ STATICFILES_DIRS = [
         os.path.join(BASE_DIR, "frontend", "node_modules", "@sentry"),
     ),
     ("css", BASE_DIR + "/frontend/css/"),
+    ("js", BASE_DIR + "/frontend/js/"),
     ("assets/images", BASE_DIR + "/frontend/assets/images/"),
 ]
 
