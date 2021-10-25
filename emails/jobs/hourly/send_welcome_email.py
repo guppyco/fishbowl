@@ -3,6 +3,8 @@ import logging
 
 from django_extensions.management.jobs import HourlyJob
 
+from django.utils import timezone
+
 from emails.mailer import send_welcome_signup_email
 from emails.utils import AccountEmail
 
@@ -14,6 +16,11 @@ class Job(HourlyJob):
         # Get user signed up 6 hours before
         emails = []
         users = AccountEmail.get_signed_up_users()
+        LOGGER.info(
+            "Email hourly job, time: %s - users count: %s",
+            timezone.now(),
+            users.count(),
+        )
         if users.count() > 0:
             for user in users:
                 emails.append(user.email)
