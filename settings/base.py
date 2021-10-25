@@ -259,3 +259,4 @@ MESSAGE_TAGS = {
 
 BASE_URL = "http://localhost:8000"
 LOGIN_URL = "/login/"
+INTERNAL_IPS = ("127.0.0.1", "localhost", "162.243.168.41")

@@ -104,4 +104,12 @@
     })
   })
 </script>
+{% if first_signup %}
+<script>
+  gtag('event', 'signup', {
+    'event_category': 'Users',
+    'event_label': 'Home page signup'
+  });
+</script>
+{% endif %}
 {% endblock %}
