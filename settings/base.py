@@ -157,7 +157,7 @@ LOGGING = {
         "file": {
             "filters": ["require_debug_false"],
             "class": "logging.handlers.RotatingFileHandler",
-            "filename": "bookclubz.log",
+            "filename": "guppy.log",
             "formatter": "simple",
             "maxBytes": 1024 * 1024 * 50,
         },
