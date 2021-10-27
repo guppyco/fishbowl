@@ -11,8 +11,8 @@ from django.utils import timezone
 from accounts.jobs.daily.collect_payouts import Job
 from search.factories import HistoryFactory, SearchFactory
 
-from .factories import UserProfileFactory
-from .models import Payout, PayoutRequest, UserProfile
+from .factories import ReferralLinkFactory, UserProfileFactory
+from .models import Payout, PayoutRequest, UserProfile, UserProfileReferralHit
 from .utils import setup_tests
 
 
@@ -176,6 +176,25 @@ class SignupPageTests(TestCase):
         TODO: Test that error message gets passed if the login is incorrect.
         """
 
+    def test_signup_with_referral(self):
+        user = setup_tests(self.client)
+        referral = ReferralLinkFactory(identifier=user.pk, user_id=user.pk)
+        self.client.get(reverse("logout"))
+
+        data = create_signup_post_data(
+            {
+                "signup-email": "Anna+Test@guppy.co",
+            }
+        )
+        self.client.get(referral)
+        url = reverse("signup")
+        self.client.post(url, data, follow=True)
+
+        user_profile_referral_hits = UserProfileReferralHit.objects.all()
+        self.assertEqual(user_profile_referral_hits.count(), 1)
+        self.assertEqual(user_profile_referral_hits[0].user_profile.pk, user.pk)
+        self.assertTrue(user_profile_referral_hits[0].referral_hit.confirmed)
+
 
 class ProfileViewTests(TestCase):
     def setUp(self):
@@ -317,6 +336,7 @@ class UserProfileTest(APITestCase):
         self.assertEqual(profile["address"], "31 TP, Arcata, California, US")
         self.assertEqual(profile["status"], False)
         self.assertEqual(profile["last_time"], "no data")
+        self.assertTrue(profile["reflink"])
 
         search = SearchFactory(user_id=self.user.pk)
         response = self.client.get(profile_url)

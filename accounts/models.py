@@ -3,6 +3,7 @@ from datetime import timedelta
 from typing import Any, Dict, Union
 
 from django_extensions.db.models import TimeStampedModel
+from django_reflinks.models import ReferralHit
 
 from django.contrib.auth.models import (
     AbstractBaseUser,
@@ -267,3 +268,8 @@ class PayoutRequest(TimeStampedModel):
         )
 
         super().save(*args, **kwargs)
+
+
+class UserProfileReferralHit(models.Model):
+    user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    referral_hit = models.OneToOneField(ReferralHit, on_delete=models.CASCADE)

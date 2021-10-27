@@ -7,7 +7,7 @@ from django.utils.html import format_html
 
 from search.models import History, Search
 
-from .models import Payout, PayoutRequest, UserProfile
+from .models import Payout, PayoutRequest, UserProfile, UserProfileReferralHit
 
 
 @admin.register(UserProfile)
@@ -74,3 +74,12 @@ class PayoutRequestAdmin(admin.ModelAdmin):
         "created",
         "note",
     )
+
+
+@admin.register(UserProfileReferralHit)
+class UserProfileReferralHitAdmin(admin.ModelAdmin):
+    list_display = (
+        "user_profile",
+        "referral_hit",
+    )
+    search_fields = ("user_profile__name",)
