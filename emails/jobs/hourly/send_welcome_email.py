@@ -3,8 +3,6 @@ import logging
 
 from django_extensions.management.jobs import HourlyJob
 
-from django.utils import timezone
-
 from emails.mailer import send_welcome_signup_email
 from emails.utils import AccountEmail
 
