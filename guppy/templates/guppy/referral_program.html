@@ -1,0 +1,73 @@
+{% extends "index.html" %}
+
+{% block title %}Privacy Policy{% endblock %}
+
+{% block header_tags %}
+  <title>Refer your friends to earn more on Guppy!</title>
+  <meta name="description" content="Refer your friends to earn more on Guppy!"/>
+{% endblock %}
+
+{% block content %}
+<div class="row legal-header text-center">
+  <div class="col-md-8 offset-md-2">
+    <h2 class="align-items-center">Refer your friends to earn more on Guppy!</h2>
+  </div>
+</div>
+<section class="row navbar-change">
+  <div class="col-md-8 offset-md-2">
+    <p>Each time you refer a friend on Guppy you'll earn additional cash.
+    Simply send them this referral link, and once they've signed up and remained active<sup>(1)</sup> for 90 days, we'll add cash to your payout balance.
+    </p>
+
+    {% if user.is_authenticated %}
+    <ul>
+      <li>Your referral link:
+        <div class="input-group mb-3">
+          <input type="text" class="form-control referral-link" value="{{ reflink }}">
+          <div class="input-group-append">
+            <button class="btn btn-outline-secondary copy-referral-link" type="button">Copy</button>
+          </div>
+        </div>
+      </li>
+
+      <li>Current payout per referral: <b>$0</b></li>
+
+      <li>Your total earnings for referrals: <b>$0</b></li>
+
+      <li>Number of your referrals who have signed up: <b>0</b></li>
+
+      <li>Number of your referrals who have been active for 90 days: <b>0</b></li>
+    </ul>
+    {% endif %}
+
+    <p><i><sup>(1) </sup>"Active" means that the user has been an active contributor to Guppy for 90 days.
+    Watch out! If you try to scam the system with fake referrals you will be permanently banned from receiving Guppy payouts, and you will lose any payouts currently allocated to your account.
+    No exceptions or excuses.
+    </i></p>
+  </div>
+</section>
+{% endblock content %}
+
+{% block extra_js %}
+<script type="text/javascript">
+  const copyTextBtn = document.querySelector('.copy-referral-link');
+
+  copyTextBtn.addEventListener('click', function(event) {
+    const copyText = document.querySelector('.referral-link');
+    copyText.focus();
+    copyText.select();
+
+    try {
+      const successful = document.execCommand('copy');
+      if (successful) {
+        copyTextBtn.textContent = 'Copied'
+      }
+      setTimeout(function () {
+        copyTextBtn.textContent = 'Copy'
+      }, 3000);
+    } catch (err) {
+      alert('Oops, unable to copy');
+    }
+  });
+</script>
+{% endblock %}

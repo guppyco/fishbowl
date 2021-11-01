@@ -3,6 +3,7 @@
 import json
 import logging
 import urllib
+import uuid
 
 from django_reflinks.models import ReferralHit, ReferralLink
 from honeypot.decorators import check_honeypot
@@ -196,13 +197,12 @@ class UserProfileView(LoginRequiredMixin, DetailView):
             "unpaid_amount_text": cents_to_dollars(unpaid_amount),
         }
         # Pass referral link
-        try:
-            referral_link, _ = ReferralLink.objects.get_or_create(
-                user_id=request.user.pk,
-                identifier=request.user.pk,
-            )
-        except ReferralLink.DoesNotExist:
-            referral_link = None
+        referral_link, created = ReferralLink.objects.get_or_create(
+            user_id=request.user.pk,
+        )
+        if created:
+            referral_link.identifier = uuid.uuid4().hex[:6]
+            referral_link.save()
         context["reflink"] = request.build_absolute_uri(referral_link)
 
         # Pass first_signup variable to tell Google Analytics
@@ -267,16 +267,15 @@ class UserProfileAPIView(APIView):
                     "reflink": False,
                 },
             }
-            try:
-                referral_link, _ = ReferralLink.objects.get_or_create(
-                    user_id=request.user.pk,
-                    identifier=request.user.pk,
-                )
-                content["profile"]["reflink"] = request.build_absolute_uri(
-                    referral_link
-                )
-            except ReferralLink.DoesNotExist:
-                pass
+            referral_link, created = ReferralLink.objects.get_or_create(
+                user_id=request.user.pk,
+            )
+            if created:
+                referral_link.identifier = uuid.uuid4().hex[:6]
+                referral_link.save()
+            content["profile"]["reflink"] = request.build_absolute_uri(
+                referral_link
+            )
 
             return Response(content)
         except Exception as exc:

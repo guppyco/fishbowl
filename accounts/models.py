@@ -271,5 +271,9 @@ class PayoutRequest(TimeStampedModel):
 
 
 class UserProfileReferralHit(models.Model):
+    """
+    List all users and they referred accounts (who signed up to the site)
+    """
+
     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     referral_hit = models.OneToOneField(ReferralHit, on_delete=models.CASCADE)

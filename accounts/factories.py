@@ -1,3 +1,5 @@
+import uuid
+
 import factory
 from django_reflinks.models import ReferralLink
 
@@ -18,4 +20,4 @@ class ReferralLinkFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = ReferralLink
 
-    identifier = "test"
+    identifier = uuid.uuid4().hex[:6]

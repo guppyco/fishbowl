@@ -178,7 +178,7 @@ class SignupPageTests(TestCase):
 
     def test_signup_with_referral(self):
         user = setup_tests(self.client)
-        referral = ReferralLinkFactory(identifier=user.pk, user_id=user.pk)
+        referral = ReferralLinkFactory(user_id=user.pk)
         self.client.get(reverse("logout"))
 
         data = create_signup_post_data(
