@@ -1,7 +1,11 @@
 import calendar
+import uuid
 from datetime import datetime, timedelta
 
+from django_reflinks.models import ReferralLink
+
 from django.contrib.auth import authenticate
+from django.db import IntegrityError, transaction
 from django.db.models import QuerySet
 from django.utils import timezone
 
@@ -62,3 +66,24 @@ def cents_to_dollars(cents: int, show_init: bool = True) -> str:
         dollars = "$" + dollars
 
     return dollars
+
+
+def get_refferal_link(user_id) -> QuerySet[ReferralLink]:
+    referral_link, created = ReferralLink.objects.get_or_create(user_id=user_id)
+    if created or not referral_link.identifier:
+        duplicate = True
+        while duplicate:
+            try:
+                if not referral_link.identifier:
+                    referral_link.identifier = create_code()
+                with transaction.atomic():
+                    referral_link.save()
+                    duplicate = False
+            except IntegrityError:
+                referral_link.identifier = create_code()
+
+    return referral_link
+
+
+def create_code():
+    return uuid.uuid4().hex[0:6]

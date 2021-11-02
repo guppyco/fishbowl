@@ -3,7 +3,7 @@ import uuid
 import factory
 from django_reflinks.models import ReferralLink
 
-from .models import UserProfile
+from .models import UserProfile, UserProfileReferralHit
 
 
 class UserProfileFactory(factory.django.DjangoModelFactory):
@@ -21,3 +21,8 @@ class ReferralLinkFactory(factory.django.DjangoModelFactory):
         model = ReferralLink
 
     identifier = uuid.uuid4().hex[:6]
+
+
+class UserProfileReferralHitFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = UserProfileReferralHit

@@ -3,9 +3,8 @@
 import json
 import logging
 import urllib
-import uuid
 
-from django_reflinks.models import ReferralHit, ReferralLink
+from django_reflinks.models import ReferralHit
 from honeypot.decorators import check_honeypot
 from rest_framework import status
 from rest_framework.authentication import BasicAuthentication
@@ -35,7 +34,7 @@ from .forms import (
     CustomUserCreationForm,
 )
 from .models import Payout, UserProfile, UserProfileReferralHit
-from .utils import cents_to_dollars
+from .utils import cents_to_dollars, get_refferal_link
 
 LOGGER = logging.getLogger(__name__)
 
@@ -207,12 +206,7 @@ class UserProfileView(LoginRequiredMixin, DetailView):
             "unpaid_amount_text": cents_to_dollars(unpaid_amount),
         }
         # Pass referral link
-        referral_link, created = ReferralLink.objects.get_or_create(
-            user_id=request.user.pk,
-        )
-        if created:
-            referral_link.identifier = uuid.uuid4().hex[:6]
-            referral_link.save()
+        referral_link = get_refferal_link(request.user.pk)
         context["reflink"] = request.build_absolute_uri(referral_link)
 
         # Pass first_signup variable to tell Google Analytics
@@ -284,12 +278,7 @@ class UserProfileAPIView(APIView):
                     "reflink": False,
                 },
             }
-            referral_link, created = ReferralLink.objects.get_or_create(
-                user_id=request.user.pk,
-            )
-            if created:
-                referral_link.identifier = uuid.uuid4().hex[:6]
-                referral_link.save()
+            referral_link = get_refferal_link(request.user.pk)
             content["profile"]["reflink"] = request.build_absolute_uri(
                 referral_link
             )
