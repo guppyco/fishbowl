@@ -6,6 +6,10 @@ from .models import History, Search, SearchResult
 
 @admin.register(Search)
 class SearchAdmin(admin.ModelAdmin):
+    """
+    Register admin for SearchAdmin
+    """
+
     list_display = ("_search_terms", "search_type", "view_user", "modified")
     search_fields = ("search_terms",)
     list_filter = ("user_id",)

@@ -47,6 +47,10 @@ class CustomUserManager(BaseUserManager):
 
 
 class UserProfile(AbstractBaseUser, TimeStampedModel, PermissionsMixin):
+    """
+    Custom user profile
+    """
+
     email = models.EmailField(unique=True)
     is_staff = models.BooleanField(
         _("staff status"),
@@ -234,6 +238,10 @@ class Payout(TimeStampedModel):
 
 
 class PayoutRequest(TimeStampedModel):
+    """
+    The requested payouts
+    """
+
     user_profile = models.ForeignKey(
         UserProfile,
         on_delete=models.CASCADE,

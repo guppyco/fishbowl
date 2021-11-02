@@ -1,3 +1,4 @@
+# pylint: disable=missing-docstring
 from datetime import datetime, timedelta
 
 from freezegun import freeze_time

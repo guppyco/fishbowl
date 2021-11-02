@@ -44,11 +44,18 @@ def guppy_search(request):
 
 
 class SearchView(mixins.CreateModelMixin, generics.GenericAPIView):
+    """
+    The view for Search
+    """
+
     serializer_class = SimpleSearchSerializer
     permission_classes = [AllowAny]
     queryset = Search.objects.all()
 
     def post(self, request):
+        """
+        Override post method
+        """
         results = []
         # TODO: parse results from HTML content?
         if "search_results" in request.data:
@@ -94,6 +101,10 @@ class SearchView(mixins.CreateModelMixin, generics.GenericAPIView):
 
 
 class HistoryCreateView(CreateAPIView):
+    """
+    The view for create History
+    """
+
     serializer_class = HistorySerialzer
     permission_classes = [AllowAny]
 

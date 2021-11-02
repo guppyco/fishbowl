@@ -3,6 +3,7 @@ ignore=migrations
 # List of plugins (as comma separated values of python modules names) to load,
 # usually to register additional checkers.
 load-plugins=pylint_django
+docstring-min-length=30
 [FORMAT]
 
 # Maximum number of characters on a single line.
@@ -19,9 +20,8 @@ ignore-comments=yes
 # IGNORE
 disable=
   attribute-defined-outside-init,
-  broad-except, # Ignore "Catching too general exception Exception"
   fixme,
-  missing-docstring,
+  missing-module-docstring,
   modelform-uses-exclude,
   too-few-public-methods,
   too-many-ancestors,
