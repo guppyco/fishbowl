@@ -42,6 +42,9 @@ LOGGER = logging.getLogger(__name__)
 
 @check_honeypot
 def signup_user(request):
+    """
+    Handle signup user
+    """
     if request.user.is_authenticated:
         return redirect_user(request)
 
@@ -175,6 +178,10 @@ def get_next_str(request):
 
 
 class UserProfileView(LoginRequiredMixin, DetailView):
+    """
+    The view for user profile (web)
+    """
+
     template_name = "accounts/profile.html"
     model = UserProfile
 
@@ -182,6 +189,9 @@ class UserProfileView(LoginRequiredMixin, DetailView):
         return self.request.user
 
     def get(self, request, *args, **kwargs):
+        """
+        Custom get method
+        """
         self.object = self.get_object()
         context = self.get_context_data(object=self.object)
 
@@ -238,9 +248,16 @@ class UserProfileView(LoginRequiredMixin, DetailView):
 
 
 class UserProfileAPIView(APIView):
+    """
+    The view for user profile API
+    """
+
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        """
+        Custome get method
+        """
         try:
             user = request.user
             profile = UserProfile.objects.get(email=user)
@@ -278,15 +295,22 @@ class UserProfileAPIView(APIView):
             )
 
             return Response(content)
-        except Exception as exc:
+        except UserProfile.DoesNotExist as exc:
             LOGGER.exception(exc)
             return Response(status=status.HTTP_404_NOT_FOUND)
 
 
 class PayoutAPIView(ViewSet):
+    """
+    Handle payout requests
+    """
+
     permission_classes = [IsAuthenticated]
 
     def request_payout(self, request):  # pylint: disable=no-self-use
+        """
+        Process a payout request
+        """
         user = request.user
         profile = UserProfile.objects.get(email=user)
 

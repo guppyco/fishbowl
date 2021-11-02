@@ -12,6 +12,10 @@ from .models import Payout, PayoutRequest, UserProfile, UserProfileReferralHit
 
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
+    """
+    Register admin for UserProfile
+    """
+
     list_display = ("email", "created", "history", "search", "status")
     search_fields = ("email",)
     readonly_fields = ("history", "search", "status")
