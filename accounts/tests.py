@@ -12,7 +12,13 @@ from django.utils import timezone
 from accounts.jobs.daily.collect_payouts import Job
 from search.factories import HistoryFactory, SearchFactory
 
-from .factories import ReferralLinkFactory, UserProfileFactory
+from .factories import (
+    PayoutFactory,
+    ReferralHitFactory,
+    ReferralLinkFactory,
+    UserProfileFactory,
+    UserProfileReferralHitFactory,
+)
 from .models import Payout, PayoutRequest, UserProfile, UserProfileReferralHit
 from .utils import setup_tests
 
@@ -680,3 +686,123 @@ class PayoutAmountTest(TestCase):
             payment_status=Payout.REQUESTING
         )
         self.assertEqual(requesting_payouts.count(), 38)
+
+    # pylint: disable=too-many-statements
+    def test_requesting_referral_amount(self):
+        referral_link = ReferralLinkFactory(user=self.user)
+        # users[0] referred users[1] and users[2]
+        referral_hit1 = ReferralHitFactory(
+            hit_user=self.users[1],
+            referral_link=referral_link,
+        )
+        referral_hit2 = ReferralHitFactory(
+            hit_user=self.users[2],
+            referral_link=referral_link,
+        )
+        user_referral_hit1 = UserProfileReferralHitFactory(
+            user_profile=self.user,
+            referral_hit=referral_hit1,
+        )
+        user_referral_hit2 = UserProfileReferralHitFactory(
+            user_profile=self.user,
+            referral_hit=referral_hit2,
+        )
+
+        with freeze_time(datetime(2021, 4, 1)):
+            PostData.create_history(self)
+            self.daily_job.execute()
+
+        PostData.login(self)
+        profile_url = reverse("user_profile_api")
+        response = self.client.get(profile_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["profile"]["paid_amount"], 0)
+        self.assertEqual(response.data["profile"]["requesting_amount"], 0)
+        self.assertEqual(
+            response.data["profile"]["unpaid_amount"], int(1000 / 30 / 1)
+        )
+        self.assertEqual(
+            response.data["profile"]["unpaid_amount_text"], "$0.33"
+        )
+
+        # users[1] earned 89 payouts
+        PayoutFactory.create_batch(89, user_profile=self.users[1])
+        self.daily_job.execute()
+        response = self.client.get(profile_url)
+        self.assertEqual(
+            response.data["profile"]["unpaid_amount"], int(1000 / 30 / 1)
+        )
+        user_referral_hit1.refresh_from_db()
+        self.assertEqual(
+            user_referral_hit1.payment_status,
+            UserProfileReferralHit.NONE,
+        )
+
+        # users[1] earned 90 payouts
+        PayoutFactory(user_profile=self.users[1])
+        self.daily_job.execute()
+        response = self.client.get(profile_url)
+        self.assertEqual(
+            response.data["profile"]["unpaid_amount"], int(1000 / 30 / 1) + 99
+        )
+        user_referral_hit1.refresh_from_db()
+        self.assertEqual(
+            user_referral_hit1.payment_status,
+            UserProfileReferralHit.OPENED,
+        )
+        # users[2] earned 90 payouts
+        PayoutFactory.create_batch(90, user_profile=self.users[2])
+        self.daily_job.execute()
+        response = self.client.get(profile_url)
+        self.assertEqual(
+            response.data["profile"]["unpaid_amount"],
+            int(1000 / 30 / 1) + 99 + 97,
+        )
+        user_referral_hit2.refresh_from_db()
+        self.assertEqual(
+            user_referral_hit1.payment_status,
+            UserProfileReferralHit.OPENED,
+        )
+
+        # Test another user
+        referral_link = ReferralLinkFactory(
+            user=self.users[3],
+            identifier="12345",
+        )
+        # users[3] referred users[4]
+        referral_hit = ReferralHitFactory(
+            hit_user=self.users[4],
+            referral_link=referral_link,
+        )
+        user_referral_hit3 = UserProfileReferralHitFactory(
+            user_profile=self.users[3],
+            referral_hit=referral_hit,
+        )
+        # users[4] earned 90 payouts
+        PayoutFactory.create_batch(90, user_profile=self.users[4])
+        self.daily_job.execute()
+        PostData.login(self, self.users[3])
+        response = self.client.get(profile_url)
+        self.assertEqual(
+            response.data["profile"]["unpaid_amount"],
+            95,
+        )
+        self.assertEqual(
+            response.data["profile"]["unpaid_amount_text"], "$0.95"
+        )
+        # Test updating payment status
+        payout = Payout.objects.get(note=user_referral_hit3.pk)
+        payout.payment_status = Payout.PAID
+        payout.save()
+        user_referral_hit3.refresh_from_db()
+        self.assertEqual(
+            user_referral_hit3.payment_status,
+            UserProfileReferralHit.PAID,
+        )
+        payout.payment_status = Payout.REQUESTING
+        payout.save()
+        user_referral_hit3.refresh_from_db()
+        self.assertEqual(
+            user_referral_hit3.payment_status,
+            UserProfileReferralHit.REQUESTING,
+        )

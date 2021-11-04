@@ -85,5 +85,6 @@ class UserProfileReferralHitAdmin(admin.ModelAdmin):
     list_display = (
         "user_profile",
         "referral_hit",
+        "payment_status",
     )
     search_fields = ("user_profile__name",)

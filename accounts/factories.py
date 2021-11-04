@@ -1,9 +1,9 @@
 import uuid
 
 import factory
-from django_reflinks.models import ReferralLink
+from django_reflinks.models import ReferralHit, ReferralLink
 
-from .models import UserProfile, UserProfileReferralHit
+from .models import Payout, UserProfile, UserProfileReferralHit
 
 
 class UserProfileFactory(factory.django.DjangoModelFactory):
@@ -23,6 +23,21 @@ class ReferralLinkFactory(factory.django.DjangoModelFactory):
     identifier = uuid.uuid4().hex[:6]
 
 
+class ReferralHitFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = ReferralHit
+
+    authenticated = False
+    ip = factory.Faker("ipv4")
+
+
 class UserProfileReferralHitFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = UserProfileReferralHit
+
+
+class PayoutFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Payout
+
+    amount = 1

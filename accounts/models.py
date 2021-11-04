@@ -214,6 +214,10 @@ class UserProfile(AbstractBaseUser, TimeStampedModel, PermissionsMixin):
 
 
 class Payout(TimeStampedModel):
+    """
+    Saving all daily payouts for activate users and referral payouts
+    """
+
     user_profile = models.ForeignKey(
         UserProfile,
         on_delete=models.CASCADE,
@@ -236,6 +240,25 @@ class Payout(TimeStampedModel):
     )
     note = models.CharField(max_length=500, blank=True)
     date = models.DateField(default=timezone.now)
+
+    def save(self, *args, **kwargs):
+        # Change UserProfileReferralHit payment status when updating Payout
+        if self.note:
+            if self.payment_status == self.PAID:
+                payment_status = UserProfileReferralHit.PAID
+            elif self.payment_status == self.REQUESTING:
+                payment_status = UserProfileReferralHit.REQUESTING
+            else:
+                payment_status = UserProfileReferralHit.OPENED
+
+            UserProfileReferralHit.objects.filter(
+                user_profile=self.user_profile,
+                pk=self.note,
+            ).update(
+                payment_status=payment_status,
+            )
+
+        super().save(*args, **kwargs)
 
 
 class PayoutRequest(TimeStampedModel):
@@ -261,7 +284,7 @@ class PayoutRequest(TimeStampedModel):
     note = models.CharField(max_length=500, blank=True)
 
     def save(self, *args, **kwargs):
-        # Change requesting payouts to paid when updating PayoutRequest
+        # Change Payout payment status when updating PayoutRequest
         if self.payment_status == self.PAID:
             payment_status = Payout.PAID
         else:
@@ -285,3 +308,17 @@ class UserProfileReferralHit(models.Model):
 
     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     referral_hit = models.OneToOneField(ReferralHit, on_delete=models.CASCADE)
+    # payment status
+    NONE = 0
+    OPENED = 1
+    REQUESTING = 2
+    PAID = 3
+    PAYMENT_STATUSES = (
+        (NONE, "none"),
+        (OPENED, "opened"),
+        (REQUESTING, "requesting"),
+        (PAID, "paid"),
+    )
+    payment_status = models.IntegerField(
+        choices=PAYMENT_STATUSES, blank=False, default=NONE
+    )
