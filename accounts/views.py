@@ -34,7 +34,7 @@ from .forms import (
     CustomUserCreationForm,
 )
 from .models import Payout, UserProfile, UserProfileReferralHit
-from .utils import cents_to_dollars, get_refferal_link
+from .utils import cents_to_dollars
 
 LOGGER = logging.getLogger(__name__)
 
@@ -206,7 +206,7 @@ class UserProfileView(LoginRequiredMixin, DetailView):
             "unpaid_amount_text": cents_to_dollars(unpaid_amount),
         }
         # Pass referral link
-        referral_link = get_refferal_link(request.user.pk)
+        referral_link = request.user.get_refferal_link()
         context["reflink"] = request.build_absolute_uri(referral_link)
 
         # Pass first_signup variable to tell Google Analytics
@@ -223,16 +223,13 @@ class UserProfileView(LoginRequiredMixin, DetailView):
                 except ReferralHit.DoesNotExist:
                     referral_hit = None
                 if referral_hit is not None:
-                    try:
-                        referred_user = referral_hit.referral_link.user
-                        UserProfileReferralHit.objects.create(
-                            referral_hit=referral_hit,
-                            user_profile=referred_user,
-                        )
-                        referral_hit.confirmed = timezone.now()
-                        referral_hit.save()
-                    except UserProfileReferralHit.DoesNotExist:
-                        pass
+                    referred_user = referral_hit.referral_link.user
+                    UserProfileReferralHit.objects.create(
+                        referral_hit=referral_hit,
+                        user_profile=referred_user,
+                    )
+                    referral_hit.confirmed = timezone.now()
+                    referral_hit.save()
 
         return self.render_to_response(context)
 
@@ -278,7 +275,7 @@ class UserProfileAPIView(APIView):
                     "reflink": False,
                 },
             }
-            referral_link = get_refferal_link(request.user.pk)
+            referral_link = request.user.get_refferal_link()
             content["profile"]["reflink"] = request.build_absolute_uri(
                 referral_link
             )

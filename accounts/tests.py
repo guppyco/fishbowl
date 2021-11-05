@@ -20,7 +20,7 @@ from .factories import (
     UserProfileReferralHitFactory,
 )
 from .models import Payout, PayoutRequest, UserProfile, UserProfileReferralHit
-from .utils import setup_tests
+from .utils import calculate_referral_amount, setup_tests
 
 
 def create_signup_post_data(input_updates=None):
@@ -791,7 +791,9 @@ class PayoutAmountTest(TestCase):
             response.data["profile"]["unpaid_amount_text"], "$0.95"
         )
         # Test updating payment status
-        payout = Payout.objects.get(note=user_referral_hit3.pk)
+        payout = Payout.objects.get(
+            user_profile_referral_hit=user_referral_hit3
+        )
         payout.payment_status = Payout.PAID
         payout.save()
         user_referral_hit3.refresh_from_db()
@@ -806,3 +808,23 @@ class PayoutAmountTest(TestCase):
             user_referral_hit3.payment_status,
             UserProfileReferralHit.REQUESTING,
         )
+
+    def test_referral_amount_calculator(self):
+        total = 100
+        self.assertEqual(calculate_referral_amount(0, total), 0)
+        self.assertEqual(calculate_referral_amount(1, total), 99)
+        self.assertEqual(calculate_referral_amount(2, total), 97)
+        self.assertEqual(calculate_referral_amount(3, total), 95)
+        self.assertEqual(calculate_referral_amount(4, total), 93)
+        self.assertEqual(calculate_referral_amount(5, total), 92)
+        self.assertEqual(calculate_referral_amount(6, total), 90)
+        self.assertEqual(calculate_referral_amount(100, total), 25)
+        self.assertEqual(calculate_referral_amount(1000, total), 1)
+
+    def test_total_referral_amount(self):
+        total = 100
+        amount_total = 0
+        for i in range(1, 500):
+            amount_total += calculate_referral_amount(i, total)
+
+        self.assertTrue(amount_total < 10000)
