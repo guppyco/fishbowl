@@ -76,6 +76,12 @@ footer {
 footer hr.clearfix {
   margin: 5px 10px;
 }
+footer .icons .icon {
+  display: inline-block;
+  width: 200px;
+  padding: 10px;
+  font-size: 25px;
+}
 
 /* Home page */
 .home-page section {

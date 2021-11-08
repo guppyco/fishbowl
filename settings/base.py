@@ -243,6 +243,10 @@ STATICFILES_DIRS = [
         os.path.join(BASE_DIR, "frontend", "node_modules", "bootstrap"),
     ),
     (
+        "node_modules/bootstrap-icons",
+        os.path.join(BASE_DIR, "frontend", "node_modules", "bootstrap-icons"),
+    ),
+    (
         "node_modules/sentry",
         os.path.join(BASE_DIR, "frontend", "node_modules", "@sentry"),
     ),
