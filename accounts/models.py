@@ -233,6 +233,17 @@ class UserProfile(AbstractBaseUser, TimeStampedModel, PermissionsMixin):
 
         return referral_link
 
+    def save(self, *args, **kwargs):
+        """
+        Create ReferralHit when a new user is created
+        """
+        first_save = not self.id
+
+        super().save(*args, **kwargs)
+
+        if first_save:
+            self.get_refferal_link()
+
 
 class UserProfileReferralHit(models.Model):
     """

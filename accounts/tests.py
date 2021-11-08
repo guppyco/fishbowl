@@ -689,7 +689,7 @@ class PayoutAmountTest(TestCase):
 
     # pylint: disable=too-many-statements
     def test_requesting_referral_amount(self):
-        referral_link = ReferralLinkFactory(user=self.user)
+        referral_link = self.user.get_refferal_link()
         # users[0] referred users[1] and users[2]
         referral_hit1 = ReferralHitFactory(
             hit_user=self.users[1],
@@ -765,10 +765,7 @@ class PayoutAmountTest(TestCase):
         )
 
         # Test another user
-        referral_link = ReferralLinkFactory(
-            user=self.users[3],
-            identifier="12345",
-        )
+        referral_link = self.users[3].get_refferal_link()
         # users[3] referred users[4]
         referral_hit = ReferralHitFactory(
             hit_user=self.users[4],
