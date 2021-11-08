@@ -33,4 +33,10 @@ urlpatterns = [  # pylint: disable=invalid-name
         views.PrivacyPolicyView.as_view(),
         name="privacy-policy",
     ),
+    path(
+        "referral-program/",
+        views.ReferralProgramView.as_view(),
+        name="referral-program",
+    ),
+    path("ref/", include("django_reflinks.urls")),
 ]
