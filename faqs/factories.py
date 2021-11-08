@@ -10,4 +10,4 @@ class FAQFactory(factory.django.DjangoModelFactory):
 
     question = "This is test question"
     answer = "This is the test answer"
-    order = FuzzyDecimal(low=0, high=10)
+    order = FuzzyDecimal(low=0, high=100)

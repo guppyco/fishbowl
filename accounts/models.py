@@ -1,15 +1,17 @@
 import json
+import uuid
 from datetime import timedelta
 from typing import Any, Dict, Union
 
 from django_extensions.db.models import TimeStampedModel
+from django_reflinks.models import ReferralHit, ReferralLink
 
 from django.contrib.auth.models import (
     AbstractBaseUser,
     BaseUserManager,
     PermissionsMixin,
 )
-from django.db import models
+from django.db import IntegrityError, models, transaction
 from django.db.models.query import QuerySet  # pylint: disable=unused-import
 from django.urls import reverse
 from django.utils import timezone
@@ -47,6 +49,10 @@ class CustomUserManager(BaseUserManager):
 
 
 class UserProfile(AbstractBaseUser, TimeStampedModel, PermissionsMixin):
+    """
+    Custom user profile
+    """
+
     email = models.EmailField(unique=True)
     is_staff = models.BooleanField(
         _("staff status"),
@@ -207,8 +213,66 @@ class UserProfile(AbstractBaseUser, TimeStampedModel, PermissionsMixin):
 
         return query
 
+    @staticmethod
+    def create_code() -> str:
+        return uuid.uuid4().hex[0:6]
+
+    def get_refferal_link(self) -> QuerySet[ReferralLink]:
+        referral_link, created = ReferralLink.objects.get_or_create(user=self)
+        if created or not referral_link.identifier:
+            duplicate = True
+            while duplicate:
+                try:
+                    if not referral_link.identifier:
+                        referral_link.identifier = self.create_code()
+                    with transaction.atomic():
+                        referral_link.save()
+                        duplicate = False
+                except IntegrityError:
+                    referral_link.identifier = self.create_code()
+
+        return referral_link
+
+    def save(self, *args, **kwargs):
+        """
+        Create ReferralHit when a new user is created
+        """
+        first_save = not self.id
+
+        super().save(*args, **kwargs)
+
+        if first_save:
+            self.get_refferal_link()
+
+
+class UserProfileReferralHit(models.Model):
+    """
+    List all users and they referred accounts (who signed up to the site)
+    """
+
+    user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    referral_hit = models.OneToOneField(ReferralHit, on_delete=models.CASCADE)
+    # payment status
+    NONE = 0
+    OPENED = 1
+    REQUESTING = 2
+    PAID = 3
+    PAYMENT_STATUSES = (
+        (NONE, "none"),
+        (OPENED, "opened"),
+        (REQUESTING, "requesting"),
+        (PAID, "paid"),
+    )
+    payment_status = models.IntegerField(
+        choices=PAYMENT_STATUSES, blank=False, default=NONE
+    )
+
 
 class Payout(TimeStampedModel):
+    """
+    Saving all daily payouts for activate users and referral payouts
+    """
+
     user_profile = models.ForeignKey(
         UserProfile,
         on_delete=models.CASCADE,
@@ -229,11 +293,37 @@ class Payout(TimeStampedModel):
     payment_status = models.IntegerField(
         choices=PAYMENT_STATUSES, blank=False, default=UNPAID
     )
+    user_profile_referral_hit = models.ForeignKey(
+        UserProfileReferralHit,
+        on_delete=models.CASCADE,
+        related_name="payout",
+        blank=True,
+        null=True,
+    )
     note = models.CharField(max_length=500, blank=True)
     date = models.DateField(default=timezone.now)
 
+    def save(self, *args, **kwargs):
+        # Change UserProfileReferralHit payment status when updating Payout
+        if self.user_profile_referral_hit:
+            if self.payment_status == self.PAID:
+                payment_status = UserProfileReferralHit.PAID
+            elif self.payment_status == self.REQUESTING:
+                payment_status = UserProfileReferralHit.REQUESTING
+            else:
+                payment_status = UserProfileReferralHit.OPENED
+
+            self.user_profile_referral_hit.payment_status = payment_status
+            self.user_profile_referral_hit.save()
+
+        super().save(*args, **kwargs)
+
 
 class PayoutRequest(TimeStampedModel):
+    """
+    The requested payouts
+    """
+
     user_profile = models.ForeignKey(
         UserProfile,
         on_delete=models.CASCADE,
@@ -252,7 +342,7 @@ class PayoutRequest(TimeStampedModel):
     note = models.CharField(max_length=500, blank=True)
 
     def save(self, *args, **kwargs):
-        # Change requesting payouts to paid when updating PayoutRequest
+        # Change Payout payment status when updating PayoutRequest
         if self.payment_status == self.PAID:
             payment_status = Payout.PAID
         else:

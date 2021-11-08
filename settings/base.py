@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "crispy_forms",
     "django_celery_results",
     "django_extensions",
+    "django_reflinks",
     "honeypot",
     "rest_framework",
     "rest_framework.authtoken",
@@ -72,6 +73,8 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "django_reflinks.middleware.AnonymousReferralMiddleware",
+    "django_reflinks.middleware.ReferralLinkMiddleware",
 ]
 
 ROOT_URLCONF = "guppy.urls"
@@ -238,6 +241,10 @@ STATICFILES_DIRS = [
     (
         "node_modules/bootstrap",
         os.path.join(BASE_DIR, "frontend", "node_modules", "bootstrap"),
+    ),
+    (
+        "node_modules/bootstrap-icons",
+        os.path.join(BASE_DIR, "frontend", "node_modules", "bootstrap-icons"),
     ),
     (
         "node_modules/sentry",

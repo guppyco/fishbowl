@@ -7,11 +7,15 @@ from django.utils.html import format_html
 
 from search.models import History, Search
 
-from .models import Payout, PayoutRequest, UserProfile
+from .models import Payout, PayoutRequest, UserProfile, UserProfileReferralHit
 
 
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
+    """
+    Register admin for UserProfile
+    """
+
     list_display = ("email", "created", "history", "search", "status")
     search_fields = ("email",)
     readonly_fields = ("history", "search", "status")
@@ -74,3 +78,13 @@ class PayoutRequestAdmin(admin.ModelAdmin):
         "created",
         "note",
     )
+
+
+@admin.register(UserProfileReferralHit)
+class UserProfileReferralHitAdmin(admin.ModelAdmin):
+    list_display = (
+        "user_profile",
+        "referral_hit",
+        "payment_status",
+    )
+    search_fields = ("user_profile__name",)

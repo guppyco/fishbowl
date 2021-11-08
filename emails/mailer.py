@@ -14,6 +14,9 @@ def send_email(
     reply_to_email=None,
     from_name="Guppy",
 ):
+    """
+    The sender method
+    """
     try:
         if from_email is None:
             from_email = "no-reply@m.guppy.co"

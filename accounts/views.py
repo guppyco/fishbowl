@@ -4,6 +4,7 @@ import json
 import logging
 import urllib
 
+from django_reflinks.models import ReferralHit
 from honeypot.decorators import check_honeypot
 from rest_framework import status
 from rest_framework.authentication import BasicAuthentication
@@ -17,13 +18,13 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ViewSet
 
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.middleware.csrf import get_token
 from django.shortcuts import redirect, render
+from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.detail import DetailView
 
@@ -32,7 +33,7 @@ from .forms import (
     CustomUserChangeForm,
     CustomUserCreationForm,
 )
-from .models import Payout, UserProfile
+from .models import Payout, UserProfile, UserProfileReferralHit
 from .utils import cents_to_dollars
 
 LOGGER = logging.getLogger(__name__)
@@ -40,6 +41,9 @@ LOGGER = logging.getLogger(__name__)
 
 @check_honeypot
 def signup_user(request):
+    """
+    Handle signup user
+    """
     if request.user.is_authenticated:
         return redirect_user(request)
 
@@ -61,8 +65,7 @@ def signup_user(request):
             user = authenticate(username=email, password=password)
             if user is not None and user.is_active:
                 login(request, user)
-                if not settings.DEBUG:
-                    request.session["first_signup"] = True
+                request.session["first_signup"] = True
                 return redirect_user(request)
             #  TODO: MAKE SURE ERROR RETURNS PROPERLY
             messages.error(request, "This account is not valid")
@@ -174,6 +177,10 @@ def get_next_str(request):
 
 
 class UserProfileView(LoginRequiredMixin, DetailView):
+    """
+    The view for user profile (web)
+    """
+
     template_name = "accounts/profile.html"
     model = UserProfile
 
@@ -181,15 +188,11 @@ class UserProfileView(LoginRequiredMixin, DetailView):
         return self.request.user
 
     def get(self, request, *args, **kwargs):
+        """
+        Custom get method
+        """
         self.object = self.get_object()
         context = self.get_context_data(object=self.object)
-
-        # Pass first_signup or premium variable to tell Google Analytics
-        # if this signup/premium should be counted as a conversion.
-        if hasattr(self.request, "session"):
-            first_signup = self.request.session.pop("first_signup", False)
-            if first_signup:
-                context["first_signup"] = True
 
         paid_amount = self.object.get_earned_amount(Payout.PAID)
         requesting_amount = self.object.get_earned_amount(Payout.REQUESTING)
@@ -202,12 +205,31 @@ class UserProfileView(LoginRequiredMixin, DetailView):
             "unpaid_amount": unpaid_amount,
             "unpaid_amount_text": cents_to_dollars(unpaid_amount),
         }
+        # Pass referral link
+        referral_link = request.user.get_refferal_link()
+        context["reflink"] = request.build_absolute_uri(referral_link)
+
         # Pass first_signup variable to tell Google Analytics
         # if this signup should be counted as a conversion.
         if hasattr(self.request, "session"):
             first_signup = self.request.session.pop("first_signup", False)
             if first_signup:
                 context["first_signup"] = True
+                # Add refferal to reffered account
+                try:
+                    referral_hit = ReferralHit.objects.filter(
+                        hit_user_id=request.user.pk
+                    ).latest("created")
+                except ReferralHit.DoesNotExist:
+                    referral_hit = None
+                if referral_hit is not None:
+                    referred_user = referral_hit.referral_link.user
+                    UserProfileReferralHit.objects.create(
+                        referral_hit=referral_hit,
+                        user_profile=referred_user,
+                    )
+                    referral_hit.confirmed = timezone.now()
+                    referral_hit.save()
 
         return self.render_to_response(context)
 
@@ -217,9 +239,16 @@ class UserProfileView(LoginRequiredMixin, DetailView):
 
 
 class UserProfileAPIView(APIView):
+    """
+    The view for user profile API
+    """
+
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        """
+        Custome get method
+        """
         try:
             user = request.user
             profile = UserProfile.objects.get(email=user)
@@ -243,19 +272,31 @@ class UserProfileAPIView(APIView):
                     ),
                     "unpaid_amount": unpaid_amount,
                     "unpaid_amount_text": cents_to_dollars(unpaid_amount),
+                    "reflink": False,
                 },
             }
+            referral_link = request.user.get_refferal_link()
+            content["profile"]["reflink"] = request.build_absolute_uri(
+                referral_link
+            )
 
             return Response(content)
-        except Exception as exc:
+        except UserProfile.DoesNotExist as exc:
             LOGGER.exception(exc)
             return Response(status=status.HTTP_404_NOT_FOUND)
 
 
 class PayoutAPIView(ViewSet):
+    """
+    Handle payout requests
+    """
+
     permission_classes = [IsAuthenticated]
 
     def request_payout(self, request):  # pylint: disable=no-self-use
+        """
+        Process a payout request
+        """
         user = request.user
         profile = UserProfile.objects.get(email=user)
 
