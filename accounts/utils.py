@@ -4,7 +4,6 @@ from datetime import date, datetime, timedelta
 
 from django.contrib.auth import authenticate
 from django.db.models import QuerySet
-from django.db.models.query_utils import Q
 from django.utils import timezone
 
 from .models import Payout, UserProfile, UserProfileReferralHit
@@ -124,8 +123,8 @@ class PayoutGenerator:
             payment_status=UserProfileReferralHit.NONE,
         ).order_by("pk")
         # Count the current valid referrals
-        number_of_referral = UserProfileReferralHit.objects.filter(
-            ~Q(payment_status=UserProfileReferralHit.NONE)
+        number_of_referral = UserProfileReferralHit.objects.exclude(
+            payment_status=UserProfileReferralHit.NONE
         ).count()
         total = 100
         today = date.today()

@@ -12,6 +12,7 @@ from django.contrib.auth.models import (
     PermissionsMixin,
 )
 from django.db import IntegrityError, models, transaction
+from django.db.models import Sum
 from django.db.models.query import QuerySet  # pylint: disable=unused-import
 from django.urls import reverse
 from django.utils import timezone
@@ -233,6 +234,43 @@ class UserProfile(AbstractBaseUser, TimeStampedModel, PermissionsMixin):
 
         return referral_link
 
+    def current_referral_payout(self) -> int:
+        payouts = self.payouts.filter(
+            user_profile_referral_hit__isnull=False,
+            payment_status=Payout.PAID,
+        ).aggregate(Sum("amount"))
+
+        if not payouts["amount__sum"]:
+            amount = 0
+        else:
+            amount = payouts["amount__sum"]
+
+        return amount
+
+    def total_earnings_for_referrals(self) -> int:
+        payouts = self.payouts.filter(
+            user_profile_referral_hit__isnull=False,
+        ).aggregate(Sum("amount"))
+
+        if not payouts["amount__sum"]:
+            amount = 0
+        else:
+            amount = payouts["amount__sum"]
+
+        return amount
+
+    def number_of_referrals(self) -> int:
+        referrals = self.user_profile_referral_hits.count()
+
+        return referrals
+
+    def number_of_activate_referrals(self) -> int:
+        referrals = self.user_profile_referral_hits.exclude(
+            payment_status=UserProfileReferralHit.NONE,
+        ).count()
+
+        return referrals
+
     def save(self, *args, **kwargs):
         """
         Create ReferralHit when a new user is created
@@ -250,7 +288,11 @@ class UserProfileReferralHit(models.Model):
     List all users and they referred accounts (who signed up to the site)
     """
 
-    user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    user_profile = models.ForeignKey(
+        UserProfile,
+        on_delete=models.CASCADE,
+        related_name="user_profile_referral_hits",
+    )
     referral_hit = models.OneToOneField(ReferralHit, on_delete=models.CASCADE)
     # payment status
     NONE = 0
@@ -340,20 +382,39 @@ class PayoutRequest(TimeStampedModel):
         choices=PAYMENT_STATUSES, blank=False, default=REQUESTING
     )
     note = models.CharField(max_length=500, blank=True)
+    payout_ids = models.TextField(blank=True, null=True)
 
     def save(self, *args, **kwargs):
         # Change Payout payment status when updating PayoutRequest
         if self.payment_status == self.PAID:
-            payment_status = Payout.PAID
+            payout_payment_status = Payout.PAID
+            referral_payment_status = UserProfileReferralHit.PAID
         else:
-            payment_status = Payout.REQUESTING
+            payout_payment_status = Payout.REQUESTING
+            referral_payment_status = UserProfileReferralHit.REQUESTING
 
-        payout_ids = json.loads(self.note)
-        Payout.objects.filter(
+        payout_ids = json.loads(self.payout_ids)
+        payouts = Payout.objects.filter(
             user_profile=self.user_profile,
             pk__in=payout_ids,
-        ).update(
-            payment_status=payment_status,
         )
+        payouts.update(
+            payment_status=payout_payment_status,
+        )
+        # Change UserProfileReferralHit payment status
+        # when updating PayoutRequest
+        user_profile_referral_hit_ids = []
+        for payout in payouts:
+            if payout.user_profile_referral_hit:
+                user_profile_referral_hit_ids.append(
+                    payout.user_profile_referral_hit.pk
+                )
+        if user_profile_referral_hit_ids:
+            UserProfileReferralHit.objects.filter(
+                user_profile=self.user_profile,
+                pk__in=user_profile_referral_hit_ids,
+            ).update(
+                payment_status=referral_payment_status,
+            )
 
         super().save(*args, **kwargs)

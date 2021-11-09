@@ -643,7 +643,7 @@ class PayoutAmountTest(TestCase):
         requesting_payouts = self.user.payouts.filter(
             payment_status=Payout.REQUESTING
         )
-        self.assertTrue(payout_request.note)
+        self.assertTrue(payout_request.payout_ids)
         self.assertEqual(requesting_payouts.count(), 38)
 
         response = self.client.get(reverse("payouts_request_api"))
@@ -707,6 +707,15 @@ class PayoutAmountTest(TestCase):
             user_profile=self.user,
             referral_hit=referral_hit2,
         )
+        # Add un-activate referral hit
+        referral_hit8 = ReferralHitFactory(
+            hit_user=self.users[7],
+            referral_link=referral_link,
+        )
+        UserProfileReferralHitFactory(
+            user_profile=self.users[8],
+            referral_hit=referral_hit8,
+        )
 
         with freeze_time(datetime(2021, 4, 1)):
             PostData.create_history(self)
@@ -737,6 +746,10 @@ class PayoutAmountTest(TestCase):
             user_referral_hit1.payment_status,
             UserProfileReferralHit.NONE,
         )
+        self.assertEqual(self.user.current_referral_payout(), 0)
+        self.assertEqual(self.user.total_earnings_for_referrals(), 0)
+        self.assertEqual(self.user.number_of_referrals(), 2)
+        self.assertEqual(self.user.number_of_activate_referrals(), 0)
 
         # users[1] earned 90 payouts
         PayoutFactory(user_profile=self.users[1])
@@ -750,6 +763,10 @@ class PayoutAmountTest(TestCase):
             user_referral_hit1.payment_status,
             UserProfileReferralHit.OPENED,
         )
+        self.assertEqual(self.user.current_referral_payout(), 0)
+        self.assertEqual(self.user.total_earnings_for_referrals(), 99)
+        self.assertEqual(self.user.number_of_referrals(), 2)
+        self.assertEqual(self.user.number_of_activate_referrals(), 1)
         # users[2] earned 90 payouts
         PayoutFactory.create_batch(90, user_profile=self.users[2])
         self.daily_job.execute()
@@ -798,6 +815,11 @@ class PayoutAmountTest(TestCase):
             user_referral_hit3.payment_status,
             UserProfileReferralHit.PAID,
         )
+        self.assertEqual(self.users[3].current_referral_payout(), 95)
+        self.assertEqual(self.users[3].total_earnings_for_referrals(), 95)
+        self.assertEqual(self.users[3].number_of_referrals(), 1)
+        self.assertEqual(self.users[3].number_of_activate_referrals(), 1)
+
         payout.payment_status = Payout.REQUESTING
         payout.save()
         user_referral_hit3.refresh_from_db()
@@ -805,6 +827,10 @@ class PayoutAmountTest(TestCase):
             user_referral_hit3.payment_status,
             UserProfileReferralHit.REQUESTING,
         )
+        self.assertEqual(self.users[3].current_referral_payout(), 0)
+        self.assertEqual(self.users[3].total_earnings_for_referrals(), 95)
+        self.assertEqual(self.users[3].number_of_referrals(), 1)
+        self.assertEqual(self.users[3].number_of_activate_referrals(), 1)
 
     def test_referral_amount_calculator(self):
         total = 100
