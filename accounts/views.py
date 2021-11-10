@@ -322,7 +322,7 @@ class PayoutAPIView(ViewSet):
         payout_ids = unpaid_payouts["objects"].values_list("pk", flat=True)
         user.payout_requests.create(
             amount=unpaid_payouts["amount"],
-            note=json.dumps(list(payout_ids)),
+            payout_ids=json.dumps(list(payout_ids)),
         )
         # Update requesting payouts
         unpaid_payouts["objects"].update(payment_status=Payout.REQUESTING)
