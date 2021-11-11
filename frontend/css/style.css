@@ -1,3 +1,6 @@
+body {
+  position: relative;
+}
 a {
   color: #0084FF;
 }
@@ -74,16 +77,29 @@ a {
 }
 
 footer {
-  background-color: #efefef;
+  background-color: #156381;
+  color: #fff;
+}
+footer .container {
+  position: relative;
+}
+footer a {
+  color: #fff;
+}
+footer a:hover {
+  color: #b2eaff;
 }
 footer hr.clearfix {
   margin: 5px 10px;
 }
 footer .icons .icon {
   display: inline-block;
-  width: 200px;
+  width: 300px;
   padding: 10px;
   font-size: 25px;
+}
+footer .long_plant {
+  display: none;
 }
 
 /* Home page */
