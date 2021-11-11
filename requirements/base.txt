@@ -8,6 +8,7 @@ django-cors-headers==3.7.0
 django-crispy-forms==1.11.2
 django-extensions==3.0.3
 django-honeypot==1.0.1
+django-user-agents==0.4.0
 djangorestframework==3.12.4
 drf-jwt==1.19.0
 factory_boy==3.2.0

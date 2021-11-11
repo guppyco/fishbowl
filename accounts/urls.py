@@ -7,6 +7,7 @@ from accounts import views
 
 urlpatterns = [
     path("signup/", views.signup_user, name="signup"),
+    path("signup/success/", views.signup_user_success, name="signup_success"),
     path("login/", views.login_user, name="login"),
     path("logout/", views.logout_user, name="logout"),
     path("api/login/", views.api_login_user, name="api_login"),
