@@ -66,7 +66,7 @@ def signup_user(request):
             if user is not None and user.is_active:
                 login(request, user)
                 request.session["first_signup"] = True
-                return redirect_user(request)
+                return redirect("signup_success")
             #  TODO: MAKE SURE ERROR RETURNS PROPERLY
             messages.error(request, "This account is not valid")
 
@@ -76,6 +76,41 @@ def signup_user(request):
         "next": get_next_str(request),
     }
     template = "accounts/signup.html"
+
+    return render(request, template, context)
+
+
+def signup_user_success(request):
+    """
+    Handle signup user
+    """
+    if not request.user.is_authenticated:
+        return redirect("login")
+
+    context = {"browser_family": request.user_agent.browser.family}
+    template = "accounts/signup_success.html"
+
+    # Pass first_signup variable to tell Google Analytics
+    # if this signup should be counted as a conversion.
+    if hasattr(request, "session"):
+        first_signup = request.session.pop("first_signup", False)
+        if first_signup:
+            context["first_signup"] = True
+            # Add refferal to reffered account
+            try:
+                referral_hit = ReferralHit.objects.filter(
+                    hit_user_id=request.user.pk
+                ).latest("created")
+            except ReferralHit.DoesNotExist:
+                referral_hit = None
+            if referral_hit is not None:
+                referred_user = referral_hit.referral_link.user
+                UserProfileReferralHit.objects.create(
+                    referral_hit=referral_hit,
+                    user_profile=referred_user,
+                )
+                referral_hit.confirmed = timezone.now()
+                referral_hit.save()
 
     return render(request, template, context)
 

@@ -8,6 +8,9 @@ a {
   background-color: #0084FF;
   color: #fff;
 }
+.hidden {
+  display: none;
+}
 .btn.btn-outline-secondary:hover {
   color: #fff;
   background-color: #FF5E00;
