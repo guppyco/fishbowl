@@ -89,8 +89,6 @@
   {% endif %}
 </div>
 
-<!-- Google analytics client-side tracking script for user signup. -->
-
 {% endblock user_profile %}
 
 {% block extra_js %}
@@ -113,6 +111,7 @@
   })
 </script>
 {% if not debug and first_signup %}
+<!-- Google analytics client-side tracking script for user signup. -->
 <script>
   gtag('event', 'signup', {
     'event_category': 'Users',

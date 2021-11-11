@@ -72,7 +72,7 @@ class SignupPageTests(TestCase):
 
         self.assertEqual(len(response.redirect_chain), 1)
         redirect = response.redirect_chain.pop()
-        self.assertIn("/account/", redirect[0])
+        self.assertIn("/signup/success/", redirect[0])
         self.assertEqual(redirect[1], 302)
         member = UserProfile.objects.latest("created")
         self.assertEqual(member.get_short_name(), "Name")

@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "django_celery_results",
     "django_extensions",
     "django_reflinks",
+    "django_user_agents",
     "honeypot",
     "rest_framework",
     "rest_framework.authtoken",
@@ -75,6 +76,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django_reflinks.middleware.AnonymousReferralMiddleware",
     "django_reflinks.middleware.ReferralLinkMiddleware",
+    "django_user_agents.middleware.UserAgentMiddleware",
 ]
 
 ROOT_URLCONF = "guppy.urls"
