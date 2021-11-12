@@ -1,5 +1,10 @@
 <html>
   <head>
+    {% if debug %}
+    <meta name="robots" content="noindex">
+    {% else %}
+    {% block noindex %}{% endblock %}
+    {% endif %}
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     {% block header_tags %}{% endblock %}
     {% load static %}
@@ -76,7 +81,6 @@
       {% block index %}{% endblock %}
       {% block swimming_fish %}{% endblock %}
     </div>
-    {% block extra_js %}{% endblock %}
 
     <!-- Footer -->
     <footer class="page-footer font-small indigo mt-auto">
@@ -117,4 +121,5 @@
     <!-- Footer -->
 
   </body>
+  {% block extra_js %}{% endblock %}
 </html>
