@@ -21,13 +21,8 @@
 
     {% if user.is_authenticated %}
     <ul>
-      <li>Your referral link:
-        <div class="input-group mb-3">
-          <input type="text" class="form-control referral-link" value="{{ reflink }}">
-          <div class="input-group-append">
-            <button class="btn btn-outline-secondary copy-referral-link" type="button">Copy</button>
-          </div>
-        </div>
+      <li>
+        {% include 'accounts/includes/referral_link.html' %}
       </li>
 
       <li>Current payout per referral: <b>{{ current_referral_payout }}</b></li>
@@ -47,31 +42,3 @@
   </div>
 </section>
 {% endblock content %}
-
-{% block extra_js %}
-<script type="text/javascript">
-  window.onload = function() {
-    const copyTextBtn = document.querySelector('.copy-referral-link');
-
-    if (copyTextBtn) {
-      copyTextBtn.addEventListener('click', function(event) {
-        const copyText = document.querySelector('.referral-link');
-        copyText.focus();
-        copyText.select();
-
-        try {
-          const successful = document.execCommand('copy');
-          if (successful) {
-            copyTextBtn.textContent = 'Copied'
-          }
-          setTimeout(function () {
-            copyTextBtn.textContent = 'Copy'
-          }, 3000);
-        } catch (err) {
-          alert('Oops, unable to copy');
-        }
-      });
-    }
-  }
-</script>
-{% endblock %}
