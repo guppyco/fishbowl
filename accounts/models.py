@@ -234,19 +234,6 @@ class UserProfile(AbstractBaseUser, TimeStampedModel, PermissionsMixin):
 
         return referral_link
 
-    def current_referral_payout(self) -> int:
-        payouts = self.payouts.filter(
-            user_profile_referral_hit__isnull=False,
-            payment_status=Payout.PAID,
-        ).aggregate(Sum("amount"))
-
-        if not payouts["amount__sum"]:
-            amount = 0
-        else:
-            amount = payouts["amount__sum"]
-
-        return amount
-
     def total_earnings_for_referrals(self) -> int:
         payouts = self.payouts.filter(
             user_profile_referral_hit__isnull=False,

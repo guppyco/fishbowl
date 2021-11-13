@@ -1,6 +1,6 @@
 from django.views.generic.base import TemplateView
 
-from accounts.utils import cents_to_dollars
+from accounts.utils import cents_to_dollars, get_current_payout_per_referral
 
 
 class TermsOfServiceView(TemplateView):
@@ -27,8 +27,8 @@ class ReferralProgramView(TemplateView):
             context.update(
                 {
                     "reflink": reflink,
-                    "current_referral_payout": cents_to_dollars(
-                        user_profile.current_referral_payout()
+                    "current_payout_per_referral": cents_to_dollars(
+                        get_current_payout_per_referral()
                     ),
                     "total_earnings_for_referrals": cents_to_dollars(
                         user_profile.total_earnings_for_referrals()
