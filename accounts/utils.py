@@ -82,6 +82,15 @@ def calculate_referral_amount(number_of_referral, total) -> int:
     return round(amount, 2) * 100
 
 
+def get_current_payout_per_referral() -> int:
+    referred_users = UserProfileReferralHit.objects.count()
+    total = 100
+
+    payout = calculate_referral_amount(referred_users + 1, total)
+
+    return payout
+
+
 class PayoutGenerator:
     """
     Helper class used to generate payouts
