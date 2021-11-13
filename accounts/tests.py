@@ -20,7 +20,11 @@ from .factories import (
     UserProfileReferralHitFactory,
 )
 from .models import Payout, PayoutRequest, UserProfile, UserProfileReferralHit
-from .utils import calculate_referral_amount, setup_tests
+from .utils import (
+    calculate_referral_amount,
+    get_current_payout_per_referral,
+    setup_tests,
+)
 
 
 def create_signup_post_data(input_updates=None):
@@ -746,7 +750,7 @@ class PayoutAmountTest(TestCase):
             user_referral_hit1.payment_status,
             UserProfileReferralHit.NONE,
         )
-        self.assertEqual(self.user.current_referral_payout(), 0)
+        self.assertEqual(get_current_payout_per_referral(), 93)
         self.assertEqual(self.user.total_earnings_for_referrals(), 0)
         self.assertEqual(self.user.number_of_referrals(), 2)
         self.assertEqual(self.user.number_of_activate_referrals(), 0)
@@ -763,7 +767,7 @@ class PayoutAmountTest(TestCase):
             user_referral_hit1.payment_status,
             UserProfileReferralHit.OPENED,
         )
-        self.assertEqual(self.user.current_referral_payout(), 0)
+        self.assertEqual(get_current_payout_per_referral(), 93)
         self.assertEqual(self.user.total_earnings_for_referrals(), 99)
         self.assertEqual(self.user.number_of_referrals(), 2)
         self.assertEqual(self.user.number_of_activate_referrals(), 1)
@@ -815,7 +819,7 @@ class PayoutAmountTest(TestCase):
             user_referral_hit3.payment_status,
             UserProfileReferralHit.PAID,
         )
-        self.assertEqual(self.users[3].current_referral_payout(), 95)
+        self.assertEqual(get_current_payout_per_referral(), 92)
         self.assertEqual(self.users[3].total_earnings_for_referrals(), 95)
         self.assertEqual(self.users[3].number_of_referrals(), 1)
         self.assertEqual(self.users[3].number_of_activate_referrals(), 1)
@@ -827,7 +831,7 @@ class PayoutAmountTest(TestCase):
             user_referral_hit3.payment_status,
             UserProfileReferralHit.REQUESTING,
         )
-        self.assertEqual(self.users[3].current_referral_payout(), 0)
+        self.assertEqual(get_current_payout_per_referral(), 92)
         self.assertEqual(self.users[3].total_earnings_for_referrals(), 95)
         self.assertEqual(self.users[3].number_of_referrals(), 1)
         self.assertEqual(self.users[3].number_of_activate_referrals(), 1)
