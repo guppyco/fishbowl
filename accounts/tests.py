@@ -19,7 +19,13 @@ from .factories import (
     UserProfileFactory,
     UserProfileReferralHitFactory,
 )
-from .models import Payout, PayoutRequest, UserProfile, UserProfileReferralHit
+from .models import (
+    IpTracker,
+    Payout,
+    PayoutRequest,
+    UserProfile,
+    UserProfileReferralHit,
+)
 from .utils import (
     calculate_referral_amount,
     get_current_payout_per_referral,
@@ -855,3 +861,21 @@ class PayoutAmountTest(TestCase):
             amount_total += calculate_referral_amount(i, total)
 
         self.assertTrue(amount_total < 10000)
+
+
+class IpTrackerTests(APITestCase):
+    def setUp(self):
+        self.user = setup_tests(self.client)
+
+    def test_track_ip(self):
+        ips = IpTracker.objects.count()
+        self.assertEqual(ips, 0)
+
+        profile_url = reverse("user_profile_api")
+        self.client.get(profile_url)
+        ips = IpTracker.objects.count()
+        self.assertEqual(ips, 1)
+        # Visit profile page one more time
+        self.client.get(profile_url)
+        ips = IpTracker.objects.count()
+        self.assertEqual(ips, 1)
