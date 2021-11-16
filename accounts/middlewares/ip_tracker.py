@@ -12,12 +12,12 @@ class IpTrackerMiddleware:
 
     def __call__(self, request):
         user = request.user
-        ip = self.get_client_ip(request)
+        ip_address = self.get_client_ip(request)
 
         if user.is_authenticated:
             IpTracker.objects.get_or_create(
                 user_profile=user,
-                ip=ip,
+                ip=ip_address,
             )
 
         response = self.get_response(request)
@@ -30,8 +30,8 @@ class IpTrackerMiddleware:
         """
         x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
         if x_forwarded_for:
-            ip = x_forwarded_for.split(",")[0]
+            ip_address = x_forwarded_for.split(",")[0]
         else:
-            ip = request.META.get("REMOTE_ADDR")
+            ip_address = request.META.get("REMOTE_ADDR")
 
-        return ip
+        return ip_address
