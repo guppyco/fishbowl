@@ -57,6 +57,9 @@
           <li class="nav-item {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
             <a class="nav-link" href="{{ base_url }}">Home <span class="sr-only">(current)</span></a>
           </li>
+          <li class="nav-item {% if request.resolver_match.url_name == 'about' %}active{% endif %}">
+            <a class="nav-link" href="{% url 'about' %}">About</a>
+          </li>
           <li class="nav-item {% if request.resolver_match.url_name == 'faqs-list' %}active{% endif %}">
             <a class="nav-link" href="{% url 'faqs:faqs-list' %}">FAQS</a>
           </li>
@@ -100,6 +103,11 @@
         </div>
 
         <div class="row text-center d-flex justify-content-center pt-4">
+          <div class="col-md-4 mb-3">
+            <h6 class="text-uppercase font-weight-bold">
+              <a href="{% url 'about' %}">About</a>
+            </h6>
+          </div>
           <div class="col-md-4 mb-3">
             <h6 class="text-uppercase font-weight-bold">
               <a href="{% url 'terms-of-service' %}">Terms of service</a>
