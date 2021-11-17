@@ -28,6 +28,14 @@ a {
 .navbar-light .navbar-text a.btn-outline-secondary:hover {
   color: #fff;
 }
+.homepage-head h1 {
+  font-size: 3rem;
+}
+@media (min-width: 768px) {
+  .homepage-head h1 {
+    font-size: 3.5rem;
+  }
+}
 .faqs .list-faq {
   margin: 0;
   padding: 0;

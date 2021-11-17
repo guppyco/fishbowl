@@ -54,9 +54,6 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav mr-auto">
-          <li class="nav-item {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
-            <a class="nav-link" href="{{ base_url }}">Home <span class="sr-only">(current)</span></a>
-          </li>
           <li class="nav-item {% if request.resolver_match.url_name == 'faqs-list' %}active{% endif %}">
             <a class="nav-link" href="{% url 'faqs:faqs-list' %}">FAQS</a>
           </li>
