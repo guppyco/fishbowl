@@ -5,7 +5,7 @@ from freezegun import freeze_time
 from rest_framework.test import APITestCase
 
 from django.contrib.auth import authenticate
-from django.test import RequestFactory, TestCase
+from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
@@ -19,7 +19,13 @@ from .factories import (
     UserProfileFactory,
     UserProfileReferralHitFactory,
 )
-from .models import Payout, PayoutRequest, UserProfile, UserProfileReferralHit
+from .models import (
+    IpTracker,
+    Payout,
+    PayoutRequest,
+    UserProfile,
+    UserProfileReferralHit,
+)
 from .utils import (
     calculate_referral_amount,
     get_current_payout_per_referral,
@@ -78,8 +84,8 @@ class SignupPageTests(TestCase):
         redirect = response.redirect_chain.pop()
         self.assertIn("/signup/success/", redirect[0])
         self.assertEqual(redirect[1], 302)
-        member = UserProfile.objects.latest("created")
-        self.assertEqual(member.get_short_name(), "Name")
+        account = UserProfile.objects.latest("created")
+        self.assertEqual(account.get_short_name(), "Name")
         self.assertContains(
             response, "Google analytics client-side tracking script"
         )
@@ -133,8 +139,8 @@ class SignupPageTests(TestCase):
         Test that the user can login from the login page.
         TODO: Remove the 'login' flag.
         """
-        member = UserProfile.objects.create_user("anna@guppy.co", "test")
-        user = authenticate(username=member.email, password="test")
+        account = UserProfile.objects.create_user("anna@guppy.co", "test")
+        user = authenticate(username=account.email, password="test")
         self.assertIsNotNone(user)
         data = {
             "login-username": "anna@guppy.co",
@@ -151,8 +157,8 @@ class SignupPageTests(TestCase):
         Test that the user can login from the login page.
         then redirect to "next"
         """
-        member = UserProfile.objects.create_user("anna@guppy.co", "test")
-        user = authenticate(username=member.email, password="test")
+        account = UserProfile.objects.create_user("anna@guppy.co", "test")
+        user = authenticate(username=account.email, password="test")
         self.assertIsNotNone(user)
         data = {
             "login-username": "anna@guppy.co",
@@ -209,8 +215,7 @@ class SignupPageTests(TestCase):
 
 class ProfileViewTests(TestCase):
     def setUp(self):
-        self.member = setup_tests(self.client)
-        self.factory = RequestFactory()
+        setup_tests(self.client)
 
     def test_profile_page(self):
         url = reverse("user_profile")
@@ -220,8 +225,7 @@ class ProfileViewTests(TestCase):
 
 class ProfileUpdateTests(TestCase):
     def setUp(self):
-        self.member = setup_tests(self.client)
-        self.factory = RequestFactory()
+        setup_tests(self.client)
 
     def test_profile_page(self):
         url = reverse("user_profile_edit")
@@ -855,3 +859,21 @@ class PayoutAmountTest(TestCase):
             amount_total += calculate_referral_amount(i, total)
 
         self.assertTrue(amount_total < 10000)
+
+
+class IpTrackerTests(APITestCase):
+    def setUp(self):
+        self.user = setup_tests(self.client)
+
+    def test_track_ip(self):
+        ips = IpTracker.objects.count()
+        self.assertEqual(ips, 0)
+
+        profile_url = reverse("user_profile_api")
+        self.client.get(profile_url)
+        ips = IpTracker.objects.count()
+        self.assertEqual(ips, 1)
+        # Visit profile page one more time
+        self.client.get(profile_url)
+        ips = IpTracker.objects.count()
+        self.assertEqual(ips, 1)
