@@ -405,3 +405,25 @@ class PayoutRequest(TimeStampedModel):
             )
 
         super().save(*args, **kwargs)
+
+
+class IpTracker(TimeStampedModel):
+    """
+    Track IP addresses of logged in users
+    """
+
+    user_profile = models.ForeignKey(
+        UserProfile,
+        on_delete=models.CASCADE,
+        related_name="ips",
+        blank=False,
+        null=False,
+    )
+    ip = models.CharField(max_length=100, blank=False, null=False)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user_profile", "ip"], name="unique_ip"
+            )
+        ]

@@ -77,6 +77,7 @@ MIDDLEWARE = [
     "django_reflinks.middleware.AnonymousReferralMiddleware",
     "django_reflinks.middleware.ReferralLinkMiddleware",
     "django_user_agents.middleware.UserAgentMiddleware",
+    "accounts.middlewares.ip_tracker.IpTrackerMiddleware",
 ]
 
 ROOT_URLCONF = "guppy.urls"
