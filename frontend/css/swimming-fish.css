@@ -167,18 +167,18 @@
     -o-transform: translate(80vw, -280px) rotateY(180deg) rotateZ(-10deg);
   }
   70% {
-    transform: translate(63vw, -510px) rotateY(180deg) rotateZ(-20deg);;
-    -webkit-transform: translate(63vw, -510px) rotateY(180deg) rotateZ(-20deg);;
-    -moz-transform: translate(63vw, -510px) rotateY(180deg) rotateZ(-20deg);;
-    -ms-transform: translate(63vw, -510px) rotateY(180deg) rotateZ(-20deg);;
-    -o-transform: translate(63vw, -510px) rotateY(180deg) rotateZ(-20deg);;
+    transform: translate(63vw, -470px) rotateY(180deg) rotateZ(-20deg);;
+    -webkit-transform: translate(63vw, -470px) rotateY(180deg) rotateZ(-20deg);;
+    -moz-transform: translate(63vw, -470px) rotateY(180deg) rotateZ(-20deg);;
+    -ms-transform: translate(63vw, -470px) rotateY(180deg) rotateZ(-20deg);;
+    -o-transform: translate(63vw, -470px) rotateY(180deg) rotateZ(-20deg);;
   }
   74% {
-    transform: translate(55vw, -520px) rotateY(180deg) rotateZ(40deg);;
-    -webkit-transform: translate(55vw, -520px) rotateY(180deg) rotateZ(40deg);;
-    -moz-transform: translate(55vw, -520px) rotateY(180deg) rotateZ(40deg);;
-    -ms-transform: translate(55vw, -520px) rotateY(180deg) rotateZ(40deg);;
-    -o-transform: translate(55vw, -520px) rotateY(180deg) rotateZ(40deg);;
+    transform: translate(55vw, -480px) rotateY(180deg) rotateZ(40deg);;
+    -webkit-transform: translate(55vw, -480px) rotateY(180deg) rotateZ(40deg);;
+    -moz-transform: translate(55vw, -480px) rotateY(180deg) rotateZ(40deg);;
+    -ms-transform: translate(55vw, -480px) rotateY(180deg) rotateZ(40deg);;
+    -o-transform: translate(55vw, -480px) rotateY(180deg) rotateZ(40deg);;
   }
   80% {
     transform: translate(40vw, -245px) rotateY(180deg) rotateZ(45deg);
@@ -193,6 +193,13 @@
     -moz-transform: translate(20vw, 165px) rotateY(180deg) rotateZ(50deg);
     -ms-transform: translate(20vw, 165px) rotateY(180deg) rotateZ(50deg);
     -o-transform: translate(20vw, 165px) rotateY(180deg) rotateZ(50deg);
+  }
+  96% {
+    transform: translate(18vw, 175px) rotateY(180deg) rotateZ(5deg);
+    -webkit-transform: translate(18vw, 175px) rotateY(180deg) rotateZ(5deg);
+    -moz-transform: translate(18vw, 175px) rotateY(180deg) rotateZ(5deg);
+    -ms-transform: translate(18vw, 175px) rotateY(180deg) rotateZ(5deg);
+    -o-transform: translate(18vw, 175px) rotateY(180deg) rotateZ(5deg);
   }
   99% {
     transform: translate(0vw) rotateY(180deg);
@@ -219,15 +226,15 @@
 
 .fish-body {
   position: absolute;
-  width: 160px;
-  height: 75px;
+  width: 120px;
+  height: 57px;
   border-radius: 50%;
   background-color: #0084FF;
-  box-shadow: 23px -6px 17px inset #ff5e00;
-  -webkit-box-shadow: 23px -6px 17px inset #ff5e00;
-  -moz-box-shadow: 23px -6px 17px inset #ff5e00;
-  -o-box-shadow: 23px -6px 17px inset #ff5e00;
-  -ms-box-shadow: 23px -6px 17px inset #ff5e00;
+  box-shadow: 14px -3px 16px inset #ff5e00;
+  -webkit-box-shadow: 14px -3px 16px inset #ff5e00;
+  -moz-box-shadow: 14px -3px 16px inset #ff5e00;
+  -o-box-shadow: 14px -3px 16px inset #ff5e00;
+  -ms-box-shadow: 14px -3px 16px inset #ff5e00;
   transform: skewX(5deg) skewY(-10deg);
   -webkit-transform: skewX(5deg) skewY(-10deg);
   -moz-transform: skewX(5deg) skewY(-10deg);
@@ -237,32 +244,32 @@
 
 .fish-body:before {
   content: "";
-  width: 15px;
-  height: 15px;
+  width: 11px;
+  height: 12px;
   background-color: #ffffff;
   position: absolute;
   border-radius: 50%;
-  right: 18px;
-  top: 16px;
+  right: 13px;
+  top: 14px;
 }
 
 .fish-body:after {
   content: "";
-  width: 7px;
-  height: 9px;
+  width: 5px;
+  height: 7px;
   background-color: #000000;
   position: absolute;
   border-radius: 50%;
-  right: 20px;
-  top: 18px;
+  right: 15px;
+  top: 17px;
 }
 
 .top-fin {
   position: absolute;
-  left: 79px;
-  top: -23px;
-  width: 28px;
-  height: 50px;
+  left: 56px;
+  top: -20px;
+  width: 20px;
+  height: 40px;
   border-radius: 20% 50%;
   background-color: #0084FF;
   box-shadow: 2px -11px 7px inset #00000080;
@@ -307,9 +314,9 @@
 .tail-fin {
   position: absolute;
   left: -35px;
-  bottom: -89px;
-  width: 43px;
-  height: 50px;
+  bottom: -77px;
+  width: 34px;
+  height: 43px;
   border-radius: 40% 50%;
   background-color: #FF5E00;
   box-shadow: 1px -13px 7px inset #00000047;
@@ -329,10 +336,10 @@
   content: "";
   z-index: -1;
   position: absolute;
-  left: -16px;
+  left: -18px;
   bottom: 19px;
-  width: 40px;
-  height: 48px;
+  width: 34px;
+  height: 43px;
   border-radius: 40% 50%;
   background-color: #FF5E00;
   box-shadow: 1px -13px 7px inset #00000047;
@@ -373,10 +380,10 @@
 
 .side-fin {
   position: absolute;
-  left: 82px;
-  bottom: -77px;
-  width: 33px;
-  height: 38px;
+  left: 69px;
+  bottom: -60px;
+  width: 24px;
+  height: 29px;
   border-radius: 50% 40%;
   background-color: #0084FF;
   box-shadow: 1px -13px 7px inset #00000080;
@@ -394,8 +401,8 @@
 
 .scale {
   position: absolute;
-  width: 21px;
-  height: 24px;
+  width: 16px;
+  height: 20px;
   border-radius: 39%;
   background-color: #0084FF;
   box-shadow: 3px -3px 5px inset #ff530059;
@@ -411,19 +418,81 @@
 }
 
 .scale-1 {
-  left: 48px;
-  bottom: -44px;
+  left: 35px;
+  bottom: -37px;
 }
 
 .scale-2 {
-  left: 64px;
-  bottom: -32px;
+  left: 49px;
+  bottom: -28px;
 }
 
 .scale-3 {
-  left: 84px;
-  bottom: -37px;
+  left: 60px;
+  bottom: -35px;
 }
+
+@media (min-width: 768px) {
+  .fish-body {
+    width: 160px;
+    height: 75px;
+    box-shadow: 23px -6px 17px inset #ff5e00;
+    -webkit-box-shadow: 23px -6px 17px inset #ff5e00;
+    -moz-box-shadow: 23px -6px 17px inset #ff5e00;
+    -o-box-shadow: 23px -6px 17px inset #ff5e00;
+    -ms-box-shadow: 23px -6px 17px inset #ff5e00;
+  }
+  .top-fin {
+    left: 79px;
+    top: -23px;
+    width: 28px;
+    height: 50px;
+  }
+  .tail-fin {
+    bottom: -89px;
+    width: 43px;
+    height: 50px;
+  }
+  .tail-fin:before {
+    width: 40px;
+    height: 48px;
+  }
+  .side-fin {
+    left: 82px;
+    bottom: -77px;
+    width: 33px;
+    height: 38px;
+  }
+  .scale {
+    width: 21px;
+    height: 24px;
+  }
+  .scale-1 {
+    left: 48px;
+    bottom: -44px;
+  }
+  .scale-2 {
+    left: 64px;
+    bottom: -32px;
+  }
+  .scale-3 {
+    left: 84px;
+    bottom: -37px;
+  }
+  .fish-body:before {
+    width: 15px;
+    height: 15px;
+    right: 18px;
+    top: 16px;
+  }
+  .fish-body:after {
+    width: 7px;
+    height: 9px;
+    right: 20px;
+    top: 18px;
+  }
+}
+
 body footer .long_plant {
   display: block;
   position: absolute;

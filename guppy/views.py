@@ -11,6 +11,10 @@ class PrivacyPolicyView(TemplateView):
     template_name = "guppy/privacy_policy.html"
 
 
+class AboutView(TemplateView):
+    template_name = "guppy/about.html"
+
+
 class ReferralProgramView(TemplateView):
     template_name = "guppy/referral_program.html"
 
