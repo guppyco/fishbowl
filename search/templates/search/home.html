@@ -1,11 +1,13 @@
 {% extends "index.html" %}
 {% load static %}
+{% load cache %}
 
 {% block header_tags %}
 <link rel="stylesheet" href="{% static 'css/swimming-fish.css' %}">
 {% endblock %}
 
 {% block content %}
+{% cache 3600 home_page_intro user.is_authenticated %}
 <div class="row home-page">
   <div class="col-md-8 offset-md-2">
     {% if not user.is_authenticated %}
@@ -69,9 +71,11 @@
     -->
   </div>
 </div>
+{% endcache %}
 {% endblock %}
 
 {% block swimming_fish %}
+{% cache 3600 home_page_fish_swimming %}
 <div class="fish-block">
   <div id="fish-tank">
     <div id="bubble-field"></div>
@@ -89,6 +93,7 @@
     </div>
   </div>
 </div>
+{% endcache %}
 {% endblock %}
 
 {% block extra_js %}

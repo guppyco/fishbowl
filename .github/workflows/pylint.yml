@@ -11,10 +11,13 @@ jobs:
     steps:
       - name: apt update
         run: sudo apt update
+      - uses: niden/actions-memcached@v7
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
         with:
           python-version: 3.8.5
+      - name: memcached dependencies
+        run: sudo apt install libmemcached-dev
       - name: Cache Python environment
         uses: actions/cache@v2
         with:
