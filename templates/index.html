@@ -125,6 +125,8 @@
     </footer>
     <!-- Footer -->
 
+    {% block extra_js %}{% endblock %}
+
     <!-- Sovrn //Commerce scripts -->
     {% if not debug %}
     <script type="text/javascript">
@@ -141,5 +143,4 @@
     {% endif %}
 
   </body>
-  {% block extra_js %}{% endblock %}
 </html>
