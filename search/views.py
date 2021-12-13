@@ -7,6 +7,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from django.conf import settings
+from django.http.response import HttpResponse
 from django.shortcuts import redirect, render
 
 from accounts.models import UserProfile
@@ -41,6 +42,25 @@ def guppy_search(request):
     template = "search/search.html"
     context = {"q": request.GET["q"]}
     return render(request, template, context)
+
+
+def search_tracking(request):
+    queries = request.GET
+    user_id = request.user.pk
+    if user_id is None:
+        user_id = 0
+    data = {}
+    if "url" in queries and "search_term" in queries:
+        data["url"] = queries["url"][1:-1]
+        data["search_term"] = queries["search_term"][1:-1].replace("<and>", "&")
+        data["user_id"] = user_id
+
+        serializer = HistorySerialzer(data=data)
+        if serializer.is_valid(raise_exception=True):
+            click_url(data)
+            return redirect(data["url"])
+
+    return HttpResponse("Unauthorized", status=status.HTTP_401_UNAUTHORIZED)
 
 
 class SearchView(mixins.CreateModelMixin, generics.GenericAPIView):
@@ -111,7 +131,7 @@ class HistoryCreateView(CreateAPIView):
     def create(self, request, *args, **kwargs):
         data = {}
         for key, item in request.data.items():
-            if item.strip():
+            if item and item.strip():
                 data[key] = item
         user_id = request.user.pk
         if user_id is None:

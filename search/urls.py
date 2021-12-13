@@ -27,4 +27,5 @@ urlpatterns = [  # pylint: disable=invalid-name
         name="api_histories",
     ),
     path("search/", views.guppy_search, name="guppy_search"),
+    path("search-tracking/", views.search_tracking, name="search_tracking"),
 ]
