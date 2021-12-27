@@ -11,6 +11,7 @@ class Advertiser(TimeStampedModel):
     Advertiser model
     """
 
+    email = models.EmailField(blank=False, null=False)
     ad_url = models.CharField(max_length=1000, blank=False, null=False)
     ad_sizes = models.ManyToManyField("advertisers.AdSize")
     monthly_budget = models.IntegerField(blank=False, null=False)

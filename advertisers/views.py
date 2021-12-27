@@ -14,15 +14,29 @@ from .forms import AdvertiserCreationForm
 LOGGER = logging.getLogger(__name__)
 
 
+def index(request):
+    """
+    Advertiser landing page
+    """
+
+    email = ""
+    if request.user.is_authenticated:
+        email = request.user.email
+    template = "advertisers/index.html"
+    return render(request, template, {"email": email})
+
+
 def signup(request):
     """
     Handle signup user
     """
 
-    form = AdvertiserCreationForm()
+    email = request.GET.get("email", "")
+    form = AdvertiserCreationForm(initial={"email": email})
     context = {
         "is_payment": False,
         "form": form,
+        "email": email,
     }
     template = "advertisers/signup.html"
 
@@ -41,9 +55,8 @@ def signup(request):
         if advertiser_form.is_valid():
             stripe.api_key = settings.STRIPE_SECRET_KEY
 
-            customer_data = {}
+            customer_data = {"email": request.POST.get("email")}
             if request.user.is_authenticated:
-                customer_data = {"email": request.user.email}
                 advertiser_form.user_profile = request.user
             customer = stripe.Customer.create(**customer_data)
             setup_intent = stripe.SetupIntent.create(

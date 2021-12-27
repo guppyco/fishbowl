@@ -53,6 +53,7 @@ class AdvertiserCreationForm(forms.ModelForm):
     class Meta:
         model = Advertiser
         fields = [
+            "email",
             "ad_url",
             "ad_sizes",
             "monthly_budget",

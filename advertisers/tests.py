@@ -36,6 +36,7 @@ class StripeTests(TestCase):
         url = reverse("advertiser_signup")
         ad_size = AdSizeFactory(width=250)
         data = {
+            "email": "email@example.com",
             "ad_url": "https://example.com/",
             "monthly_budget": "10",
             "ad_sizes": [ad_size.pk],
@@ -47,6 +48,7 @@ class StripeTests(TestCase):
 
         advertisers = Advertiser.objects.all()
         self.assertEqual(advertisers.count(), 1)
+        self.assertEqual(advertisers[0].email, "email@example.com")
         self.assertEqual(advertisers[0].ad_url, "https://example.com/")
         self.assertEqual(advertisers[0].ad_sizes.first().width, 250)
         self.assertEqual(advertisers[0].is_valid_payment, False)
