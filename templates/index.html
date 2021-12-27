@@ -46,7 +46,7 @@
     {% endif %}
 
   </head>
-  <body class="d-flex flex-column min-vh-100">
+  <body class="d-flex flex-column min-vh-100 {% if request.resolver_match.url_name == 'home' %}home{% endif %}">
     <nav class="navbar navbar-expand-lg navbar-light">
       <a class="navbar-brand" href="{{ base_url }}"><img src="{% static 'assets/images/logo-with-name_394x128.png' %}" /></a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
