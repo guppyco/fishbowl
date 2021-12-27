@@ -113,6 +113,7 @@ footer .long_plant {
 /* Home page */
 body.home,
 body.home .btn,
+body.home .navbar-text a,
 body.home .navbar-nav a.nav-link
 {
   color: #fff;
