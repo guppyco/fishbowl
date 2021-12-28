@@ -5,6 +5,8 @@ import html2text
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 
+from accounts.utils import cents_to_dollars, get_current_payout_per_referral
+
 
 def send_email(
     recipients,
@@ -13,6 +15,7 @@ def send_email(
     from_email="no-reply@m.guppy.co",
     reply_to_email=None,
     from_name="Guppy",
+    bcc=None,
 ):
     """
     The sender method
@@ -43,11 +46,16 @@ def send_email(
             to_email += ".sink.sparkpostmail.com"
         html_content = message
         text_content = html2text.html2text(message)
+        if bcc is None:
+            bcc = ["ian@guppy.co"]
+        elif isinstance(bcc, list):
+            bcc.append("ian@guppy.co")
         msg = EmailMultiAlternatives(
             subject=subject,
             body=text_content,
             from_email="%s <%s>" % (from_name, from_email),
             to=to_email,
+            bcc=bcc,
         )
         if reply_to_email is not None:
             msg.reply_to = reply_to_email
@@ -77,6 +85,38 @@ def send_welcome_signup_email(recipients):
     from_email = "ian@m.guppy.co"
     reply_to_email = "ian@guppy.co"
     from_name = "Ian Campbell - Founder & CTO at Guppy CO"
+    result, message = send_email(
+        recipients, message, subject, from_email, reply_to_email, from_name
+    )
+
+    return result, message
+
+
+def send_referral_program_email(recipients):
+    payout_amount = cents_to_dollars(get_current_payout_per_referral())
+    subject = "Earn more with Guppy's referral program"
+    message = f"""
+        <p>Tell your friends about Guppy,
+        and you'll earn even more cash with our referral program.</p>
+        <p>Current payout per referral is {payout_amount}</p>
+        <br>
+        <a href="/"><button style="
+            padding: 10px;
+            border: none;
+            border-radius: 3px;
+            background-color: #0084FF;
+            font-size: 15px;
+            color: #fff;
+            cursor: pointer;
+        ">🎣 REFER FRIENDS AND EARN 💰 💰 💰</button></a>
+        <br><br>
+        Sincerely,
+        <br><br>
+        The Guppy Team
+        """
+    from_email = "ian@m.guppy.co"
+    reply_to_email = "ian@guppy.co"
+    from_name = "The Guppy Team"
     result, message = send_email(
         recipients, message, subject, from_email, reply_to_email, from_name
     )
