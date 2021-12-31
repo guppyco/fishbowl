@@ -7,7 +7,18 @@
 
 {% block content %}
 <div class="row">
-  <h4 class="col-md-8 offset-md-2">{{ text }}</h4>
+  <div class="col-md-8 offset-md-2">
+    {% if error_text %}
+    <h4>{{ error_text }}</h4>
+    {% else %}
+    <h4>
+      Your advertiser account has been created! We'll begin serving your ads shortly. 
+    </h4>
+    <h4>
+      Expect an email from one of our team members with additional information. Thanks for being a Guppy advertiser! As usual, please email help@guppy.co wtih any questions or comments."
+    </h4>
+    {% endif %}
+  </div>
   <p class="col-md-8 offset-md-2"><a href="{{ base_url }}"><< Back to home</a></p>
 </div>
 {% endblock content %}

@@ -92,18 +92,21 @@ def signup_success(request):
     Signup advertiser success page
     """
 
-    text = "The advertiser is created successfully"
     customer_id = request.GET.get("customer_id", "")
     redirect_status = request.GET.get("redirect_status", "")
+    error_text = None
     if not customer_id or redirect_status != "succeeded":
-        text = "Something went wrong!"
+        error_text = "Something went wrong!"
     else:
         try:
             advertiser = Advertiser.objects.get(stripe_id=customer_id)
             advertiser.is_valid_payment = True
             advertiser.save()
         except Advertiser.DoesNotExist:
-            text = "The advertiser does not exist."
+            LOGGER.error(
+                "Advertiser with stripe_id %s does not exist.", customer_id
+            )
+            error_text = "Something went wrong - we'll be reaching out for more information, or please contact us at help@guppy.co."
 
     template = "advertisers/signup_success.html"
-    return render(request, template, {"text": text})
+    return render(request, template, {"error_text": error_text})
