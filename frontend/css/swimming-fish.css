@@ -1,7 +1,7 @@
 .fish-block {
   width: 100%;
   height: 100%;
-  background-color: #b2eaff;
+  background-color: #233b78;
   position: absolute;
   top: 0;
   left: 0;
@@ -50,11 +50,11 @@
 
 .bubble {
   position: relative;
-  box-shadow: 0px 0px 12px 5px inset #fff;
-  -webkit-box-shadow: 0px 0px 12px 5px inset #fff;
-  -moz-box-shadow: 0px 0px 12px 5px inset #fff;
-  -o-box-shadow: 0px 0px 12px 5px inset #fff;
-  -ms-box-shadow: 0px 0px 12px 5px inset #fff;
+  box-shadow: 0px 0px 12px 5px inset #7d94d1;
+  -webkit-box-shadow: 0px 0px 12px 5px inset #7d94d1;
+  -moz-box-shadow: 0px 0px 12px 5px inset #7d94d1;
+  -o-box-shadow: 0px 0px 12px 5px inset #7d94d1;
+  -ms-box-shadow: 0px 0px 12px 5px inset #7d94d1;
   border-radius: 50%;
   display: inline-block;
   width: 30px;
@@ -69,7 +69,7 @@
 .bubble:after {
   content: '';
   position: absolute;
-  background-color: white;
+  background-color: #c1d4ff;
   width: 13px;
   height: 8px;
   top: 10%;

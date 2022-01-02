@@ -7,7 +7,6 @@
 {% endblock %}
 
 {% block content %}
-{% cache 3600 home_page_intro user.is_authenticated %}
 <div class="row home-page">
   <div class="col-md-8 offset-md-2">
     {% if not user.is_authenticated %}
@@ -45,11 +44,18 @@
 
     <section>
       <h2>How it works</h2>
-      <p>
-        Like Google, Facebook, Twitter, and other tech companies, Guppy collects personal information about your browsing history.<br />
-        Unlike these platforms, Guppy pays you for your data.<br />
-        <b>Your data is valuable - get paid for it.</b>
-      </p>
+      <div class="row how-it-works">
+        <div class="col-md-4">
+          <p>Like Google, Facebook, Twitter, and other tech companies, Guppy collects personal information about your browsing history.<br><br>
+            Unlike these platforms, Guppy pays you for your data.</p>
+        </div>
+        <div class="col-md-4">
+          <p>Guppy removes ads across the web and replaces them with our own ads that make you even more money.</p>
+        </div>
+        <div class="col-md-4">
+          <p>Your data is valuable. Your attention is valuable. Get paid for it.</p>
+        </div>
+      </div>
     </section>
 
     <section>
@@ -71,7 +77,6 @@
     -->
   </div>
 </div>
-{% endcache %}
 {% endblock %}
 
 {% block swimming_fish %}

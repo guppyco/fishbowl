@@ -150,10 +150,14 @@ def login_user(request):
 @permission_classes([AllowAny])
 @authentication_classes([BasicAuthentication])
 def api_login_user(request):
-    login_form = CustomAuthenticationForm(data=request.POST)
+    if request.POST:
+        data = request.POST
+    else:
+        data = request.data
+    login_form = CustomAuthenticationForm(data=data)
     if login_form.is_valid():
-        username = request.POST["username"]
-        password = request.POST["password"]
+        username = data["username"]
+        password = data["password"]
         member = authenticate(username=username, password=password)
         if member is not None and member.is_active:
             login(request, member)
