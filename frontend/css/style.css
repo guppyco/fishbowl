@@ -87,6 +87,7 @@ a {
 footer {
   background-color: #0c1d46;
   color: #fff;
+  padding: 30px;
 }
 footer .container {
   position: relative;
