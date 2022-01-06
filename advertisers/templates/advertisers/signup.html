@@ -23,16 +23,16 @@
   <div class="col-md-8 offset-md-2 clearfix"></div>
   <div class="col-md-8 offset-md-2">
     {% if not is_payment %}
-    <form class="signup-login-form" action="" method="POST">{% csrf_token %}
+    <form class="signup-login-form" action="" method="POST" enctype="multipart/form-data">{% csrf_token %}
       {% crispy form %}
-      <button type="submit" class="btn btn-primary" name="signup">Checkout</button>
+      <button type="submit" class="btn btn-primary">Checkout</button>
     </form>
     {% else %}
     <form id="payment-form">
       <div id="payment-element">
         <!-- Elements will create form elements here -->
       </div>
-      <button id="submit" class="btn btn-primary" >Submit</button>
+      <button id="submit" class="btn btn-primary">Submit</button>
       <div id="error-message">
         <!-- Display error message to your customers here -->
       </div>

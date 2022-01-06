@@ -12,8 +12,9 @@
 <div class="row text-center advertisers">
   <div class="col-md-8 offset-md-2 alert alert-danger hidden" id="message" role="alert">
   </div>
-  <form class="input-group col-md-8 offset-md-2 form" id="email-form">
-    <input type="text" class="form-control" placeholder="Email" aria-label="Email" required id="email-input" value="{{ email }}">
+  <form class="input-group col-md-8 offset-md-2 form" id="email-form" method="POST" action="{% url 'advertiser_signup' %}">
+    {% csrf_token %}
+    <input type="email" name="email" class="form-control" placeholder="Email" aria-label="Email" required id="email-input" value="{{ email }}">
     <div class="input-group-append">
       <button class="btn btn-primary" type="submit">Advertise now</button>
     </div>
@@ -37,13 +38,13 @@
 
 {% block extra_js %}
 <script>
-  const form = document.getElementById('email-form');
+  // const form = document.getElementById('email-form');
 
-  form.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    const input = document.getElementById('email-input');
+  // form.addEventListener('submit', async (event) => {
+  //   event.preventDefault();
+  //   const input = document.getElementById('email-input');
 
-    window.location.href = '{% url "advertiser_signup" %}?email=' + encodeURIComponent(input.value)
-  })
+  //   window.location.href = '{% url "advertiser_signup" %}?email=' + encodeURIComponent(input.value)
+  // })
 </script>
 {% endblock extra_js %}

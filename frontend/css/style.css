@@ -85,7 +85,7 @@ a {
 }
 
 footer {
-  background-color: #156381;
+  background-color: #0c1d46;
   color: #fff;
 }
 footer .container {
@@ -111,6 +111,16 @@ footer .long_plant {
 }
 
 /* Home page */
+body.home,
+body.home .btn,
+body.home .navbar-text a,
+body.home .navbar-nav a.nav-link
+{
+  color: #fff;
+}
+body.home .navbar-toggler {
+  background-color: #fff;
+}
 .home-page section {
   margin-bottom: 35px;
 }

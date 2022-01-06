@@ -1,12 +1,12 @@
 from django.contrib import admin
 
-from .models import AdSize, Advertiser
+from .models import AdSize, Advertisement, Advertiser
 
 
 @admin.register(Advertiser)
 class AdvertiserAdmin(admin.ModelAdmin):
     list_display = (
-        "ad_url",
+        "email",
         "monthly_budget",
         "stripe_id",
         "user_profile",
@@ -25,3 +25,8 @@ class AdvertiserAdmin(admin.ModelAdmin):
 @admin.register(AdSize)
 class AdSizeAdmin(admin.ModelAdmin):
     list_display = ("width", "height", "is_enabled")
+
+
+@admin.register(Advertisement)
+class AdvertisementAdmin(admin.ModelAdmin):
+    list_display = ("url", "image")

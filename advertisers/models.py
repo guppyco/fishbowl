@@ -1,3 +1,5 @@
+import os
+
 from django_extensions.db.models import TimeStampedModel
 
 from django.db import models
@@ -12,8 +14,13 @@ class Advertiser(TimeStampedModel):
     """
 
     email = models.EmailField(blank=False, null=False)
-    ad_url = models.CharField(max_length=1000, blank=False, null=False)
-    ad_sizes = models.ManyToManyField("advertisers.AdSize")
+    advertisement = models.ForeignKey(
+        "advertisers.Advertisement",
+        on_delete=models.SET_NULL,
+        related_name="advertiser",
+        blank=True,
+        null=True,
+    )
     monthly_budget = models.IntegerField(blank=False, null=False)
     stripe_id = models.CharField(max_length=75, null=True, blank=True)
     user_profile = models.ForeignKey(
@@ -33,6 +40,22 @@ class Advertiser(TimeStampedModel):
         default=False,
         help_text=_("Is approved"),
     )
+
+
+def get_upload_path(instance, filename):
+    return os.path.join("advertisements", str(instance.id), filename)
+
+
+class Advertisement(models.Model):
+    """
+    The advertisement
+    """
+
+    url = models.URLField(max_length=2000, blank=False, null=False)
+    image = models.ImageField(upload_to=get_upload_path, null=True, blank=True)
+
+    def __str__(self):
+        return str(self.url)
 
 
 class AdSize(models.Model):

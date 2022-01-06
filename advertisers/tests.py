@@ -1,14 +1,25 @@
 # pylint: disable=missing-docstring
+import base64
+
+import mock
 import stripe
 
 from django.conf import settings
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.test.utils import override_settings
 from django.urls.base import reverse
 
 from accounts.utils import setup_tests
-from advertisers.factories import AdSizeFactory
 from advertisers.models import Advertiser
+
+
+class StripeCustomer:
+    id = "cus_test"
+
+
+class StripeSetupIntent:
+    client_secret = "client_secret_test"
 
 
 @override_settings(DEBUG=True)
@@ -20,26 +31,58 @@ class StripeTests(TestCase):
     def test_advertiser_signup_page(self):
         url = reverse("advertiser_signup")
         response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse("advertisers"))
 
     def test_advertiser_signup_submit_invalid(self):
         url = reverse("advertiser_signup")
         response = self.client.post(url, {})
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Checkout")
-        self.assertNotContains(response, "Submit")
+        self.assertEqual(response.status_code, 302)
 
         advertisers = Advertiser.objects.count()
         self.assertEqual(advertisers, 0)
 
-    def test_advertiser_signup_submit(self):
+    @mock.patch("stripe.Customer.create")
+    @mock.patch("stripe.SetupIntent.create")
+    def test_advertiser_signup_submit_email(
+        self, stripe_setup_intent_mock, stripe_customer_mock
+    ):
+        stripe_customer_mock.return_value = StripeCustomer()
+        stripe_setup_intent_mock.return_value = StripeSetupIntent()
         url = reverse("advertiser_signup")
-        ad_size = AdSizeFactory(width=250)
+        response = self.client.post(url, {"email": "admin@example.com"})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Checkout")
+        self.assertNotContains(response, "Submit")
+
+        advertisers = Advertiser.objects.all()
+        self.assertEqual(advertisers.count(), 1)
+        self.assertEqual(advertisers[0].email, "admin@example.com")
+        self.assertEqual(advertisers[0].monthly_budget, 0)
+        self.assertFalse(advertisers[0].advertisement)
+
+    @mock.patch("stripe.Customer.create")
+    @mock.patch("stripe.SetupIntent.create")
+    def test_advertiser_signup_submit(
+        self, stripe_setup_intent_mock, stripe_customer_mock
+    ):
+        stripe_customer_mock.return_value = StripeCustomer()
+        stripe_setup_intent_mock.return_value = StripeSetupIntent()
+        url = reverse("advertiser_signup")
+        self.client.post(url, {"email": "email@example.com"})
+        image_content = base64.b64decode(
+            "iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w3"
+            "8GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg=="
+        )
+        image = SimpleUploadedFile(
+            "file.jpg", image_content, content_type="image/jpeg"
+        )
+        advertiser = Advertiser.objects.first()
         data = {
-            "email": "email@example.com",
-            "ad_url": "https://example.com/",
+            "advertiser_id": advertiser.pk,
+            "url": "https://example.com/",
             "monthly_budget": "10",
-            "ad_sizes": [ad_size.pk],
+            "image": image,
         }
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, 200)
@@ -49,8 +92,7 @@ class StripeTests(TestCase):
         advertisers = Advertiser.objects.all()
         self.assertEqual(advertisers.count(), 1)
         self.assertEqual(advertisers[0].email, "email@example.com")
-        self.assertEqual(advertisers[0].ad_url, "https://example.com/")
-        self.assertEqual(advertisers[0].ad_sizes.first().width, 250)
+        self.assertEqual(advertisers[0].monthly_budget, 1000)
         self.assertEqual(advertisers[0].is_valid_payment, False)
         self.assertEqual(advertisers[0].approved, False)
 
@@ -61,7 +103,10 @@ class StripeTests(TestCase):
         response = self.client.get(url)
         advertiser = Advertiser.objects.first()
         self.assertEqual(advertiser.is_valid_payment, True)
-        self.assertContains(response, "The advertiser is created successfully")
-
-        # Delete Stripe customer after testing
-        stripe.Customer.delete(advertiser.stripe_id)
+        self.assertContains(
+            response,
+            (
+                "Your advertiser account has been created! "
+                "We'll begin serving your ads shortly."
+            ),
+        )

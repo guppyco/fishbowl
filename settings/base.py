@@ -268,6 +268,9 @@ STATICFILES_DIRS = [
     ("assets/images", BASE_DIR + "/frontend/assets/images/"),
 ]
 
+MEDIA_ROOT = BASE_DIR + "/files/"
+MEDIA_URL = "/files/"
+
 STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY")
 STRIPE_PUBLISHABLE_KEY = os.environ.get("STRIPE_PUBLISHABLE_KEY")
 
