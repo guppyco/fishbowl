@@ -58,6 +58,9 @@
           <li class="nav-item {% if request.resolver_match.url_name == 'about' %}active{% endif %}">
             <a class="nav-link" href="{% url 'about' %}">About</a>
           </li>
+          <li class="nav-item {% if request.resolver_match.url_name == 'advertisers' %}active{% endif %}">
+            <a class="nav-link" href="{% url 'advertisers' %}">Advertisers</a>
+          </li>
           <li class="nav-item {% if request.resolver_match.url_name == 'faqs-list' %}active{% endif %}">
             <a class="nav-link" href="{% url 'faqs:faqs-list' %}">FAQS</a>
           </li>
@@ -99,19 +102,25 @@
             <i class="bi bi-github"></i>
           </a>
         </div>
+        <hr class="clearfix rgba-white-light">
 
         <div class="row text-center d-flex justify-content-center pt-4">
-          <div class="col-md-4 mb-3">
+          <div class="col-md-3 mb-3">
             <h6 class="text-uppercase font-weight-bold">
               <a href="{% url 'about' %}">About</a>
             </h6>
           </div>
-          <div class="col-md-4 mb-3">
+          <div class="col-md-3 mb-3">
+            <h6 class="text-uppercase font-weight-bold">
+              <a href="{% url 'advertisers' %}">Advertisers</a>
+            </h6>
+          </div>
+          <div class="col-md-3 mb-3">
             <h6 class="text-uppercase font-weight-bold">
               <a href="{% url 'terms-of-service' %}">Terms of service</a>
             </h6>
           </div>
-          <div class="col-md-4 mb-3">
+          <div class="col-md-3 mb-3">
             <h6 class="text-uppercase font-weight-bold">
               <a href="{% url 'privacy-policy' %}">Privacy policy</a>
             </h6>

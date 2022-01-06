@@ -1,0 +1,89 @@
+{% extends "index.html" %}
+{% load crispy_forms_tags %}
+
+{% block header_tags %}
+<title>Sign up advertiser.</title>
+<meta name="description" content="Sign up advertiser"/>
+<script src="https://js.stripe.com/v3/"></script>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <h4 class="col-md-8 offset-md-2">Sign up advertiser</h4>
+  {% if messages %}
+    {% for message in messages %}
+    <div class="col-md-8 offset-md-2 alert {{ message.tags }} alert-dismissible fade show" role="alert">
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+      {{ message }}
+    </div>
+    {% endfor %}
+  {% endif %}
+  <div class="col-md-8 offset-md-2 clearfix"></div>
+  <div class="col-md-8 offset-md-2">
+    {% if not is_payment %}
+    <form class="signup-login-form" action="" method="POST" enctype="multipart/form-data">{% csrf_token %}
+      {% crispy form %}
+      <button type="submit" class="btn btn-primary">Checkout</button>
+    </form>
+    {% else %}
+    <form id="payment-form">
+      <div id="payment-element">
+        <!-- Elements will create form elements here -->
+      </div>
+      <button id="submit" class="btn btn-primary">Submit</button>
+      <div id="error-message">
+        <!-- Display error message to your customers here -->
+      </div>
+    </form>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock content %}
+
+{% block extra_js %}
+{% if is_payment %}
+<script>
+  const stripe = Stripe('{{ STRIPE_PUBLISHABLE_KEY }}');
+  const options = {
+    clientSecret: '{{ client_secret }}',
+  };
+
+  // Set up Stripe.js and Elements to use in checkout form, passing the client secret obtained in step 2
+  const elements = stripe.elements(options);
+
+  // Create and mount the Payment Element
+  const paymentElement = elements.create('payment');
+  paymentElement.mount('#payment-element');
+
+  // Submit form
+  const form = document.getElementById('payment-form');
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    const {error} = await stripe.confirmSetup({
+      //`Elements` instance that was used to create the Payment Element
+      elements,
+      confirmParams: {
+        return_url: '{{ success_url }}',
+      }
+    });
+
+    if (error) {
+      // This point will only be reached if there is an immediate error when
+      // confirming the payment. Show error to your customer (e.g., payment
+      // details incomplete)
+      const messageContainer = document.querySelector('#error-message');
+      messageContainer.textContent = error.message;
+    } else {
+      // Your customer will be redirected to your `return_url`. For some payment
+      // methods like iDEAL, your customer will be redirected to an intermediate
+      // site first to authorize the payment, then redirected to the `return_url`.
+    }
+  });
+</script>
+{% endif %}
+{% endblock extra_js %}
