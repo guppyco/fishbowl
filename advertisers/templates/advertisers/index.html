@@ -7,12 +7,12 @@
 
 {% block content %}
 <div class="row">
-  <h1 class="col-md-8 offset-md-2">The fastest way to advertise on any website online</h1>
+  <h1 class="col-md-8 offset-md-2">The fastest way to advertise on any website</h1>
 </div>
 <div class="row text-center advertisers">
   <div class="col-md-8 offset-md-2 alert alert-danger hidden" id="message" role="alert">
   </div>
-  <form class="input-group offset-md-2 form" id="email-form" method="POST" action="{% url 'advertiser_signup' %}">
+  <form class="input-group col-md-8 offset-md-2 form" id="email-form" method="POST" action="{% url 'advertiser_signup' %}">
     {% csrf_token %}
     <input type="email" name="email" class="form-control" placeholder="Email" aria-label="Email" required id="email-input" value="{{ email }}">
     <div class="input-group-append">

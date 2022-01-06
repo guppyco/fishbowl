@@ -103,4 +103,10 @@ class StripeTests(TestCase):
         response = self.client.get(url)
         advertiser = Advertiser.objects.first()
         self.assertEqual(advertiser.is_valid_payment, True)
-        self.assertContains(response, "The advertiser is created successfully")
+        self.assertContains(
+            response,
+            (
+                "Your advertiser account has been created! "
+                "We'll begin serving your ads shortly."
+            ),
+        )
