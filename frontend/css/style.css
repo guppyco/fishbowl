@@ -87,6 +87,7 @@ a {
 footer {
   background-color: #0c1d46;
   color: #fff;
+  padding: 30px;
 }
 footer .container {
   position: relative;
@@ -121,6 +122,10 @@ body.home .navbar-nav a.nav-link
 body.home .navbar-toggler {
   background-color: #fff;
 }
+.home-page .fish-tank-shadow {
+  background-color: rgba(35, 59, 120, 0.8);
+  box-shadow: 0 -30px 20px 20px rgb(35 59 120 / 80%);
+}
 .home-page section {
   margin-bottom: 35px;
 }
@@ -131,4 +136,12 @@ body.home .navbar-toggler {
 }
 .home-page .large-font {
   font-size: 23px;
+}
+
+.advertiser-info .head {
+  font-size: 100px;
+}
+.advertisers .form {
+  max-width: 420px;
+  margin: 0 auto;
 }
