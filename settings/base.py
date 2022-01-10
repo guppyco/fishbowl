@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     "adminsortable2",
     # Guppy apps
     "accounts",
+    "advertisers",
     "emails",
     "faqs",
     "guppy",
@@ -94,6 +95,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "accounts.context_processors.extra_context",
+                "advertisers.context_processors.extra_context",
             ],
         },
     },
@@ -265,6 +267,12 @@ STATICFILES_DIRS = [
     ("js", BASE_DIR + "/frontend/js/"),
     ("assets/images", BASE_DIR + "/frontend/assets/images/"),
 ]
+
+MEDIA_ROOT = BASE_DIR + "/files/"
+MEDIA_URL = "/files/"
+
+STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY")
+STRIPE_PUBLISHABLE_KEY = os.environ.get("STRIPE_PUBLISHABLE_KEY")
 
 HONEYPOT_FIELD_NAME = "guppy"
 
