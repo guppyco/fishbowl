@@ -37,10 +37,7 @@ def signup(request):
     if not email and not advertiser_id:
         return redirect("advertisers")
     if not advertiser_id:
-        advertiser = Advertiser.objects.create(
-            email=email,
-            monthly_budget=0,
-        )
+        advertiser = Advertiser.objects.create(email=email)
 
         advertisement_form = AdvertisementCreationForm(
             initial={"advertiser_id": advertiser.pk}
@@ -69,11 +66,8 @@ def signup(request):
                 payment_method_types=["card"],
             )
 
-            monthly_budget = request.POST.get("monthly_budget", 0)
-            budget = int(monthly_budget) * 100
             advertiser_model.advertisement = advertisement
             advertiser_model.stripe_id = customer.id
-            advertiser_model.monthly_budget = budget
             if request.user.is_authenticated:
                 advertiser_model.user_profile = request.user
             advertiser_model.save()

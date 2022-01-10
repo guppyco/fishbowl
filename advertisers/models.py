@@ -21,7 +21,6 @@ class Advertiser(TimeStampedModel):
         blank=True,
         null=True,
     )
-    monthly_budget = models.IntegerField(blank=False, null=False)
     stripe_id = models.CharField(max_length=75, null=True, blank=True)
     user_profile = models.ForeignKey(
         UserProfile,
@@ -53,6 +52,7 @@ class Advertisement(models.Model):
 
     url = models.URLField(max_length=2000, blank=False, null=False)
     image = models.ImageField(upload_to=get_upload_path, null=True, blank=True)
+    monthly_budget = models.IntegerField(blank=False, null=False, default=0)
 
     def __str__(self):
         return str(self.url)
