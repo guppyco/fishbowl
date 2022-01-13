@@ -23,7 +23,6 @@ class AdvertiserCreationForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.user_profile = kwargs.pop("user_profile", None)
         super().__init__(*args, **kwargs)
-        self.fields["monthly_budget"].label = "Monthly budget (US $)"
         self.helper = FormHelper(self)
         self.helper.layout = Layout()
         for field_name, field in list(self.fields.items()):
@@ -43,15 +42,9 @@ class AdvertiserCreationForm(forms.ModelForm):
     class Meta:
         model = Advertiser
         fields = [
-            "monthly_budget",
+            "email",
+            "stripe_id",
         ]
-
-    def clean_monthly_budget(self):
-        """
-        Convert monthly bedgut from dollar to cent
-        """
-        monthly_budget = self.cleaned_data["monthly_budget"] * 100
-        return monthly_budget
 
     def save(self, commit=True):
         instance = super().save(commit=False)
@@ -64,18 +57,18 @@ class AdvertiserCreationForm(forms.ModelForm):
 
 class AdvertisementCreationForm(forms.ModelForm):
     """
-    A form that creates an advertisement
-    and advertiser_id and monthly_budget to create Advertiser
+    A form that creates an advertisement for Advertiser
     """
 
+    # Submit advertiser_id which was created on the landing page
     advertiser_id = forms.IntegerField()
-    monthly_budget = forms.CharField()
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["advertiser_id"].widget = forms.HiddenInput()
         self.fields["url"].label = "Ad URL"
         self.fields["monthly_budget"].label = "Monthly budget (US $)"
+        self.fields["monthly_budget"].initial = None
         self.fields[
             "image"
         ].help_text = "<i>* Must be .png, .jpg, .jpeg, .gif</i>"
@@ -95,9 +88,17 @@ class AdvertisementCreationForm(forms.ModelForm):
         self.helper.form_show_labels = False
         self.helper.form_tag = False
 
+    def clean_monthly_budget(self):
+        """
+        Convert monthly bedgut from dollar to cent
+        """
+        monthly_budget = int(self.cleaned_data["monthly_budget"]) * 100
+        return monthly_budget
+
     class Meta:
         model = Advertisement
         fields = [
             "url",
             "image",
+            "monthly_budget",
         ]

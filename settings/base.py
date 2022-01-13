@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     "ckeditor",
     "ckeditor_uploader",
     "adminsortable2",
+    "compressor",
     # Guppy apps
     "accounts",
     "advertisers",
@@ -244,6 +245,7 @@ STATIC_URL = "/static/"
 STATICFILES_FINDERS = (
     "django.contrib.staticfiles.finders.FileSystemFinder",
     "django.contrib.staticfiles.finders.AppDirectoriesFinder",
+    "compressor.finders.CompressorFinder",
 )
 
 STATICFILES_DIRS = [
@@ -270,6 +272,8 @@ STATICFILES_DIRS = [
 
 MEDIA_ROOT = BASE_DIR + "/files/"
 MEDIA_URL = "/files/"
+
+COMPRESS_ENABLED = True
 
 STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY")
 STRIPE_PUBLISHABLE_KEY = os.environ.get("STRIPE_PUBLISHABLE_KEY")

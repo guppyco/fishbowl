@@ -58,7 +58,6 @@ class StripeTests(TestCase):
         advertisers = Advertiser.objects.all()
         self.assertEqual(advertisers.count(), 1)
         self.assertEqual(advertisers[0].email, "admin@example.com")
-        self.assertEqual(advertisers[0].monthly_budget, 0)
         self.assertFalse(advertisers[0].advertisement)
 
     @mock.patch("stripe.Customer.create")
@@ -92,9 +91,13 @@ class StripeTests(TestCase):
         advertisers = Advertiser.objects.all()
         self.assertEqual(advertisers.count(), 1)
         self.assertEqual(advertisers[0].email, "email@example.com")
-        self.assertEqual(advertisers[0].monthly_budget, 1000)
         self.assertEqual(advertisers[0].is_valid_payment, False)
         self.assertEqual(advertisers[0].approved, False)
+
+        advertisement = advertisers[0].advertisement
+        self.assertEqual(advertisement.monthly_budget, 1000)
+        self.assertEqual(advertisement.url, "https://example.com/")
+        self.assertTrue(advertisement.image)
 
         # Return from Stripe
         url = reverse("advertiser_signup_success") + (
@@ -110,3 +113,16 @@ class StripeTests(TestCase):
                 "We'll begin serving your ads shortly."
             ),
         )
+
+
+class AdsTest(TestCase):
+    def test_adsterra_not_found(self):
+        url = reverse("ads_view", kwargs={"width": 0, "height": 10})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 404)
+
+    def test_adsterra(self):
+        url = reverse("ads_view", kwargs={"width": 300, "height": 250})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "48e6c00c4f6d1487ce256f45fb4c634b")

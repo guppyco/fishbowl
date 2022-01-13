@@ -9,13 +9,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     {% block header_tags %}{% endblock %}
     {% load static %}
+    {% load compress %}
+    {% compress js %}
     <script type="text/javascript" src="{% static 'node_modules/jquery/dist/jquery.js' %}"></script>
     <script type="text/javascript" src="{% static 'node_modules/bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'node_modules/sentry/browser/build/bundle.js' %}"></script>
+    {% endcompress %}
+    {% compress css %}
     <link rel="stylesheet" type="text/css" href="{% static 'node_modules/bootstrap/dist/css/bootstrap.css' %}" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="{% static 'node_modules/bootstrap-icons/font/bootstrap-icons.css' %}" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}" crossorigin="anonymous" />
+    {% endcompress %}
     <link rel="icon" href="{% static 'assets/images/logo_128x128.png' %}" type="text/png"/>
-    <script type="text/javascript" src="{% static 'node_modules/sentry/browser/build/bundle.js' %}"></script>
     {% if sentry_dsn %}
     <script type="text/javascript">
       Sentry.init({ dsn: '{{sentry_dsn}}' });
@@ -136,21 +141,6 @@
     <!-- Footer -->
 
     {% block extra_js %}{% endblock %}
-
-    <!-- Sovrn //Commerce scripts -->
-    {% if not debug %}
-    <script type="text/javascript">
-      var vglnk = {key: 'ffa7d2fcb2bb7c922d9d3f0851bc14fc'};
-      (function(d, t) {
-          var s = d.createElement(t);
-              s.type = 'text/javascript';
-              s.async = true;
-              s.src = '//cdn.viglink.com/api/vglnk.js';
-          var r = d.getElementsByTagName(t)[0];
-              r.parentNode.insertBefore(s, r);
-      }(document, 'script'));
-    </script>
-    {% endif %}
 
   </body>
 </html>

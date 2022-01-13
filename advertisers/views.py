@@ -4,10 +4,13 @@ import stripe
 
 from django.conf import settings
 from django.contrib import messages
+from django.http import HttpResponseNotFound
 from django.shortcuts import redirect, render
 from django.urls import reverse
+from django.views.decorators.clickjacking import xframe_options_exempt
 
 from advertisers.models import Advertiser
+from advertisers.utils import get_adsterra_key
 
 from .forms import AdvertisementCreationForm
 
@@ -37,10 +40,7 @@ def signup(request):
     if not email and not advertiser_id:
         return redirect("advertisers")
     if not advertiser_id:
-        advertiser = Advertiser.objects.create(
-            email=email,
-            monthly_budget=0,
-        )
+        advertiser = Advertiser.objects.create(email=email)
 
         advertisement_form = AdvertisementCreationForm(
             initial={"advertiser_id": advertiser.pk}
@@ -69,11 +69,8 @@ def signup(request):
                 payment_method_types=["card"],
             )
 
-            monthly_budget = request.POST.get("monthly_budget", 0)
-            budget = int(monthly_budget) * 100
             advertiser_model.advertisement = advertisement
             advertiser_model.stripe_id = customer.id
-            advertiser_model.monthly_budget = budget
             if request.user.is_authenticated:
                 advertiser_model.user_profile = request.user
             advertiser_model.save()
@@ -130,3 +127,22 @@ def signup_success(request):
 
     template = "advertisers/signup_success.html"
     return render(request, template, {"error_text": error_text})
+
+
+@xframe_options_exempt
+def ads(request, width=0, height=0):
+    """
+    Show ads with size
+    TODO: make the dynamic ads with multiple services!?
+    """
+    adsterra_key = get_adsterra_key(width, height)
+    if not adsterra_key:
+        return HttpResponseNotFound("Not found")
+
+    template = "advertisers/ads.html"
+    context = {
+        "key": adsterra_key,
+        "width": width,
+        "height": height,
+    }
+    return render(request, template, context)

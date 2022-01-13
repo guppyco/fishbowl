@@ -46,6 +46,8 @@ jobs:
         # env:
         #   ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
         run: cp .env.example .env
+      - name: Setup frontend
+        run: (cd frontend && yarn)
       - name: Run migrations
         run: python manage.py migrate
       - name: Run tests
