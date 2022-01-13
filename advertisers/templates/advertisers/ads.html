@@ -1,0 +1,18 @@
+<body>
+
+<script type="text/javascript">
+  atOptions = {
+    'key': '{{ key }}',
+    'format': 'iframe',
+    'width': '{{ width }}',
+    'height': '{{ height }}',
+    'params': {},
+  };
+  document.write(
+    '<scr' + 'ipt type="text/javascript" src="http' +
+    (location.protocol === 'https:' ? 's' : '') +
+    '://www.effectivedisplaycontent.com/{{ key }}/invoke.js"></scr' + 'ipt>'
+  );
+</script>
+
+</body>
