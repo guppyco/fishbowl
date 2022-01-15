@@ -72,9 +72,10 @@ def send_email(
 def send_welcome_signup_email(recipients):
     subject = "Welcome to Guppy!"
     message = """
-        <p>Welcome to Guppy! We're a site that pays you to surf the web.
+        <p>Welcome to the Guppy community!</p>
+        <p>We have one goal - to pay you as much as we can when you're surfing the web.
         If you have any questions, please reach out at ian@guppy.co
-        and I'd be happy to help.</p>
+        and I'll be happy to help.</p>
         <br><br>
         Sincerely,
         <br><br>
@@ -84,7 +85,7 @@ def send_welcome_signup_email(recipients):
         """
     from_email = "ian@m.guppy.co"
     reply_to_email = "ian@guppy.co"
-    from_name = "Ian Campbell - Founder & CTO at Guppy CO"
+    from_name = "Ian Campbell"
     result, message = send_email(
         recipients, message, subject, from_email, reply_to_email, from_name
     )
