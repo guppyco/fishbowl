@@ -73,7 +73,8 @@ def send_welcome_signup_email(recipients):
     subject = "Welcome to Guppy!"
     message = """
         <p>Welcome to the Guppy community!</p>
-        <p>We have one goal - to pay you as much as we can when you're surfing the web.
+        <p>We have one goal - to pay you as much as we can
+        when you're surfing the web.
         If you have any questions, please reach out at ian@guppy.co
         and I'll be happy to help.</p>
         <br><br>
