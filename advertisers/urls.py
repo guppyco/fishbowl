@@ -10,4 +10,5 @@ urlpatterns = [
         views.signup_success,
         name="advertiser_signup_success",
     ),
+    path("ads/<int:width>/<int:height>/", views.ads, name="ads_view"),
 ]

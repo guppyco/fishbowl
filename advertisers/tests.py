@@ -113,3 +113,16 @@ class StripeTests(TestCase):
                 "We'll begin serving your ads shortly."
             ),
         )
+
+
+class AdsTest(TestCase):
+    def test_adsterra_not_found(self):
+        url = reverse("ads_view", kwargs={"width": 0, "height": 10})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 404)
+
+    def test_adsterra(self):
+        url = reverse("ads_view", kwargs={"width": 300, "height": 250})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "48e6c00c4f6d1487ce256f45fb4c634b")

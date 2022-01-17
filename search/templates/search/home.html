@@ -1,9 +1,12 @@
 {% extends "index.html" %}
 {% load static %}
 {% load cache %}
+{% load compress %}
 
 {% block header_tags %}
+{% compress css %}
 <link rel="stylesheet" href="{% static 'css/swimming-fish.css' %}">
+{% endcompress %}
 {% endblock %}
 
 {% block content %}
@@ -102,5 +105,7 @@
 {% endblock %}
 
 {% block extra_js %}
+{% compress js %}
 <script type="text/javascript" src="{% static 'js/swimming-fish.js' %}"></script>
+{% endcompress %}
 {% endblock %}

@@ -1,6 +1,7 @@
 <html>
   <head>
     <meta name="a.validate.01" content="479a82b50abf58cbf22acec5aa350e8cb10a" />
+    <meta name="propeller" content="fb3e4713affce89ea1790906cb1b05db">
     {% if debug %}
     <meta name="robots" content="noindex">
     {% else %}
@@ -9,13 +10,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     {% block header_tags %}{% endblock %}
     {% load static %}
+    {% load compress %}
+    {% compress js %}
     <script type="text/javascript" src="{% static 'node_modules/jquery/dist/jquery.js' %}"></script>
     <script type="text/javascript" src="{% static 'node_modules/bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'node_modules/sentry/browser/build/bundle.js' %}"></script>
+    {% endcompress %}
+    {% compress css %}
     <link rel="stylesheet" type="text/css" href="{% static 'node_modules/bootstrap/dist/css/bootstrap.css' %}" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="{% static 'node_modules/bootstrap-icons/font/bootstrap-icons.css' %}" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}" crossorigin="anonymous" />
+    {% endcompress %}
     <link rel="icon" href="{% static 'assets/images/logo_128x128.png' %}" type="text/png"/>
-    <script type="text/javascript" src="{% static 'node_modules/sentry/browser/build/bundle.js' %}"></script>
     {% if sentry_dsn %}
     <script type="text/javascript">
       Sentry.init({ dsn: '{{sentry_dsn}}' });
