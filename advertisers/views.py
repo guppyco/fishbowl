@@ -4,10 +4,13 @@ import stripe
 
 from django.conf import settings
 from django.contrib import messages
+from django.http import HttpResponseNotFound
 from django.shortcuts import redirect, render
 from django.urls import reverse
+from django.views.decorators.clickjacking import xframe_options_exempt
 
 from advertisers.models import Advertiser
+from advertisers.utils import get_adsterra_key
 
 from .forms import AdvertisementCreationForm
 
@@ -124,3 +127,22 @@ def signup_success(request):
 
     template = "advertisers/signup_success.html"
     return render(request, template, {"error_text": error_text})
+
+
+@xframe_options_exempt
+def ads(request, width=0, height=0):
+    """
+    Show ads with size
+    TODO: make the dynamic ads with multiple services!?
+    """
+    adsterra_key = get_adsterra_key(width, height)
+    if not adsterra_key:
+        return HttpResponseNotFound("Not found")
+
+    template = "advertisers/ads.html"
+    context = {
+        "key": adsterra_key,
+        "width": width,
+        "height": height,
+    }
+    return render(request, template, context)
