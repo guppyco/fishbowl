@@ -73,3 +73,43 @@ class AdSize(models.Model):
 
     def __str__(self):
         return str(self.width) + "x" + str(self.height)
+
+
+class AdBrand(models.Model):
+    """
+    Ads brand
+    """
+
+    name = models.CharField(max_length=50, blank=False, null=False)
+    url = models.URLField(max_length=2000, blank=True, null=True)
+
+    def __str__(self):
+        return self.name
+
+
+class Ad(models.Model):
+    """
+    The ad object
+    """
+
+    brand = models.ForeignKey(
+        AdBrand,
+        on_delete=models.SET_NULL,
+        related_name="ads",
+        blank=True,
+        null=True,
+    )
+    size = models.ForeignKey(
+        AdSize,
+        on_delete=models.SET_NULL,
+        related_name="ads",
+        blank=True,
+        null=True,
+    )
+    code = models.TextField()
+    view = models.IntegerField(default=0)
+    is_enabled = models.BooleanField(
+        _("is enabled"),
+        default=True,
+        help_text=_("Designates whether this ads is enabled."),
+    )

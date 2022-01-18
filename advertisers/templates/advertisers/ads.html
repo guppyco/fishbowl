@@ -1,18 +1,11 @@
 <body style="margin: 0; padding: 0;">
 
-<script type="text/javascript">
-  atOptions = {
-    'key': '{{ key }}',
-    'format': 'iframe',
-    'width': '{{ width }}',
-    'height': '{{ height }}',
-    'params': {},
-  };
-  document.write(
-    '<scr' + 'ipt type="text/javascript" src="http' +
-    (location.protocol === 'https:' ? 's' : '') +
-    '://www.effectivedisplaycontent.com/{{ key }}/invoke.js"></scr' + 'ipt>'
-  );
-</script>
+{% if code %}
+  {% autoescape off %}
+    {{ code }}
+  {% endautoescape %}
+{% else %}
+  <div style="background-color: transparent;"></div>
+{% endif %}
 
 </body>

@@ -11,6 +11,7 @@ from django.test.utils import override_settings
 from django.urls.base import reverse
 
 from accounts.utils import setup_tests
+from advertisers.factories import AdFactory, AdSizeFactory
 from advertisers.models import Advertiser
 
 
@@ -116,13 +117,27 @@ class StripeTests(TestCase):
 
 
 class AdsTest(TestCase):
-    def test_adsterra_not_found(self):
+    def test_ad_not_found(self):
         url = reverse("ads_view", kwargs={"width": 0, "height": 10})
         response = self.client.get(url)
         self.assertEqual(response.status_code, 404)
 
-    def test_adsterra(self):
+    def test_ad(self):
+        ads_size = AdSizeFactory(width=300, height=250)
+        ad = AdFactory(size=ads_size, code="123", is_enabled=True)
+        AdFactory(size=ads_size, code="456", is_enabled=False)
+        url = reverse("ads_view", kwargs={"width": 100, "height": 150})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "123")
+        self.assertNotContains(response, "456")
+        ad.refresh_from_db()
+        self.assertEqual(ad.view, 0)
+
         url = reverse("ads_view", kwargs={"width": 300, "height": 250})
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "48e6c00c4f6d1487ce256f45fb4c634b")
+        self.assertContains(response, "123")
+        self.assertNotContains(response, "456")
+        ad.refresh_from_db()
+        self.assertEqual(ad.view, 1)
