@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import AdSize, Advertisement, Advertiser
+from .models import Ad, AdBrand, AdSize, Advertisement, Advertiser
 
 
 @admin.register(Advertiser)
@@ -29,3 +29,13 @@ class AdvertisementAdmin(admin.ModelAdmin):
         form = super().get_form(request, obj, change, **kwargs)
         form.base_fields["monthly_budget"].label = "Monthly Budget (cent)"
         return form
+
+
+@admin.register(AdBrand)
+class AdBrandAdmin(admin.ModelAdmin):
+    list_display = ("name", "url")
+
+
+@admin.register(Ad)
+class AdAdmin(admin.ModelAdmin):
+    list_display = ("brand", "size", "code", "view", "is_enabled")

@@ -4,13 +4,13 @@ import stripe
 
 from django.conf import settings
 from django.contrib import messages
-from django.http import HttpResponseNotFound
+from django.http import HttpResponse, HttpResponseNotFound
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views.decorators.clickjacking import xframe_options_exempt
 
 from advertisers.models import Advertiser
-from advertisers.utils import get_adsterra_key
+from advertisers.utils import get_ad_from_size
 
 from .forms import AdvertisementCreationForm
 
@@ -135,14 +135,36 @@ def ads(request, width=0, height=0):
     Show ads with size
     TODO: make the dynamic ads with multiple services!?
     """
-    adsterra_key = get_adsterra_key(width, height)
-    if not adsterra_key:
+
+    if not width or not height:
         return HttpResponseNotFound("Not found")
 
+    ad_obj = get_ad_from_size(width, height)
+    if ad_obj:
+        code = ad_obj.code
+        # Update the view of this ad
+        ad_obj.view = ad_obj.view + 1
+        ad_obj.save()
+    else:
+        code = None
     template = "advertisers/ads.html"
     context = {
-        "key": adsterra_key,
+        "code": code,
         "width": width,
         "height": height,
     }
     return render(request, template, context)
+
+
+def ads_checker(request, width=0, height=0):
+    """
+    Check if having an ad for size
+    Return 200 if yes, 404 if no
+    """
+
+    if not width or not height:
+        return HttpResponseNotFound("Not found")
+    ad_obj = get_ad_from_size(width, height)
+    if ad_obj:
+        return HttpResponse("")
+    return HttpResponseNotFound("Not found")
