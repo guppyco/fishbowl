@@ -71,6 +71,13 @@ class AdSize(models.Model):
         help_text=_("Is enabled"),
     )
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["width", "height"], name="unique size"
+            )
+        ]
+
     def __str__(self):
         return str(self.width) + "x" + str(self.height)
 

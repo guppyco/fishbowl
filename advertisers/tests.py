@@ -124,20 +124,28 @@ class AdsTest(TestCase):
 
     def test_ad(self):
         ads_size = AdSizeFactory(width=300, height=250)
-        ad = AdFactory(size=ads_size, code="123", is_enabled=True)
+        ad_obj = AdFactory(size=ads_size, code="123", is_enabled=True)
         AdFactory(size=ads_size, code="456", is_enabled=False)
         url = reverse("ads_view", kwargs={"width": 100, "height": 150})
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, "123")
         self.assertNotContains(response, "456")
-        ad.refresh_from_db()
-        self.assertEqual(ad.view, 0)
+        ad_obj.refresh_from_db()
+        self.assertEqual(ad_obj.view, 0)
 
         url = reverse("ads_view", kwargs={"width": 300, "height": 250})
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "123")
         self.assertNotContains(response, "456")
-        ad.refresh_from_db()
-        self.assertEqual(ad.view, 1)
+        ad_obj.refresh_from_db()
+        self.assertEqual(ad_obj.view, 1)
+
+        url = reverse("ads_checker", kwargs={"width": 300, "height": 250})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+        url = reverse("ads_checker", kwargs={"width": 200, "height": 1250})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 404)
