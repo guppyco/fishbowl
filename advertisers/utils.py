@@ -1,17 +1,21 @@
+import random
 from typing import Union
 
+from advertisers.models import Ad, AdSize
 
-def get_adsterra_key(width: int, height: int) -> Union[str, None]:
-    """
-    Get Adsterra key from the size
-    """
-    adsterra_list = {
-        "300x250": "48e6c00c4f6d1487ce256f45fb4c634b",
-        "160x300": "f112ed4e140c527981961429de103f25",
-    }
 
-    resolution = str(width) + "x" + str(height)
-    if resolution in adsterra_list:
-        return adsterra_list[resolution]
+def get_ad_from_size(width: int, height: int) -> Union[Ad, None]:
+    """
+    Get ad from the size
+    """
+
+    try:
+        ad_size = AdSize.objects.get(width=width, height=height)
+    except AdSize.DoesNotExist:
+        return None
+    ads = Ad.objects.filter(size=ad_size, is_enabled=True)
+    if ads.count():
+        # Get random item with correct size
+        return random.choice(list(ads))
 
     return None
