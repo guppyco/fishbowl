@@ -124,3 +124,31 @@ def send_referral_program_email(recipients):
     )
 
     return result, message
+
+
+def send_follow_up_email(recipients):
+    subject = "Your Guppy account is inactive"
+    message = """
+        <p>I noticed your Guppy account is inactive -
+        you'll no longer earn cash on the web with Guppy.</p>
+        <br>
+        <p>
+        Is there anything we could have done to improve your Guppy experience?
+        I'd love to hear from you - just reply to this email
+        or reach me at <a href="mailto:ian@guppy.co">ian@guppy.co</a>.
+        </p>
+        <br><br>
+        Sincerely,
+        <br><br>
+        Ian Campbell
+        <br>
+        Founder & CTO, <a href="https://guppy.co">https://guppy.co</a>
+        """
+    from_email = "ian@m.guppy.co"
+    reply_to_email = "ian@guppy.co"
+    from_name = "Ian Campbell"
+    result, message = send_email(
+        recipients, message, subject, from_email, reply_to_email, from_name
+    )
+
+    return result, message
