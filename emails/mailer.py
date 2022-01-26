@@ -102,7 +102,7 @@ def send_referral_program_email(recipients):
         and you'll earn even more cash with our referral program.</p>
         <p>Current payout per referral is {payout_amount}</p>
         <br>
-        <a href="/"><button style="
+        <a href="https://guppy.co/referral-program/"><button style="
             padding: 10px;
             border: none;
             border-radius: 3px;
