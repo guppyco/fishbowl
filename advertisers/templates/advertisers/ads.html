@@ -8,4 +8,14 @@
   <div style="background-color: transparent;"></div>
 {% endif %}
 
+<script>
+  // Open new tab when clicking
+  window.onload = function(){
+    const a = document.getElementsByTagName('a')
+    for (var i=0; i<a.length; i++) {
+        a[i].setAttribute('target', '_blank')
+    }
+  }
+</script>
+
 </body>

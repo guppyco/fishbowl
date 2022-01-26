@@ -14,6 +14,14 @@ a {
 .hidden {
   display: none;
 }
+.btn.btn-secondary {
+  background-color: #FF5E00;
+  border-color: #FF5E00;
+}
+.btn.btn-secondary:hover {
+  background-color: #0084FF;
+  border-color: #0084FF;
+}
 .btn.btn-outline-secondary:hover {
   color: #fff;
   background-color: #FF5E00;
@@ -133,6 +141,14 @@ body.home .navbar-toggler {
   background: none;
   border: none;
   padding: 0.25rem 1.25rem;
+}
+.home-page .instructions .head {
+  font-size: 80px;
+}
+.home-page .instructions .column {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 .home-page .large-font {
   font-size: 23px;
