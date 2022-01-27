@@ -19,3 +19,16 @@ def get_ad_from_size(width: int, height: int) -> Union[Ad, None]:
         return random.choice(list(ads))
 
     return None
+
+
+def get_popup_ad() -> Union[Ad, None]:
+    """
+    Get random popup ad
+    """
+
+    ads = Ad.objects.filter(size__isnull=True, is_enabled=True)
+    if ads.count():
+        # Get random item with correct size
+        return random.choice(list(ads))
+
+    return None

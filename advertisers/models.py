@@ -112,6 +112,7 @@ class Ad(models.Model):
         related_name="ads",
         blank=True,
         null=True,
+        help_text=_("Set null for popup ads"),
     )
     code = models.TextField()
     view = models.IntegerField(default=0)

@@ -38,4 +38,4 @@ class AdBrandAdmin(admin.ModelAdmin):
 
 @admin.register(Ad)
 class AdAdmin(admin.ModelAdmin):
-    list_display = ("brand", "size", "code", "view", "is_enabled")
+    list_display = ("brand", "size", "view", "is_enabled")

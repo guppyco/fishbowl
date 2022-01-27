@@ -149,3 +149,19 @@ class AdsTest(TestCase):
         url = reverse("ads_checker", kwargs={"width": 200, "height": 1250})
         response = self.client.get(url)
         self.assertEqual(response.status_code, 404)
+
+
+class PopupAdsTest(TestCase):
+    def test_ad_not_found(self):
+        url = reverse("popup_ads_view")
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["has_ads"], False)
+
+    def test_ad(self):
+        AdFactory(size=None, code="123", is_enabled=True)
+        url = reverse("popup_ads_view")
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["has_ads"], True)
+        self.assertEqual(response.data["code"], "123")

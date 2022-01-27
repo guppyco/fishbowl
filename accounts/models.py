@@ -167,6 +167,8 @@ class UserProfile(AbstractBaseUser, TimeStampedModel, PermissionsMixin):
             ):
                 time = last_search.created
 
+        if time != "no data":
+            time = time.strftime("%Y-%m-%d %H:%M")
         return time
 
     def get_earned_amount(
