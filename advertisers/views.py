@@ -1,6 +1,14 @@
 import logging
 
 import stripe
+from rest_framework.authentication import BasicAuthentication
+from rest_framework.decorators import (
+    api_view,
+    authentication_classes,
+    permission_classes,
+)
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
 
 from django.conf import settings
 from django.contrib import messages
@@ -10,7 +18,7 @@ from django.urls import reverse
 from django.views.decorators.clickjacking import xframe_options_exempt
 
 from advertisers.models import Advertiser
-from advertisers.utils import get_ad_from_size
+from advertisers.utils import get_ad_from_size, get_popup_ad
 
 from .forms import AdvertisementCreationForm
 
@@ -168,3 +176,24 @@ def ads_checker(request, width=0, height=0):
     if ad_obj:
         return HttpResponse("")
     return HttpResponseNotFound("Not found")
+
+
+@api_view(("GET",))
+@permission_classes([AllowAny])
+@authentication_classes([BasicAuthentication])
+def popup_ads(request):
+    """
+    Show popup ads code
+    """
+
+    popup_ad = get_popup_ad()
+
+    if popup_ad:
+        return Response(
+            {
+                "has_ads": True,
+                "code": popup_ad.code,
+            }
+        )
+
+    return Response({"has_ads": False})
