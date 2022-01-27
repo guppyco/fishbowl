@@ -358,21 +358,27 @@ class UserProfileTest(APITestCase):
         self.assertEqual(response.status_code, 200)
         profile = response.data["profile"]
         self.assertEqual(profile["status"], True)
-        self.assertEqual(profile["last_time"], search.created)
+        self.assertEqual(
+            profile["last_time"], search.created.strftime("%Y-%m-%d %H:%M")
+        )
 
         history = HistoryFactory(user_id=self.user.pk)
         response = self.client.get(profile_url)
         self.assertEqual(response.status_code, 200)
         profile = response.data["profile"]
         self.assertEqual(profile["status"], True)
-        self.assertEqual(profile["last_time"], history.created)
+        self.assertEqual(
+            profile["last_time"], history.created.strftime("%Y-%m-%d %H:%M")
+        )
 
         search_2 = SearchFactory(user_id=self.user.pk)
         response = self.client.get(profile_url)
         self.assertEqual(response.status_code, 200)
         profile = response.data["profile"]
         self.assertEqual(profile["status"], True)
-        self.assertEqual(profile["last_time"], search_2.created)
+        self.assertEqual(
+            profile["last_time"], search_2.created.strftime("%Y-%m-%d %H:%M")
+        )
 
     def test_get_profile_info_with_posted_data(self):
         profile_url = reverse("user_profile_api")
@@ -383,7 +389,10 @@ class UserProfileTest(APITestCase):
         response = self.client.get(profile_url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["profile"]["status"], False)
-        self.assertEqual(response.data["profile"]["last_time"], date)
+        self.assertEqual(
+            response.data["profile"]["last_time"],
+            date.strftime("%Y-%m-%d %H:%M"),
+        )
 
         history = HistoryFactory(user_id=self.user.pk)
         history.created = date
@@ -391,7 +400,10 @@ class UserProfileTest(APITestCase):
         response = self.client.get(profile_url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["profile"]["status"], False)
-        self.assertEqual(response.data["profile"]["last_time"], date)
+        self.assertEqual(
+            response.data["profile"]["last_time"],
+            date.strftime("%Y-%m-%d %H:%M"),
+        )
 
         search_2 = SearchFactory(user_id=self.user.pk)
         date = timezone.now() - timedelta(days=6)
@@ -401,7 +413,8 @@ class UserProfileTest(APITestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.data["profile"]["status"], True)
         self.assertEqual(
-            response.data["profile"]["last_time"], search_2.created
+            response.data["profile"]["last_time"],
+            search_2.created.strftime("%Y-%m-%d %H:%M"),
         )
 
 
