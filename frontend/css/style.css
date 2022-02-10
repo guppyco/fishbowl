@@ -148,7 +148,10 @@ body.home .navbar-toggler {
 .home-page .instructions .column {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start;
+}
+.home-page .instructions .btn-secondary {
+  font-size: 22px;
 }
 .home-page .large-font {
   font-size: 23px;
