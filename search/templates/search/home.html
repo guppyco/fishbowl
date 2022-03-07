@@ -13,10 +13,13 @@
 <div class="row home-page">
   <div class="col-md-8 offset-md-2 fish-tank-shadow">
     {% if not user.is_authenticated %}
-    <div class="text-center homepage-head"><h1>Get Paid to Surf the Web 🏄</h1></div>
+    <div class="text-center homepage-head">
+      <h1>Get Paid for your Data 💸</h1>
+      <i><h2>Companies like Google, Facebook, and Twitter make money from your data. It's your data - get paid for it.</h2></i>
+    </div>
     {% endif %}
     <section class="instructions">
-      <h2>How to earn money</h2>
+      <h2 class="text-center">How to earn money</h2>
       <div class="row">
         <div class="col-md-4 column">
           <div class="text-center"><p class="head">✍</p></div>
@@ -47,7 +50,7 @@
     </section>
 
     <section class="large-font">
-      <h2>Guppy payout goals</h2>
+      <h2 class="text-center">Guppy payout goals</h2>
       <div>
         Current estimated payout: <b>$1 per month</b>
       </div>
@@ -57,7 +60,7 @@
     </section>
 
     <section>
-      <h2>How it works</h2>
+      <h2 class="text-center">How it works</h2>
       <div class="row how-it-works">
         <div class="col-md-4">
           <p>Like Google, Facebook, Twitter, and other tech companies, Guppy collects personal information about your browsing history.<br><br>
@@ -73,7 +76,7 @@
     </section>
 
     <section>
-      <h2>Refer your friends and earn!</h2>
+      <h2 class="text-center">Refer your friends and earn!</h2>
       <p>
         Refer your friends using your Guppy referral link and earn each time a friend becomes a Guppy user.<br />
         <a href="{% url 'signup' %}">Click here</a> to get started,
