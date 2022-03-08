@@ -25,7 +25,7 @@ urlpatterns = [  # pylint: disable=invalid-name
     path("", include("search.urls", namespace="search")),
     path("", include("accounts.urls")),
     path("advertisers/", include("advertisers.urls")),
-    path("faqs/", include("faqs.urls", namespace="faqs")),
+    path("", include("faqs.urls", namespace="faqs")),
     path(
         "terms-of-service/",
         views.TermsOfServiceView.as_view(),
