@@ -168,3 +168,7 @@ body.home .navbar-toggler {
   max-width: 420px;
   margin: 0 auto;
 }
+
+.contact-us .help-inline {
+  color: red;
+}
