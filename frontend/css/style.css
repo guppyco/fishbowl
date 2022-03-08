@@ -153,6 +153,10 @@ body.home .navbar-toggler {
 .home-page .instructions .btn-secondary {
   font-size: 22px;
 }
+.home-page h2.text-center {
+  font-size: 38px;
+  padding: 20px 15px 5px;
+}
 .home-page .large-font {
   font-size: 23px;
 }
@@ -163,4 +167,8 @@ body.home .navbar-toggler {
 .advertisers .form {
   max-width: 420px;
   margin: 0 auto;
+}
+
+.contact-us .help-inline {
+  color: red;
 }
