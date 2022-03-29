@@ -16,4 +16,5 @@ urlpatterns = [
         views.ads_checker,
         name="ads_checker",
     ),
+    path("ads/popup/", views.popup_ads, name="popup_ads_view"),
 ]

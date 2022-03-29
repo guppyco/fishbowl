@@ -8,6 +8,7 @@ from django.test import TestCase
 from django.utils import timezone
 
 from accounts.factories import UserProfileFactory
+from emails.jobs.daily.send_follow_up_email import Job as FollowUpJob
 from emails.jobs.hourly.send_referral_program_email import Job as ReferralJob
 from emails.jobs.hourly.send_welcome_email import Job
 
@@ -108,3 +109,65 @@ class ReferralProgramEmailTests(TestCase):
             self.assertEqual(users.count(), 10)
             self.hourly_job.execute()
             self.assertEqual(send_email.call_count, 1)
+
+
+class FollowUpEmailTests(TestCase):
+    def setUp(self):
+        self.users = UserProfileFactory.create_batch(10, is_waitlisted=False)
+        self.daily_job = FollowUpJob()
+
+    @mock.patch("emails.mailer.EmailMultiAlternatives.send")
+    @freeze_time("2021-01-10")
+    def test_get_users_deactivated_empty(self, send_email):
+        users = AccountEmail.get_deactivated_users()
+        self.assertEqual(users.count(), 0)
+        self.daily_job.execute()
+        self.assertEqual(send_email.call_count, 0)
+
+    @mock.patch("emails.mailer.EmailMultiAlternatives.send")
+    def test_get_users_deactivated_now(self, send_email):
+        date = timezone.now()
+        self.users[1].last_posting_time = date
+        self.users[1].save()
+        self.users[2].last_posting_time = date
+        self.users[2].save()
+        users = AccountEmail.get_deactivated_users()
+        self.assertEqual(users.count(), 0)
+        self.daily_job.execute()
+        self.assertEqual(send_email.call_count, 0)
+
+    @mock.patch("emails.mailer.EmailMultiAlternatives.send")
+    def test_get_users_deactivated_less_than_2_weeks(self, send_email):
+        date = timezone.now() - datetime.timedelta(days=20)
+        self.users[1].last_posting_time = date
+        self.users[1].save()
+        self.users[2].last_posting_time = date
+        self.users[2].save()
+        users = AccountEmail.get_deactivated_users()
+        self.assertEqual(users.count(), 0)
+        self.daily_job.execute()
+        self.assertEqual(send_email.call_count, 0)
+
+    @mock.patch("emails.mailer.EmailMultiAlternatives.send")
+    def test_get_users_deactivated_greater_than_2_weeks(self, send_email):
+        date = timezone.now() - datetime.timedelta(days=22)
+        self.users[1].last_posting_time = date
+        self.users[1].save()
+        self.users[2].last_posting_time = date
+        self.users[2].save()
+        users = AccountEmail.get_deactivated_users()
+        self.assertEqual(users.count(), 0)
+        self.daily_job.execute()
+        self.assertEqual(send_email.call_count, 0)
+
+    @mock.patch("emails.mailer.EmailMultiAlternatives.send")
+    def test_get_users_deactivated_2_weeks_before(self, send_email):
+        two_weeks_before = timezone.now() - datetime.timedelta(days=21)
+        self.users[1].last_posting_time = two_weeks_before
+        self.users[1].save()
+        self.users[2].last_posting_time = two_weeks_before
+        self.users[2].save()
+        users = AccountEmail.get_deactivated_users()
+        self.assertEqual(users.count(), 2)
+        self.daily_job.execute()
+        self.assertEqual(send_email.call_count, 1)

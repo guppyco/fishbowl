@@ -14,7 +14,7 @@ djangorestframework==3.12.4
 drf-jwt==1.19.0
 factory_boy==3.2.0
 flower==1.0.0
-git+git://github.com/YPCrumble/django-reflinks.git@trim_next_parameter#egg=django-reflinks
+git+https://github.com/YPCrumble/django-reflinks.git@trim_next_parameter#egg=django-reflinks
 html2text==2020.1.16
 Pillow==9.0.0
 psycopg2==2.8.6
