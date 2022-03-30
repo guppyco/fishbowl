@@ -11,9 +11,9 @@ from django.test.utils import override_settings
 from django.urls.base import reverse
 
 from accounts.utils import setup_tests
-from advertisers.factories import AdFactory, AdSizeFactory
+from advertisers.factories import AdBrandFactory, AdFactory, AdSizeFactory
 from advertisers.models import Advertiser
-from advertisers.utils import get_closest_ad_size
+from advertisers.utils import get_ad_from_size, get_closest_ad_size
 
 
 class StripeCustomer:
@@ -150,6 +150,25 @@ class AdsTest(TestCase):
         url = reverse("ads_checker", kwargs={"width": 200, "height": 1250})
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
+
+    def test_disable_ads_by_brand(self):
+        ad_size_1 = AdSizeFactory(width=300, height=250)
+        ad_brand_1 = AdBrandFactory(is_enabled=False)
+        # Create ad with disabled brand
+        AdFactory(size=ad_size_1, brand=ad_brand_1, is_enabled=True)
+        ad_brand_2 = AdBrandFactory(is_enabled=True)
+        # Create disabled ad
+        AdFactory(size=ad_size_1, brand=ad_brand_2, is_enabled=False)
+        ad_size_3 = AdSizeFactory(width=350, height=300)
+        # Create enabled ad with enabled brand
+        ad_obj = AdFactory(size=ad_size_3, brand=ad_brand_2, is_enabled=True)
+        # Create another ads with disabled brand
+        AdFactory(size=ad_size_3, brand=ad_brand_1, is_enabled=True)
+        AdFactory(size=ad_size_3, brand=ad_brand_1, is_enabled=True)
+        AdFactory(size=ad_size_3, brand=ad_brand_1, is_enabled=True)
+
+        result = get_ad_from_size(width=300, height=250)
+        self.assertEqual(result.pk, ad_obj.pk)
 
     def test_ad_size(self):
         sizes = [

@@ -11,11 +11,19 @@ def get_ad_from_size(width: int, height: int) -> Optional[Ad]:
 
     ad_size = None
     try:
-        # TODO: only get the size that has ads
-        ad_size = AdSize.objects.get(width=width, height=height)
+        ad_size = AdSize.objects.get(
+            width=width,
+            height=height,
+            ads__is_enabled=True,
+            ads__brand__is_enabled=True,
+        )
     except AdSize.DoesNotExist:
         ad_size = get_closest_ad_size(width=width, height=height)
-    ads = Ad.objects.filter(size=ad_size, is_enabled=True)
+    ads = Ad.objects.filter(
+        size=ad_size,
+        is_enabled=True,
+        brand__is_enabled=True,
+    )
     if ads.count():
         # Get random item with correct size
         return random.choice(list(ads))
@@ -31,6 +39,7 @@ def get_closest_ad_size(width: int, height: int) -> Optional[AdSize]:
     ad_sizes = AdSize.objects.filter(
         is_enabled=True,
         ads__is_enabled=True,
+        ads__brand__is_enabled=True,
     )
 
     for percent in range(5, 31, 5):
