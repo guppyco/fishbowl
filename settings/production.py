@@ -22,6 +22,7 @@ BASE_URL = "https://guppy.co"
 
 os.environ["DJANGO_SETTINGS_MODULE"] = "settings.production"
 
-STATICFILES_STORAGE = (
-    "django.contrib.staticfiles.storage.ManifestStaticFilesStorage"
-)
+# Removed to fix 500 error with staticfiles
+# STATICFILES_STORAGE = (
+#     "django.contrib.staticfiles.storage.ManifestStaticFilesStorage"
+# )
