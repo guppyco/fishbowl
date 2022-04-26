@@ -36,6 +36,5 @@ for i in "${all_rules[@]}";
   done
 
 if ${has_error}; then
-  echo "a"
-  # exit 1
+  exit 1
 fi
