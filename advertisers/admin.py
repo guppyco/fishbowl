@@ -33,7 +33,7 @@ class AdvertisementAdmin(admin.ModelAdmin):
 
 @admin.register(AdBrand)
 class AdBrandAdmin(admin.ModelAdmin):
-    list_display = ("name", "url", "is_enabled")
+    list_display = ("name", "url")
 
 
 @admin.register(Ad)
