@@ -20,7 +20,7 @@ from django.urls import include, path
 
 from guppy import views
 
-urlpatterns = [
+urlpatterns = [  # pylint: disable=invalid-name
     path("admin/", admin.site.urls),
     path("", include("search.urls", namespace="search")),
     path("", include("accounts.urls")),

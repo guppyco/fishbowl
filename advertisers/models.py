@@ -89,11 +89,6 @@ class AdBrand(models.Model):
 
     name = models.CharField(max_length=50, blank=False, null=False)
     url = models.URLField(max_length=2000, blank=True, null=True)
-    is_enabled = models.BooleanField(
-        _("is enabled"),
-        default=True,
-        help_text=_("Designates whether this brand is enabled."),
-    )
 
     def __str__(self):
         return self.name

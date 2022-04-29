@@ -548,55 +548,6 @@ class PayoutTest(TestCase):
             self.assertEqual(payout.amount, int(1000 / 31 / 10))
 
 
-def assert_amounts(response, amounts):
-    """Helper function to assert amounts from response"""
-
-    if response.status_code != 200:
-        return False
-
-    data = response.data
-    if data["profile"]["paid_amount"] != amounts["paid_amount"]:
-        return False
-    if data["profile"]["requesting_amount"] != amounts["requesting_amount"]:
-        return False
-    if data["profile"]["unpaid_amount"] != amounts["unpaid_amount"]:
-        return False
-    if (
-        "unpaid_amount_text" in amounts
-        and data["profile"]["unpaid_amount_text"]
-        != amounts["unpaid_amount_text"]
-    ):
-        return False
-
-    return True
-
-
-def assert_referrals(user, referrals):
-    """Helper function to assert referrals"""
-
-    if get_current_payout_per_referral() != referrals["payout_per_referral"]:
-        return False
-    if user.total_earnings_for_referrals() != referrals["total_referrals"]:
-        return False
-    if user.number_of_referrals() != referrals["number_of_referrals"]:
-        return False
-    if user.number_of_activate_referrals() != referrals["activate_referrals"]:
-        return False
-
-    return True
-
-
-def assert_payment_status(user_referral_hit, payment_status):
-    """Helper function to refresh from database then assert payment status"""
-
-    user_referral_hit.refresh_from_db()
-
-    if user_referral_hit.payment_status != payment_status:
-        return False
-
-    return True
-
-
 class PayoutAmountTest(TestCase):
     def setUp(self):
         users = UserProfileFactory.create_batch(10, is_waitlisted=False)
@@ -651,7 +602,7 @@ class PayoutAmountTest(TestCase):
             response.data["message"], "Minimum Guppy payout is $10"
         )
 
-    def test_requesting_amount(self):
+    def test_requesting_amount(self):  # pylint: disable=too-many-statements
         with freeze_time(datetime(2021, 4, 1)):
             for user in self.users:
                 # 10 users post data in 2021/04/01
@@ -666,19 +617,15 @@ class PayoutAmountTest(TestCase):
         PostData.login(self)
         profile_url = reverse("user_profile_api")
         response = self.client.get(profile_url)
-        self.assertTrue(
-            assert_amounts(
-                response,
-                {
-                    "paid_amount": 0,
-                    "requesting_amount": 0,
-                    "unpaid_amount": int(1000 / 30 / 10)
-                    * 7  # share amount to 10 users fist 7 days
-                    + int(1000 / 30 / 1) * 23,  # share amount to 1 user whole
-                    "unpaid_amount_text": "$7.8",
-                },
-            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["profile"]["paid_amount"], 0)
+        self.assertEqual(response.data["profile"]["requesting_amount"], 0)
+        self.assertEqual(
+            response.data["profile"]["unpaid_amount"],
+            int(1000 / 30 / 10) * 7  # share amount to 10 users fist 7 days
+            + int(1000 / 30 / 1) * 23,  # share amount to 1 user whole
         )
+        self.assertEqual(response.data["profile"]["unpaid_amount_text"], "$7.8")
 
         # Execute daily job in 2021 May
         for i in range(1, 32):  # loop i from 1 to 31
@@ -687,19 +634,14 @@ class PayoutAmountTest(TestCase):
 
         profile_url = reverse("user_profile_api")
         response = self.client.get(profile_url)
-        self.assertTrue(
-            assert_amounts(
-                response,
-                {
-                    "paid_amount": 0,
-                    "requesting_amount": 0,
-                    "unpaid_amount": int(1000 / 30 / 10)
-                    * 7  # share amount to 10 users fist 7 days
-                    + int(1000 / 30 / 1) * 23  # share amount to 1 user whole
-                    + int(1000 / 31 / 1)
-                    * 6,  # amount of next 6 days in 2021 May
-                },
-            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["profile"]["paid_amount"], 0)
+        self.assertEqual(response.data["profile"]["requesting_amount"], 0)
+        self.assertEqual(
+            response.data["profile"]["unpaid_amount"],
+            int(1000 / 30 / 10) * 7  # share amount to 10 users fist 7 days
+            + int(1000 / 30 / 1) * 23  # share amount to 1 user whole
+            + int(1000 / 31 / 1) * 6,  # amount of next 6 days in 2021 May
         )
 
         # Request payout
@@ -733,30 +675,18 @@ class PayoutAmountTest(TestCase):
 
         # Check profile info
         response = self.client.get(profile_url)
-        self.assertTrue(
-            assert_amounts(
-                response,
-                {
-                    "paid_amount": 0,
-                    "requesting_amount": 1038,
-                    "unpaid_amount": 0,
-                },
-            )
-        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["profile"]["paid_amount"], 0)
+        self.assertEqual(response.data["profile"]["requesting_amount"], 1038)
+        self.assertEqual(response.data["profile"]["unpaid_amount"], 0)
 
         payout_request.payment_status = PayoutRequest.PAID
         payout_request.save()
         response = self.client.get(profile_url)
-        self.assertTrue(
-            assert_amounts(
-                response,
-                {
-                    "paid_amount": 1038,
-                    "requesting_amount": 0,
-                    "unpaid_amount": 0,
-                },
-            )
-        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["profile"]["paid_amount"], 1038)
+        self.assertEqual(response.data["profile"]["requesting_amount"], 0)
+        self.assertEqual(response.data["profile"]["unpaid_amount"], 0)
         requesting_payouts = self.user.payouts.filter(
             payment_status=Payout.REQUESTING
         )
@@ -767,23 +697,18 @@ class PayoutAmountTest(TestCase):
         payout_request.payment_status = PayoutRequest.REQUESTING
         payout_request.save()
         response = self.client.get(profile_url)
-        self.assertTrue(
-            assert_amounts(
-                response,
-                {
-                    "paid_amount": 0,
-                    "requesting_amount": 1038,
-                    "unpaid_amount": 0,
-                },
-            )
-        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["profile"]["paid_amount"], 0)
+        self.assertEqual(response.data["profile"]["requesting_amount"], 1038)
+        self.assertEqual(response.data["profile"]["unpaid_amount"], 0)
         paid_payouts = self.user.payouts.filter(payment_status=Payout.PAID)
         self.assertEqual(paid_payouts.count(), 0)
-        self.assertEqual(
-            self.user.payouts.filter(payment_status=Payout.REQUESTING).count(),
-            38,
+        requesting_payouts = self.user.payouts.filter(
+            payment_status=Payout.REQUESTING
         )
+        self.assertEqual(requesting_payouts.count(), 38)
 
+    # pylint: disable=too-many-statements
     def test_requesting_referral_amount(self):
         referral_link = self.user.get_refferal_link()
         # users[0] referred users[1] and users[2]
@@ -820,16 +745,14 @@ class PayoutAmountTest(TestCase):
         PostData.login(self)
         profile_url = reverse("user_profile_api")
         response = self.client.get(profile_url)
-        self.assertTrue(
-            assert_amounts(
-                response,
-                {
-                    "paid_amount": 0,
-                    "requesting_amount": 0,
-                    "unpaid_amount": int(1000 / 30 / 1),
-                    "unpaid_amount_text": "$0.33",
-                },
-            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["profile"]["paid_amount"], 0)
+        self.assertEqual(response.data["profile"]["requesting_amount"], 0)
+        self.assertEqual(
+            response.data["profile"]["unpaid_amount"], int(1000 / 30 / 1)
+        )
+        self.assertEqual(
+            response.data["profile"]["unpaid_amount_text"], "$0.33"
         )
 
         # users[1] earned 89 payouts
@@ -839,22 +762,15 @@ class PayoutAmountTest(TestCase):
         self.assertEqual(
             response.data["profile"]["unpaid_amount"], int(1000 / 30 / 1)
         )
-        self.assertTrue(
-            assert_payment_status(
-                user_referral_hit1,
-                UserProfileReferralHit.NONE,
-            )
+        user_referral_hit1.refresh_from_db()
+        self.assertEqual(
+            user_referral_hit1.payment_status,
+            UserProfileReferralHit.NONE,
         )
-
-        assert_referrals(
-            self.user,
-            {
-                "payout_per_referral": 93,
-                "total_referrals": 0,
-                "number_of_referrals": 2,
-                "activate_referrals": 0,
-            },
-        )
+        self.assertEqual(get_current_payout_per_referral(), 93)
+        self.assertEqual(self.user.total_earnings_for_referrals(), 0)
+        self.assertEqual(self.user.number_of_referrals(), 2)
+        self.assertEqual(self.user.number_of_activate_referrals(), 0)
 
         # users[1] earned 90 payouts
         PayoutFactory(user_profile=self.users[1])
@@ -863,22 +779,15 @@ class PayoutAmountTest(TestCase):
         self.assertEqual(
             response.data["profile"]["unpaid_amount"], int(1000 / 30 / 1) + 99
         )
-        self.assertTrue(
-            assert_payment_status(
-                user_referral_hit1,
-                UserProfileReferralHit.OPENED,
-            )
+        user_referral_hit1.refresh_from_db()
+        self.assertEqual(
+            user_referral_hit1.payment_status,
+            UserProfileReferralHit.OPENED,
         )
-
-        assert_referrals(
-            self.user,
-            {
-                "payout_per_referral": 93,
-                "total_referrals": 99,
-                "number_of_referrals": 2,
-                "activate_referrals": 1,
-            },
-        )
+        self.assertEqual(get_current_payout_per_referral(), 93)
+        self.assertEqual(self.user.total_earnings_for_referrals(), 99)
+        self.assertEqual(self.user.number_of_referrals(), 2)
+        self.assertEqual(self.user.number_of_activate_referrals(), 1)
         # users[2] earned 90 payouts
         PayoutFactory.create_batch(90, user_profile=self.users[2])
         self.daily_job.execute()
@@ -887,11 +796,10 @@ class PayoutAmountTest(TestCase):
             response.data["profile"]["unpaid_amount"],
             int(1000 / 30 / 1) + 99 + 97,
         )
-        self.assertTrue(
-            assert_payment_status(
-                user_referral_hit2,
-                UserProfileReferralHit.OPENED,
-            )
+        user_referral_hit2.refresh_from_db()
+        self.assertEqual(
+            user_referral_hit1.payment_status,
+            UserProfileReferralHit.OPENED,
         )
 
         # Test another user
@@ -910,16 +818,12 @@ class PayoutAmountTest(TestCase):
         self.daily_job.execute()
         PostData.login(self, self.users[3])
         response = self.client.get(profile_url)
-        self.assertTrue(
-            assert_amounts(
-                response,
-                {
-                    "paid_amount": 0,
-                    "requesting_amount": 0,
-                    "unpaid_amount": 95,
-                    "unpaid_amount_text": "$0.95",
-                },
-            )
+        self.assertEqual(
+            response.data["profile"]["unpaid_amount"],
+            95,
+        )
+        self.assertEqual(
+            response.data["profile"]["unpaid_amount_text"], "$0.95"
         )
         # Test updating payment status
         payout = Payout.objects.get(
@@ -927,40 +831,27 @@ class PayoutAmountTest(TestCase):
         )
         payout.payment_status = Payout.PAID
         payout.save()
-        self.assertTrue(
-            assert_payment_status(
-                user_referral_hit3,
-                UserProfileReferralHit.PAID,
-            )
+        user_referral_hit3.refresh_from_db()
+        self.assertEqual(
+            user_referral_hit3.payment_status,
+            UserProfileReferralHit.PAID,
         )
-        assert_referrals(
-            self.user,
-            {
-                "payout_per_referral": 92,
-                "total_referrals": 95,
-                "number_of_referrals": 1,
-                "activate_referrals": 1,
-            },
-        )
+        self.assertEqual(get_current_payout_per_referral(), 92)
+        self.assertEqual(self.users[3].total_earnings_for_referrals(), 95)
+        self.assertEqual(self.users[3].number_of_referrals(), 1)
+        self.assertEqual(self.users[3].number_of_activate_referrals(), 1)
 
         payout.payment_status = Payout.REQUESTING
         payout.save()
-        self.assertTrue(
-            assert_payment_status(
-                user_referral_hit3,
-                UserProfileReferralHit.REQUESTING,
-            )
+        user_referral_hit3.refresh_from_db()
+        self.assertEqual(
+            user_referral_hit3.payment_status,
+            UserProfileReferralHit.REQUESTING,
         )
-
-        assert_referrals(
-            self.user,
-            {
-                "payout_per_referral": 92,
-                "total_referrals": 95,
-                "number_of_referrals": 1,
-                "activate_referrals": 1,
-            },
-        )
+        self.assertEqual(get_current_payout_per_referral(), 92)
+        self.assertEqual(self.users[3].total_earnings_for_referrals(), 95)
+        self.assertEqual(self.users[3].number_of_referrals(), 1)
+        self.assertEqual(self.users[3].number_of_activate_referrals(), 1)
 
     def test_referral_amount_calculator(self):
         total = 100

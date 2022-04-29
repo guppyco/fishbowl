@@ -17,8 +17,8 @@ from django.urls import path
 
 from . import views
 
-app_name = "search"
-urlpatterns = [
+app_name = "search"  # pylint: disable=invalid-name
+urlpatterns = [  # pylint: disable=invalid-name
     path("", views.home, name="home"),
     path("api/search/", views.SearchView.as_view(), name="api_search"),
     path(

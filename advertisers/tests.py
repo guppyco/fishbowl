@@ -11,9 +11,8 @@ from django.test.utils import override_settings
 from django.urls.base import reverse
 
 from accounts.utils import setup_tests
-from advertisers.factories import AdBrandFactory, AdFactory, AdSizeFactory
+from advertisers.factories import AdFactory, AdSizeFactory
 from advertisers.models import Advertiser
-from advertisers.utils import get_ad_from_size, get_closest_ad_size
 
 
 class StripeCustomer:
@@ -130,10 +129,10 @@ class AdsTest(TestCase):
         url = reverse("ads_view", kwargs={"width": 100, "height": 150})
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "123")
+        self.assertNotContains(response, "123")
         self.assertNotContains(response, "456")
         ad_obj.refresh_from_db()
-        self.assertEqual(ad_obj.view, 1)
+        self.assertEqual(ad_obj.view, 0)
 
         url = reverse("ads_view", kwargs={"width": 300, "height": 250})
         response = self.client.get(url)
@@ -141,7 +140,7 @@ class AdsTest(TestCase):
         self.assertContains(response, "123")
         self.assertNotContains(response, "456")
         ad_obj.refresh_from_db()
-        self.assertEqual(ad_obj.view, 2)
+        self.assertEqual(ad_obj.view, 1)
 
         url = reverse("ads_checker", kwargs={"width": 300, "height": 250})
         response = self.client.get(url)
@@ -149,80 +148,7 @@ class AdsTest(TestCase):
 
         url = reverse("ads_checker", kwargs={"width": 200, "height": 1250})
         response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-
-    def test_disable_ads_by_brand(self):
-        ad_size_1 = AdSizeFactory(width=300, height=250)
-        ad_brand_1 = AdBrandFactory(is_enabled=False)
-        # Create ad with disabled brand
-        AdFactory(size=ad_size_1, brand=ad_brand_1, is_enabled=True)
-        ad_brand_2 = AdBrandFactory(is_enabled=True)
-        # Create disabled ad
-        AdFactory(size=ad_size_1, brand=ad_brand_2, is_enabled=False)
-        ad_size_3 = AdSizeFactory(width=350, height=300)
-        # Create enabled ad with enabled brand
-        ad_obj = AdFactory(size=ad_size_3, brand=ad_brand_2, is_enabled=True)
-        # Create another ads with disabled brand
-        AdFactory(size=ad_size_3, brand=ad_brand_1, is_enabled=True)
-        AdFactory(size=ad_size_3, brand=ad_brand_1, is_enabled=True)
-        AdFactory(size=ad_size_3, brand=ad_brand_1, is_enabled=True)
-
-        result = get_ad_from_size(width=300, height=250)
-        self.assertEqual(result.pk, ad_obj.pk)
-
-    def test_ad_size(self):
-        sizes = [
-            [100, 50, True],
-            [100, 150, True],
-            [100, 200, True],
-            [200, 300, False],
-            [250, 300, True],
-            [300, 300, True],
-            [100, 600, True],
-            [450, 500, True],
-            [900, 1000, True],
-            [1000, 1000, False],
-        ]
-        for size in sizes:
-            ads_size = AdSizeFactory(
-                width=size[0], height=size[1], is_enabled=size[2]
-            )
-            AdFactory(size=ads_size, code=size[0], is_enabled=True)
-        size = get_closest_ad_size(100, 50)
-        self.assertEqual(size.width, 100)
-        self.assertEqual(size.height, 50)
-
-        size = get_closest_ad_size(110, 50)
-        self.assertEqual(size.width, 100)
-        self.assertEqual(size.height, 50)
-
-        size = get_closest_ad_size(200, 300)
-        self.assertEqual(size.width, 250)
-        self.assertEqual(size.height, 300)
-
-        size = get_closest_ad_size(200, 350)
-        self.assertEqual(size.width, 250)
-        self.assertEqual(size.height, 300)
-
-        size = get_closest_ad_size(150, 300)
-        self.assertEqual(size.width, 100)
-        self.assertEqual(size.height, 200)
-
-        size = get_closest_ad_size(50, 500)
-        self.assertEqual(size.width, 100)
-        self.assertEqual(size.height, 600)
-
-        size = get_closest_ad_size(400, 600)
-        self.assertEqual(size.width, 450)
-        self.assertEqual(size.height, 500)
-
-        size = get_closest_ad_size(60, 60)
-        self.assertEqual(size.width, 100)
-        self.assertEqual(size.height, 150)
-
-        size = get_closest_ad_size(1000, 1000)
-        self.assertEqual(size.width, 900)
-        self.assertEqual(size.height, 1000)
+        self.assertEqual(response.status_code, 404)
 
 
 class PopupAdsTest(TestCase):
