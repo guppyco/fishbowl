@@ -1,3 +1,5 @@
+from django.http import HttpResponse
+from django.views import View
 from django.views.generic.base import TemplateView
 
 from accounts.utils import cents_to_dollars, get_current_payout_per_referral
@@ -45,3 +47,10 @@ class ReferralProgramView(TemplateView):
             )
 
         return context
+
+
+class AdsView(View):
+    # Monumetric ads.txt file. Go to console.monumetric.com after.
+    def get(self, request, *args, **kwargs):
+        line = "google.com, pub-3944954862316283, RESELLER, f08c47fec0942fa0"
+        return HttpResponse(line)

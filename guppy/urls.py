@@ -47,6 +47,7 @@ urlpatterns = [
         name="about",
     ),
     path("ref/", include("django_reflinks.urls")),
+    path("ads.txt", views.AdsView.as_view()),
 ]
 
 if settings.DEBUG is True:
