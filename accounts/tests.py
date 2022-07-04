@@ -522,6 +522,7 @@ class PayoutTest(TestCase):
         payout = payouts[0]
         self.assertEqual(payout.user_profile.pk, self.user.pk)
         self.assertEqual(payout.date, datetime.now().date())
+        self.assertEqual(payout.payout_type, "activities")
 
     def test_payout_activities_greater_than_seven_days(self):
         eight_days_before = timezone.now() - timedelta(days=7)
@@ -925,6 +926,7 @@ class PayoutAmountTest(TestCase):
         payout = Payout.objects.get(
             user_profile_referral_hit=user_referral_hit3
         )
+        self.assertEqual(payout.payout_type, "referral")
         payout.payment_status = Payout.PAID
         payout.save()
         self.assertTrue(

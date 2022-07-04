@@ -72,7 +72,20 @@ class UserProfileAdmin(admin.ModelAdmin):
 
 @admin.register(Payout)
 class PayoutAdmin(admin.ModelAdmin):
-    list_display = ("user_profile", "date", "amount", "payment_status", "note")
+    list_display = (
+        "user_profile",
+        "user_profile_referral_hit",
+        "payout_type",
+        "date",
+        "amount",
+        "payment_status",
+        "note",
+    )
+    search_fields = ("user_profile__email",)
+    list_filter = (
+        "payment_status",
+        "payout_type",
+    )
 
 
 @admin.register(PayoutRequest)
@@ -84,6 +97,8 @@ class PayoutRequestAdmin(admin.ModelAdmin):
         "created",
         "note",
     )
+    search_fields = ("user_profile__email",)
+    list_filter = ("payment_status",)
 
 
 @admin.register(UserProfileReferralHit)
