@@ -9,6 +9,7 @@ from django.utils import timezone
 from .models import Payout, UserProfile, UserProfileReferralHit
 
 LOGGER = logging.getLogger(__name__)
+FIXED_AMOUNT = 1000  # $10 = 1000 cents
 
 
 def setup_tests(client):
@@ -48,11 +49,10 @@ def calculate_amount(number_of_users) -> int:
     if not number_of_users:
         return 0
 
-    fixed_amount = 1000  # $10 = 1000 cents
     now = datetime.now()
     num_days = calendar.monthrange(now.year, now.month)[1]
 
-    amount = fixed_amount / num_days / number_of_users
+    amount = FIXED_AMOUNT / num_days / number_of_users
 
     return int(amount)
 
@@ -104,11 +104,13 @@ class PayoutGenerator:
         # Get all active users
         users = get_all_active_users()
 
-        if users.count() == 0:
+        total_users = users.count()
+        if total_users == 0:
             LOGGER.info("No active users.")
 
         # Calculate amount
-        amount = calculate_amount(users.count())
+        amount = calculate_amount(total_users)
+        note = f"Total users: {total_users}, Fixed amount: {FIXED_AMOUNT}"
 
         # Create payouts for all active users
         today = date.today()
@@ -116,8 +118,10 @@ class PayoutGenerator:
             Payout.objects.get_or_create(
                 user_profile=user,
                 date=today,
+                payout_type="activities",
                 defaults={
                     "amount": amount,
+                    "note": note,
                 },
             )
 
@@ -139,20 +143,25 @@ class PayoutGenerator:
         today = date.today()
         # Create referral payouts
         for referral in user_referrals:
-            activate_days = referral.referral_hit.hit_user.payouts.count()
-            if activate_days == 90:
-                number_of_referral += 1
-                amount = calculate_referral_amount(number_of_referral, total)
+            if referral.referral_hit.hit_user:
+                activate_days = referral.referral_hit.hit_user.payouts.count()
+                if activate_days == 90:
+                    number_of_referral += 1
+                    amount = calculate_referral_amount(
+                        number_of_referral, total
+                    )
+                    note = f"Total: {total}, Referral #{number_of_referral}"
 
-                Payout.objects.get_or_create(
-                    user_profile=referral.user_profile,
-                    user_profile_referral_hit=referral,
-                    defaults={
-                        "date": today,
-                        "amount": amount,
-                        "note": "Referral payout",
-                    },
-                )
-                # Update referral payment status
-                referral.payment_status = UserProfileReferralHit.OPENED
-                referral.save()
+                    Payout.objects.get_or_create(
+                        user_profile=referral.user_profile,
+                        user_profile_referral_hit=referral,
+                        payout_type="referral",
+                        defaults={
+                            "date": today,
+                            "amount": amount,
+                            "note": note,
+                        },
+                    )
+                    # Update referral payment status
+                    referral.payment_status = UserProfileReferralHit.OPENED
+                    referral.save()
