@@ -298,6 +298,9 @@ class UserProfileReferralHit(models.Model):
         choices=PAYMENT_STATUSES, blank=False, default=NONE
     )
 
+    def __str__(self):
+        return str(self.referral_hit)
+
 
 class Payout(TimeStampedModel):
     """
@@ -324,6 +327,12 @@ class Payout(TimeStampedModel):
     payment_status = models.IntegerField(
         choices=PAYMENT_STATUSES, blank=False, default=UNPAID
     )
+
+    # payout type
+    payout_type = models.CharField(
+        max_length=100, blank=True, default="activities"
+    )
+
     user_profile_referral_hit = models.ForeignKey(
         UserProfileReferralHit,
         on_delete=models.CASCADE,
