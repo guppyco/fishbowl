@@ -143,6 +143,14 @@ class AdsTest(TestCase):
         ad_obj.refresh_from_db()
         self.assertEqual(ad_obj.view, 2)
 
+        url = reverse("ads_view", kwargs={"width": 300.1, "height": 250.05})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "123")
+        self.assertNotContains(response, "456")
+        ad_obj.refresh_from_db()
+        self.assertEqual(ad_obj.view, 3)
+
         url = reverse("ads_checker", kwargs={"width": 300, "height": 250})
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -150,6 +158,42 @@ class AdsTest(TestCase):
         url = reverse("ads_checker", kwargs={"width": 200, "height": 1250})
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
+
+        url = reverse(
+            "ads_checker", kwargs={"width": 200.01, "height": 1250.123}
+        )
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_ad_with_specific_brand(self):
+        ads_size = AdSizeFactory(width=300, height=250)
+        AdFactory(size=ads_size, code="123", is_enabled=True)
+        AdFactory(size=ads_size, code="456", is_enabled=False)
+        brand = AdBrandFactory(name="nike")
+        ads_size_2 = AdSizeFactory(width=350, height=200)
+        AdFactory(size=ads_size_2, code="789", is_enabled=True, brand=brand)
+        url = reverse("ads_view", kwargs={"width": 300, "height": 300})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "123")
+
+        url = reverse(
+            "ads_brand_view",
+            kwargs={"width": 300, "height": 300, "brand": "nike"},
+        )
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "789")
+
+        url = reverse(
+            "ads_brand_view",
+            kwargs={"width": 300, "height": 300, "brand": "nike2"},
+        )
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "123")
+        self.assertNotContains(response, "456")
+        self.assertNotContains(response, "789")
 
     def test_disable_ads_by_brand(self):
         ad_size_1 = AdSizeFactory(width=300, height=250)
