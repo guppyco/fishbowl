@@ -12,17 +12,19 @@ def get_ad_from_size(
     """
 
     ad_size = None
-    try:
-        filters = {
-            "width": width,
-            "height": height,
-            "ads__is_enabled": True,
-            "ads__brand__is_enabled": True,
-        }  # type: Dict[str, Union[str, int, bool]]
-        if brand != "all":
-            filters["ads__brand__name"] = brand
-        ad_size = AdSize.objects.get(**filters)
-    except AdSize.DoesNotExist:
+    filters = {
+        "width": width,
+        "height": height,
+        "is_enabled": True,
+        "ads__is_enabled": True,
+        "ads__brand__is_enabled": True,
+    }  # type: Dict[str, Union[str, int, bool]]
+    if brand != "all":
+        filters["ads__brand__name"] = brand
+    ad_sizes = AdSize.objects.filter(**filters)
+    if ad_sizes.count():
+        ad_size = ad_sizes.first()
+    else:
         ad_size = get_closest_ad_size(width=width, height=height, brand=brand)
     ads_filters = {
         "size": ad_size,
