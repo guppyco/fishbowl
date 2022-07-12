@@ -1,29 +1,37 @@
 import random
-from typing import Optional, Union
+from typing import Dict, Optional, Union
 
 from advertisers.models import Ad, AdSize
 
 
-def get_ad_from_size(width: int, height: int) -> Optional[Ad]:
+def get_ad_from_size(
+    width: int, height: int, brand: str = "all"
+) -> Optional[Ad]:
     """
     Get ad from the size
     """
 
     ad_size = None
     try:
-        ad_size = AdSize.objects.get(
-            width=width,
-            height=height,
-            ads__is_enabled=True,
-            ads__brand__is_enabled=True,
-        )
+        filters = {
+            "width": width,
+            "height": height,
+            "ads__is_enabled": True,
+            "ads__brand__is_enabled": True,
+        }  # type: Dict[str, Union[str, int, bool]]
+        if brand != "all":
+            filters["ads__brand__name"] = brand
+        ad_size = AdSize.objects.get(**filters)
     except AdSize.DoesNotExist:
-        ad_size = get_closest_ad_size(width=width, height=height)
-    ads = Ad.objects.filter(
-        size=ad_size,
-        is_enabled=True,
-        brand__is_enabled=True,
-    )
+        ad_size = get_closest_ad_size(width=width, height=height, brand=brand)
+    ads_filters = {
+        "size": ad_size,
+        "is_enabled": True,
+        "brand__is_enabled": True,
+    }  # type: Dict[str, Union[str, Optional[AdSize], bool]]
+    if brand != "all":
+        ads_filters["brand__name"] = brand
+    ads = Ad.objects.filter(**ads_filters)
     if ads.count():
         # Get random item with correct size
         return random.choice(list(ads))
@@ -31,16 +39,21 @@ def get_ad_from_size(width: int, height: int) -> Optional[Ad]:
     return None
 
 
-def get_closest_ad_size(width: int, height: int) -> Optional[AdSize]:
+def get_closest_ad_size(
+    width: int, height: int, brand: str = "all"
+) -> Optional[AdSize]:
     """
     Get closest ad size
     """
 
-    ad_sizes = AdSize.objects.filter(
-        is_enabled=True,
-        ads__is_enabled=True,
-        ads__brand__is_enabled=True,
-    )
+    filters = {
+        "is_enabled": True,
+        "ads__is_enabled": True,
+        "ads__brand__is_enabled": True,
+    }  # type: Dict[str, Union[str, bool]]
+    if brand != "all":
+        filters["ads__brand__name"] = brand
+    ad_sizes = AdSize.objects.filter(**filters)
 
     for percent in range(5, 31, 5):
         for ad_size in ad_sizes:

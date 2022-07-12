@@ -138,16 +138,19 @@ def signup_success(request):
 
 
 @xframe_options_exempt
-def ads(request, width=0, height=0):
+def ads(request, width=0, height=0, brand="all"):
     """
     Show ads with size
     TODO: make the dynamic ads with multiple services!?
     """
 
+    width = round(float(width))
+    height = round(float(height))
+
     if not width or not height:
         return HttpResponseNotFound("Not found")
 
-    ad_obj = get_ad_from_size(width, height)
+    ad_obj = get_ad_from_size(width, height, brand)
     if ad_obj:
         code = ad_obj.code
         # Update the view of this ad
@@ -170,6 +173,8 @@ def ads_checker(request, width=0, height=0):
     Return 200 if yes, 404 if no
     """
 
+    width = round(float(width))
+    height = round(float(height))
     if not width or not height:
         return HttpResponseNotFound("Not found")
     ad_obj = get_ad_from_size(width, height)
