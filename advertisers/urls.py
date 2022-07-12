@@ -10,9 +10,10 @@ urlpatterns = [
         views.signup_success,
         name="advertiser_signup_success",
     ),
-    path("ads/<int:width>/<int:height>/", views.ads, name="ads_view"),
+    path("ads/<width>/<height>/", views.ads, name="ads_view"),
+    path("ads/<width>/<height>/<brand>", views.ads, name="ads_brand_view"),
     path(
-        "ads-checker/<int:width>/<int:height>/",
+        "ads-checker/<width>/<height>/",
         views.ads_checker,
         name="ads_checker",
     ),
