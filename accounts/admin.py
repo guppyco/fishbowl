@@ -22,7 +22,15 @@ class UserProfileAdmin(admin.ModelAdmin):
     Register admin for UserProfile
     """
 
-    list_display = ("email", "id", "created", "history", "search", "status")
+    list_display = (
+        "email",
+        "id",
+        "created",
+        "history",
+        "search",
+        "status",
+        "total_unpaid_earnings",
+    )
     search_fields = ("email",)
     readonly_fields = ("history", "search", "status")
 
@@ -68,6 +76,28 @@ class UserProfileAdmin(admin.ModelAdmin):
         return activities_in_past_seven_days
 
     status.short_description = "Guppy status"  # type: ignore
+
+    def total_unpaid_earnings(self, obj):  # pylint: disable=no-self-use
+        requesting_amount = obj.get_earned_amount(Payout.REQUESTING)
+        unpaid_amount = obj.get_earned_amount(Payout.UNPAID)
+        total_unpaid_earnings = requesting_amount + unpaid_amount
+        payout_url = reverse("admin:accounts_payout_changelist")
+        requesting_url = reverse("admin:accounts_payoutrequest_changelist")
+
+        return format_html(
+            '<a href="{}?q={}" target="_blank">Total: {}</a> '
+            '(<a href="{}?q={}" target="_blank">Requesting: {}</a>)',
+            payout_url,
+            obj.email,
+            total_unpaid_earnings,
+            requesting_url,
+            obj.email,
+            requesting_amount,
+        )
+
+    total_unpaid_earnings.short_description = (  # type: ignore
+        "Total unpaid earnings (cents)"
+    )
 
 
 @admin.register(Payout)
